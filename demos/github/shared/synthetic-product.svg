@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" role="img" aria-labelledby="title desc">
+  <title id="title">Abstract synthetic product illustration</title>
+  <desc id="desc">Dark geometric blocks used only as a local demonstration image.</desc>
+  <rect width="800" height="360" fill="#e5e7eb"/>
+  <circle cx="180" cy="180" r="110" fill="#2563eb"/>
+  <rect x="330" y="80" width="330" height="200" rx="30" fill="#111827"/>
+  <path d="M380 220 L465 135 L535 205 L610 125" fill="none" stroke="#f59e0b" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,38 @@
+--- demos/github/broken/index.html	2026-07-16
++++ demos/github/repaired/index.html	2026-07-16
+@@ -1,27 +1,27 @@
+ <!doctype html>
+-<html>
++<html lang="en">
+ <head>
+   <meta charset="utf-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+-  <title>Dravux Demo - Broken</title>
++  <title>Dravux Demo - Repaired</title>
+   <style>
+     body { background: #111827; color: #f9fafb; font: 18px/1.5 system-ui, sans-serif; margin: 0; padding: 3rem; }
+     .card { background: #ffffff; color: #111827; max-width: 36rem; padding: 2rem; border-radius: 1rem; }
+     img { display: block; width: 100%; border-radius: .5rem; }
+-    .actions { position: relative; height: 20px; }
+-    .actions button:focus { outline: none; }
++    .actions { display: flex; gap: 1rem; }
++    .actions button:focus-visible { outline: 4px solid #f59e0b; outline-offset: 4px; }
+   </style>
+ </head>
+ <body>
+   <main>
+     <article class="card">
+-      <img src="../shared/synthetic-product.svg">
++      <img src="../shared/synthetic-product.svg" alt="">
+       <h1>Launch faster</h1>
+-      <p>A synthetic page with deliberate barriers for the Dravux demonstration.</p>
++      <p>A synthetic page with deliberate barriers repaired for the Dravux demonstration.</p>
+       <div class="actions">
+-        <button style="position: absolute; left: 0px; top: 0px; color: #777777; background-color: #ffffff; width: 20px; height: 20px; padding: 0">G</button>
+-        <button style="position: absolute; left: 20px; top: 0px; color: #ffffff; background-color: #1f2937; width: 20px; height: 20px; padding: 0">I</button>
++        <button style="color: #ffffff; background-color: #1f2937; min-width: 44px; min-height: 44px">Go</button>
++        <button style="color: #ffffff; background-color: #1f2937; min-width: 44px; min-height: 44px">Info</button>
+       </div>
+     </article>
+   </main>
+ </body>

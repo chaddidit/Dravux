@@ -1,0 +1,63 @@
+{
+  "$schema": "../../schemas/dravux-report.schema.json",
+  "contract_version": "0.1.0",
+  "audit_id": "DRV-ADVISORY-ONLY-001",
+  "target": {
+    "name": "Dense settings panel",
+    "state": "static screenshot evidence",
+    "location": "fixtures/ambiguous/advisory-only.json",
+    "input_type": "SCREENSHOT"
+  },
+  "scope": {
+    "included": ["documented layout and content density"],
+    "excluded": ["implemented code", "user research"],
+    "required_manual_checks": ["cognitive-review", "user-research"],
+    "manual_checks_completed": [],
+    "applicability_reason": null
+  },
+  "automated_result": "PASS",
+  "final_status": "INCOMPLETE",
+  "findings": [
+    {
+      "finding_id": "DRV-COGNITIVE-ADVISORY-001",
+      "target_and_state": "Dense settings panel in static screenshot state",
+      "input_type": "SCREENSHOT",
+      "standard": null,
+      "classification": "ADVISORY",
+      "severity": "MEDIUM",
+      "title": "Dense presentation may increase avoidable cognitive effort",
+      "evidence": [
+        {
+          "type": "SCREENSHOT",
+          "description": "The screenshot shows many equally weighted controls without progressive disclosure.",
+          "locator": "synthetic settings-panel screenshot"
+        }
+      ],
+      "reproduction_steps": ["Open the synthetic screenshot.", "Count the simultaneously presented control groups and inspect their hierarchy."],
+      "user_impact": "People with attention, memory, or processing differences may need more effort to find and complete a task.",
+      "recommended_repair": "Test grouping, hierarchy, plain labels, defaults, and progressive disclosure with representative users.",
+      "verification_steps": ["Run a content/design review.", "Validate the task with representative users before calling the concern resolved."],
+      "confidence": "MEDIUM",
+      "manual_review_required": true,
+      "source": {
+        "title": "W3C Cognitive Accessibility Guidance",
+        "url": "https://www.w3.org/WAI/cognitive/"
+      },
+      "status": "OPEN"
+    }
+  ],
+  "errors": [],
+  "evidence_log": [
+    {
+      "type": "SCREENSHOT",
+      "description": "Static visual evidence supports an advisory review request, not a normative failure.",
+      "locator": "synthetic settings-panel screenshot"
+    }
+  ],
+  "run": {
+    "started_at": "2026-07-16T14:07:00Z",
+    "completed_at": "2026-07-16T14:07:01Z",
+    "tooling": ["Dravux static evidence review 1.0.1"],
+    "environment": "Synthetic static-screenshot fixture"
+  }
+}

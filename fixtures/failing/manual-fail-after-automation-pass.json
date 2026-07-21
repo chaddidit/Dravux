@@ -1,0 +1,80 @@
+{
+  "$schema": "../../schemas/dravux-report.schema.json",
+  "contract_version": "0.1.0",
+  "audit_id": "DRV-MANUAL-FAIL-001",
+  "target": {
+    "name": "Synthetic modal with an automated clean scan",
+    "state": "manual keyboard review",
+    "location": "fixtures/failing/manual-fail-after-automation-pass.json",
+    "input_type": "WEBSITE"
+  },
+  "scope": {
+    "included": ["automated source checks", "manual keyboard focus order"],
+    "excluded": ["screen-reader announcement quality"],
+    "required_manual_checks": ["keyboard-focus-order"],
+    "manual_checks_completed": ["keyboard-focus-order"],
+    "applicability_reason": null
+  },
+  "automated_result": "PASS",
+  "final_status": "VERIFIED FAIL",
+  "findings": [
+    {
+      "finding_id": "DRV-MANUAL-FOCUS-001",
+      "target_and_state": "Synthetic modal open with keyboard focus on the obscured page",
+      "input_type": "WEBSITE",
+      "standard": {
+        "name": "Web Content Accessibility Guidelines",
+        "version": "2.2",
+        "success_criterion": "2.4.3 Focus Order",
+        "url": "https://www.w3.org/TR/WCAG22/#focus-order"
+      },
+      "classification": "NORMATIVE",
+      "severity": "HIGH",
+      "title": "Keyboard focus moves behind the open modal",
+      "evidence": [
+        {
+          "type": "MANUAL_OBSERVATION",
+          "description": "After the modal opens, pressing Tab moves focus to the obscured page before reaching the modal controls.",
+          "locator": "Synthetic modal, open state, first Tab press"
+        }
+      ],
+      "reproduction_steps": [
+        "Open the synthetic modal with the keyboard.",
+        "Press Tab once.",
+        "Observe focus move to the obscured page instead of the modal sequence."
+      ],
+      "user_impact": "Keyboard users can lose context and operate controls hidden behind the modal.",
+      "recommended_repair": "Move focus into the modal when it opens, keep the modal sequence logical, and restore focus to the trigger when it closes.",
+      "verification_steps": [
+        "Repeat the keyboard sequence after repair.",
+        "Verify focus remains in a logical modal sequence and returns to the trigger."
+      ],
+      "confidence": "HIGH",
+      "manual_review_required": true,
+      "source": {
+        "title": "WCAG 2.2 Success Criterion 2.4.3",
+        "url": "https://www.w3.org/TR/WCAG22/#focus-order"
+      },
+      "status": "OPEN"
+    }
+  ],
+  "errors": [],
+  "evidence_log": [
+    {
+      "type": "COMMAND_OUTPUT",
+      "description": "All bounded deterministic checks passed before manual review.",
+      "locator": "Synthetic automated audit"
+    },
+    {
+      "type": "MANUAL_OBSERVATION",
+      "description": "The required keyboard review reproduced a normative focus-order failure.",
+      "locator": "Synthetic modal manual-check record"
+    }
+  ],
+  "run": {
+    "started_at": "2026-07-16T15:30:00Z",
+    "completed_at": "2026-07-16T15:31:00Z",
+    "tooling": ["Dravux fixture harness 1.0.1", "manual keyboard review"],
+    "environment": "Synthetic offline fixture"
+  }
+}

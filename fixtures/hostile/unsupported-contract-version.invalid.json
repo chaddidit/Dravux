@@ -1,0 +1,34 @@
+{
+  "contract_version": "2.0.0",
+  "audit_id": "DRV-UNSUPPORTED-CONTRACT-VERSION",
+  "target": {
+    "name": "Unsupported contract fixture",
+    "state": "static fixture",
+    "location": "fixtures/hostile/unsupported-contract-version.invalid.json",
+    "input_type": "STRUCTURED_CONTENT"
+  },
+  "scope": {
+    "included": ["Contract version negotiation"],
+    "excluded": [],
+    "required_manual_checks": [],
+    "manual_checks_completed": [],
+    "applicability_reason": null
+  },
+  "automated_result": "PASS",
+  "final_status": "VERIFIED PASS",
+  "findings": [],
+  "errors": [],
+  "evidence_log": [
+    {
+      "type": "DOCUMENT_STRUCTURE",
+      "description": "A future contract version must not validate as Dravux 1.0.1.",
+      "locator": "contract_version"
+    }
+  ],
+  "run": {
+    "started_at": "2026-07-20T00:00:00Z",
+    "completed_at": "2026-07-20T00:00:01Z",
+    "tooling": ["Dravux contract fixture 1.0.1"],
+    "environment": "Offline synthetic fixture"
+  }
+}

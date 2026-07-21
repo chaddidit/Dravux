@@ -1,0 +1,35 @@
+{
+  "$schema": "../schemas/dravux-report.schema.json",
+  "contract_version": "0.1.0",
+  "audit_id": "DRV-EXAMPLE-001",
+  "target": {
+    "name": "Describe the exact target",
+    "state": "Describe the tested state",
+    "location": "file, URL, node, or artifact reference",
+    "input_type": "SOURCE_CODE"
+  },
+  "scope": {
+    "included": ["Describe included states and checks"],
+    "excluded": ["Describe exclusions"],
+    "required_manual_checks": ["keyboard", "screen-reader"],
+    "manual_checks_completed": [],
+    "applicability_reason": null
+  },
+  "automated_result": "PASS",
+  "final_status": "INCOMPLETE",
+  "findings": [],
+  "errors": [],
+  "evidence_log": [
+    {
+      "type": "COMMAND_OUTPUT",
+      "description": "Record the deterministic check and result",
+      "locator": "command or artifact path"
+    }
+  ],
+  "run": {
+    "started_at": "2026-01-01T00:00:00Z",
+    "completed_at": "2026-01-01T00:00:01Z",
+    "tooling": ["tool and version"],
+    "environment": "Describe the test environment"
+  }
+}

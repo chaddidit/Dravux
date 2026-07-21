@@ -1,0 +1,66 @@
+{
+  "$schema": "../../schemas/dravux-report.schema.json",
+  "contract_version": "0.1.0",
+  "audit_id": "DRV-DUPLICATE-001",
+  "target": {
+    "name": "Duplicate finding ID fixture",
+    "state": "invalid",
+    "location": "fixtures/hostile/duplicate-ids.invalid.json",
+    "input_type": "SOURCE_CODE"
+  },
+  "scope": {
+    "included": ["finding identity"],
+    "excluded": [],
+    "required_manual_checks": [],
+    "manual_checks_completed": [],
+    "applicability_reason": null
+  },
+  "automated_result": "FAIL",
+  "final_status": "VERIFIED FAIL",
+  "findings": [
+    {
+      "finding_id": "DRV-DUPLICATE-FINDING",
+      "target_and_state": "First synthetic target",
+      "input_type": "SOURCE_CODE",
+      "standard": {"name": "WCAG", "version": "2.2", "success_criterion": "1.4.3 Contrast (Minimum)", "url": "https://www.w3.org/TR/WCAG22/#contrast-minimum"},
+      "classification": "NORMATIVE",
+      "severity": "HIGH",
+      "title": "First finding",
+      "evidence": [{"type": "SOURCE", "description": "First evidence", "locator": "first locator"}],
+      "reproduction_steps": ["Reproduce first finding."],
+      "user_impact": "First impact.",
+      "recommended_repair": "Repair first target.",
+      "verification_steps": ["Verify first repair."],
+      "confidence": "HIGH",
+      "manual_review_required": false,
+      "source": {"title": "WCAG 2.2", "url": "https://www.w3.org/TR/WCAG22/"},
+      "status": "OPEN"
+    },
+    {
+      "finding_id": "DRV-DUPLICATE-FINDING",
+      "target_and_state": "Second synthetic target",
+      "input_type": "SOURCE_CODE",
+      "standard": {"name": "WCAG", "version": "2.2", "success_criterion": "3.1.1 Language of Page", "url": "https://www.w3.org/TR/WCAG22/#language-of-page"},
+      "classification": "NORMATIVE",
+      "severity": "MEDIUM",
+      "title": "Second finding",
+      "evidence": [{"type": "SOURCE", "description": "Second evidence", "locator": "second locator"}],
+      "reproduction_steps": ["Reproduce second finding."],
+      "user_impact": "Second impact.",
+      "recommended_repair": "Repair second target.",
+      "verification_steps": ["Verify second repair."],
+      "confidence": "HIGH",
+      "manual_review_required": false,
+      "source": {"title": "WCAG 2.2", "url": "https://www.w3.org/TR/WCAG22/"},
+      "status": "OPEN"
+    }
+  ],
+  "errors": [],
+  "evidence_log": [{"type": "COMMAND_OUTPUT", "description": "Duplicate ID input", "locator": "fixture"}],
+  "run": {
+    "started_at": "2026-07-16T14:10:00Z",
+    "completed_at": "2026-07-16T14:10:01Z",
+    "tooling": ["Dravux fixture harness 1.0.1"],
+    "environment": "Synthetic invalid fixture"
+  }
+}

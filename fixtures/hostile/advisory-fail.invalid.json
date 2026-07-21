@@ -1,0 +1,43 @@
+{
+  "$schema": "../../schemas/dravux-report.schema.json",
+  "contract_version": "0.1.0",
+  "audit_id": "DRV-ADVISORY-FAIL-001",
+  "target": {"name": "Dense content layout", "state": "static", "location": "synthetic", "input_type": "SCREENSHOT"},
+  "scope": {
+    "included": ["advisory content-density review"],
+    "excluded": [],
+    "required_manual_checks": ["cognitive-review"],
+    "manual_checks_completed": [],
+    "applicability_reason": null
+  },
+  "automated_result": "FAIL",
+  "final_status": "VERIFIED FAIL",
+  "findings": [
+    {
+      "finding_id": "DRV-ADVISORY-AS-FAIL",
+      "target_and_state": "Dense static layout",
+      "input_type": "SCREENSHOT",
+      "standard": null,
+      "classification": "ADVISORY",
+      "severity": "MEDIUM",
+      "title": "Content density may increase effort",
+      "evidence": [{"type": "SCREENSHOT", "description": "Many controls are visible.", "locator": "synthetic screenshot"}],
+      "reproduction_steps": ["Inspect the screenshot."],
+      "user_impact": "Some users may need more effort.",
+      "recommended_repair": "Run a cognitive review.",
+      "verification_steps": ["Test with representative users."],
+      "confidence": "LOW",
+      "manual_review_required": true,
+      "source": {"title": "W3C Cognitive Accessibility Guidance", "url": "https://www.w3.org/WAI/cognitive/"},
+      "status": "OPEN"
+    }
+  ],
+  "errors": [],
+  "evidence_log": [{"type": "SCREENSHOT", "description": "Advisory-only evidence.", "locator": "synthetic screenshot"}],
+  "run": {
+    "started_at": "2026-07-16T14:13:00Z",
+    "completed_at": "2026-07-16T14:13:01Z",
+    "tooling": ["Dravux fixture harness 1.0.1"],
+    "environment": "Synthetic invalid fixture"
+  }
+}

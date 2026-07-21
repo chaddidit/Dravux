@@ -1,0 +1,244 @@
+{
+  "$schema": "../../../schemas/dravux-report.schema.json",
+  "contract_version": "0.1.0",
+  "audit_id": "DRV-DEMO-BROKEN-001",
+  "target": {
+    "name": "Dravux synthetic GitHub demo page",
+    "state": "broken",
+    "location": "demos/github/broken/index.html",
+    "input_type": "SOURCE_CODE"
+  },
+  "scope": {
+    "included": [
+      "page language",
+      "image alt presence",
+      "button text contrast",
+      "button target size",
+      "visible focus rule presence"
+    ],
+    "excluded": [
+      "browser runtime",
+      "framework behavior",
+      "external resources"
+    ],
+    "required_manual_checks": [
+      "keyboard",
+      "screen-reader",
+      "zoom-reflow",
+      "state-coverage"
+    ],
+    "manual_checks_completed": [],
+    "applicability_reason": null
+  },
+  "automated_result": "FAIL",
+  "final_status": "VERIFIED FAIL",
+  "findings": [
+    {
+      "finding_id": "DRV-DEMO-LANG-001",
+      "target_and_state": "demos/github/broken/index.html",
+      "input_type": "SOURCE_CODE",
+      "standard": {
+        "name": "Web Content Accessibility Guidelines",
+        "version": "2.2",
+        "success_criterion": "3.1.1 Language of Page",
+        "url": "https://www.w3.org/TR/WCAG22/#language-of-page"
+      },
+      "classification": "NORMATIVE",
+      "severity": "MEDIUM",
+      "title": "Page language is missing",
+      "evidence": [
+        {
+          "type": "SOURCE",
+          "description": "The html element has no non-empty lang attribute.",
+          "locator": "demos/github/broken/index.html"
+        }
+      ],
+      "reproduction_steps": [
+        "Open demos/github/broken/index.html.",
+        "The html element has no non-empty lang attribute."
+      ],
+      "user_impact": "Screen readers may use the wrong pronunciation rules.",
+      "recommended_repair": "Set the page's primary language with a valid lang attribute.",
+      "verification_steps": [
+        "Re-run this audit.",
+        "Confirm pronunciation with a screen reader."
+      ],
+      "confidence": "HIGH",
+      "manual_review_required": true,
+      "source": {
+        "title": "WCAG 2.2 3.1.1 Language of Page",
+        "url": "https://www.w3.org/TR/WCAG22/#language-of-page"
+      },
+      "status": "OPEN"
+    },
+    {
+      "finding_id": "DRV-DEMO-ALT-001",
+      "target_and_state": "demos/github/broken/index.html image[1]",
+      "input_type": "SOURCE_CODE",
+      "standard": {
+        "name": "Web Content Accessibility Guidelines",
+        "version": "2.2",
+        "success_criterion": "1.1.1 Non-text Content",
+        "url": "https://www.w3.org/TR/WCAG22/#non-text-content"
+      },
+      "classification": "NORMATIVE",
+      "severity": "HIGH",
+      "title": "Image has no text alternative",
+      "evidence": [
+        {
+          "type": "SOURCE",
+          "description": "Image 1 has no alt attribute.",
+          "locator": "demos/github/broken/index.html image[1]"
+        }
+      ],
+      "reproduction_steps": [
+        "Open demos/github/broken/index.html image[1].",
+        "Image 1 has no alt attribute."
+      ],
+      "user_impact": "Screen-reader users may miss the image's purpose or hear an unhelpful filename.",
+      "recommended_repair": "Add a purpose-appropriate alt value; use alt=\"\" only when the image is decorative.",
+      "verification_steps": [
+        "Re-run this audit.",
+        "Review the alternative in page context with a screen reader."
+      ],
+      "confidence": "HIGH",
+      "manual_review_required": true,
+      "source": {
+        "title": "WCAG 2.2 1.1.1 Non-text Content",
+        "url": "https://www.w3.org/TR/WCAG22/#non-text-content"
+      },
+      "status": "OPEN"
+    },
+    {
+      "finding_id": "DRV-DEMO-CONTRAST-001",
+      "target_and_state": "demos/github/broken/index.html button[1]",
+      "input_type": "SOURCE_CODE",
+      "standard": {
+        "name": "Web Content Accessibility Guidelines",
+        "version": "2.2",
+        "success_criterion": "1.4.3 Contrast (Minimum)",
+        "url": "https://www.w3.org/TR/WCAG22/#contrast-minimum"
+      },
+      "classification": "NORMATIVE",
+      "severity": "HIGH",
+      "title": "Button text contrast is below 4.5:1",
+      "evidence": [
+        {
+          "type": "SOURCE",
+          "description": "Button 1 uses #777777 on #ffffff, calculated at 4.48:1.",
+          "locator": "demos/github/broken/index.html button[1]"
+        }
+      ],
+      "reproduction_steps": [
+        "Open demos/github/broken/index.html button[1].",
+        "Button 1 uses #777777 on #ffffff, calculated at 4.48:1."
+      ],
+      "user_impact": "People with low vision may be unable to read the primary action.",
+      "recommended_repair": "Use a foreground/background pair that meets at least 4.5:1 for normal text.",
+      "verification_steps": [
+        "Re-run this audit.",
+        "Verify every interactive state and real text size."
+      ],
+      "confidence": "HIGH",
+      "manual_review_required": true,
+      "source": {
+        "title": "WCAG 2.2 1.4.3 Contrast (Minimum)",
+        "url": "https://www.w3.org/TR/WCAG22/#contrast-minimum"
+      },
+      "status": "OPEN"
+    },
+    {
+      "finding_id": "DRV-DEMO-TARGET-SPACING-001",
+      "target_and_state": "demos/github/broken/index.html buttons[1,2]",
+      "input_type": "SOURCE_CODE",
+      "standard": {
+        "name": "Web Content Accessibility Guidelines",
+        "version": "2.2",
+        "success_criterion": "2.5.8 Target Size (Minimum)",
+        "url": "https://www.w3.org/TR/WCAG22/#target-size-minimum"
+      },
+      "classification": "NORMATIVE",
+      "severity": "MEDIUM",
+      "title": "Undersized pointer targets fail the spacing exception",
+      "evidence": [
+        {
+          "type": "SOURCE",
+          "description": "Buttons 1 and 2 are under 24 by 24 CSS pixels and their centers are 20.0px apart, so the synthetic 24px spacing circles intersect.",
+          "locator": "demos/github/broken/index.html buttons[1,2]"
+        }
+      ],
+      "reproduction_steps": [
+        "Open demos/github/broken/index.html buttons[1,2].",
+        "Buttons 1 and 2 are under 24 by 24 CSS pixels and their centers are 20.0px apart, so the synthetic 24px spacing circles intersect."
+      ],
+      "user_impact": "People with limited dexterity or touch precision may activate the adjacent control by mistake.",
+      "recommended_repair": "Increase each target to at least 24 by 24 CSS pixels or provide enough spacing for the criterion's exception.",
+      "verification_steps": [
+        "Re-run this audit.",
+        "Verify computed target boxes and activation on a real touch device."
+      ],
+      "confidence": "HIGH",
+      "manual_review_required": true,
+      "source": {
+        "title": "WCAG 2.2 2.5.8 Target Size (Minimum)",
+        "url": "https://www.w3.org/TR/WCAG22/#target-size-minimum"
+      },
+      "status": "OPEN"
+    },
+    {
+      "finding_id": "DRV-DEMO-FOCUS-001",
+      "target_and_state": "demos/github/broken/index.html",
+      "input_type": "SOURCE_CODE",
+      "standard": {
+        "name": "Web Content Accessibility Guidelines",
+        "version": "2.2",
+        "success_criterion": "2.4.7 Focus Visible",
+        "url": "https://www.w3.org/TR/WCAG22/#focus-visible"
+      },
+      "classification": "NORMATIVE",
+      "severity": "HIGH",
+      "title": "Focus styling explicitly removes the indicator without replacement",
+      "evidence": [
+        {
+          "type": "SOURCE",
+          "description": "The synthetic source sets outline: none in a button focus rule and defines no replacement indicator in that state.",
+          "locator": "demos/github/broken/index.html"
+        }
+      ],
+      "reproduction_steps": [
+        "Open demos/github/broken/index.html.",
+        "The synthetic source sets outline: none in a button focus rule and defines no replacement indicator in that state."
+      ],
+      "user_impact": "Keyboard users may not know which control is active.",
+      "recommended_repair": "Remove the suppression or add a clear :focus-visible indicator that remains visible against adjacent colors.",
+      "verification_steps": [
+        "Re-run this audit.",
+        "Navigate the page manually with the keyboard and inspect every focus state."
+      ],
+      "confidence": "HIGH",
+      "manual_review_required": true,
+      "source": {
+        "title": "WCAG 2.2 2.4.7 Focus Visible",
+        "url": "https://www.w3.org/TR/WCAG22/#focus-visible"
+      },
+      "status": "OPEN"
+    }
+  ],
+  "errors": [],
+  "evidence_log": [
+    {
+      "type": "COMMAND_OUTPUT",
+      "description": "Bounded deterministic demo audit completed with 5 normative finding(s).",
+      "locator": "scripts/audit_demo_html.py"
+    }
+  ],
+  "run": {
+    "started_at": "1970-01-01T00:00:00Z",
+    "completed_at": "1970-01-01T00:00:00Z",
+    "tooling": [
+      "Dravux demo HTML audit 1.0.1",
+      "Python standard library"
+    ],
+    "environment": "Deterministic offline source fixture"
+  }
+}

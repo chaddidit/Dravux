@@ -1,0 +1,63 @@
+{
+  "$schema": "../../schemas/dravux-report.schema.json",
+  "contract_version": "0.1.0",
+  "audit_id": "DRV-AMBIGUOUS-001",
+  "target": {
+    "name": "Marketing image with context-dependent alt purpose",
+    "state": "source inspection only",
+    "location": "fixtures/ambiguous/ambiguous-evidence.json",
+    "input_type": "IMAGE_METADATA"
+  },
+  "scope": {
+    "included": ["alt attribute presence"],
+    "excluded": ["editorial purpose decision"],
+    "required_manual_checks": ["alt-purpose"],
+    "manual_checks_completed": [],
+    "applicability_reason": null
+  },
+  "automated_result": "PASS",
+  "final_status": "INCOMPLETE",
+  "findings": [
+    {
+      "finding_id": "DRV-ALT-ADVISORY-001",
+      "target_and_state": "Marketing hero image in source-only state",
+      "input_type": "IMAGE_METADATA",
+      "standard": null,
+      "classification": "ADVISORY",
+      "severity": "MEDIUM",
+      "title": "Alt text purpose cannot be confirmed without editorial context",
+      "evidence": [
+        {
+          "type": "SOURCE",
+          "description": "A non-empty alt attribute exists, but adjacent copy and image purpose were not supplied.",
+          "locator": "synthetic image metadata"
+        }
+      ],
+      "reproduction_steps": ["Inspect the image metadata and note that the alt attribute is non-empty.", "Compare it with the missing page/editorial context."],
+      "user_impact": "An irrelevant or redundant description may add noise or omit the image's purpose.",
+      "recommended_repair": "Have a content owner decide whether the image is informative, functional, or decorative and write the appropriate alternative.",
+      "verification_steps": ["Review the image in page context with the content owner.", "Test the resulting reading sequence with a screen reader."],
+      "confidence": "LOW",
+      "manual_review_required": true,
+      "source": {
+        "title": "WCAG 2.2 Non-text Content",
+        "url": "https://www.w3.org/TR/WCAG22/#non-text-content"
+      },
+      "status": "OPEN"
+    }
+  ],
+  "errors": [],
+  "evidence_log": [
+    {
+      "type": "SOURCE",
+      "description": "Attribute presence was confirmed; purpose remains unknown.",
+      "locator": "synthetic image metadata"
+    }
+  ],
+  "run": {
+    "started_at": "2026-07-16T14:04:00Z",
+    "completed_at": "2026-07-16T14:04:01Z",
+    "tooling": ["Dravux metadata inspection 1.0.1"],
+    "environment": "Synthetic source-only fixture"
+  }
+}

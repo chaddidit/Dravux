@@ -1,0 +1,35 @@
+{
+  "$schema": "../../schemas/dravux-report.schema.json",
+  "contract_version": "0.1.0",
+  "audit_id": "DRV-AUTO-PASS-MANUAL-001",
+  "target": {
+    "name": "Synthetic checkout page",
+    "state": "automated checks only",
+    "location": "fixtures/passing/automation-pass-manual-incomplete.json",
+    "input_type": "WEBSITE"
+  },
+  "scope": {
+    "included": ["rendered DOM automated rules"],
+    "excluded": ["authenticated payment provider"],
+    "required_manual_checks": ["keyboard", "screen-reader", "zoom-reflow", "error-recovery"],
+    "manual_checks_completed": [],
+    "applicability_reason": null
+  },
+  "automated_result": "PASS",
+  "final_status": "INCOMPLETE",
+  "findings": [],
+  "errors": [],
+  "evidence_log": [
+    {
+      "type": "TOOL_OUTPUT",
+      "description": "No failures were detected by the synthetic automated rule set.",
+      "locator": "fixture automated result"
+    }
+  ],
+  "run": {
+    "started_at": "2026-07-16T14:01:00Z",
+    "completed_at": "2026-07-16T14:01:01Z",
+    "tooling": ["Synthetic scanner 1.0"],
+    "environment": "Offline rendered fixture"
+  }
+}

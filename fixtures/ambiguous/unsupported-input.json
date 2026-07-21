@@ -1,0 +1,41 @@
+{
+  "$schema": "../../schemas/dravux-report.schema.json",
+  "contract_version": "0.1.0",
+  "audit_id": "DRV-UNSUPPORTED-001",
+  "target": {
+    "name": "Opaque proprietary binary design file",
+    "state": "no reader available",
+    "location": "synthetic-design-file.bin",
+    "input_type": "UNSUPPORTED"
+  },
+  "scope": {
+    "included": ["direct inspection of the proprietary binary design file"],
+    "excluded": ["exports", "screenshots", "annotations", "structured content"],
+    "required_manual_checks": [],
+    "manual_checks_completed": [],
+    "applicability_reason": "Direct inspection of a proprietary binary design file is outside Dravux's supported inputs without a proven reader."
+  },
+  "automated_result": "ERROR",
+  "final_status": "NOT APPLICABLE",
+  "findings": [],
+  "errors": [
+    {
+      "code": "NOT_APPLICABLE",
+      "message": "No reader is available for this proprietary binary design format; request a supported SVG, screenshot, or structured export.",
+      "stage": "capability-check"
+    }
+  ],
+  "evidence_log": [
+    {
+      "type": "COMMAND_OUTPUT",
+      "description": "Capability inventory found no proven reader for the proprietary binary design format.",
+      "locator": "input capability decision"
+    }
+  ],
+  "run": {
+    "started_at": "2026-07-16T14:06:00Z",
+    "completed_at": "2026-07-16T14:06:01Z",
+    "tooling": ["Dravux capability check 1.0.1"],
+    "environment": "Synthetic unsupported-input fixture"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "dravux",
+  "version": "1.0.1",
+  "description": "Capability-aware accessibility testing with validated run receipts and manual-review boundaries.",
+  "author": {
+    "name": "Dravux Project"
+  },
+  "license": "MIT",
+  "keywords": ["accessibility", "wcag", "audit", "evidence"]
+}

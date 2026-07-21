@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dravux"
+  short_description: "Capability-aware accessibility audits"
+  default_prompt: "Use $dravux to preflight this surface, audit only supported evidence, and return a validated run receipt."

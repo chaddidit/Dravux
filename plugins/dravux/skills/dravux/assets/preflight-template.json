@@ -1,0 +1,33 @@
+{
+  "$schema": "../schemas/dravux-preflight.schema.json",
+  "preflight_version": "1.0.0",
+  "package_version": "1.0.1",
+  "surface": {
+    "provider": "Example provider",
+    "product": "Example chat surface",
+    "mode": "Chat"
+  },
+  "target": {
+    "input_type": "WEBSITE",
+    "location": "https://example.com/"
+  },
+  "requested_mode": "RENDERED_DOM",
+  "capabilities": {
+    "code_execution": true,
+    "bundled_files": true,
+    "validator_execution": "AVAILABLE",
+    "acquisition": "CONVERTED_TEXT",
+    "screenshots": false,
+    "manual_evidence": false
+  },
+  "selected_mode": "SOURCE_TEXT",
+  "limitation_acknowledged": false,
+  "required_manual_checks": [
+    "keyboard",
+    "screen-reader",
+    "zoom-reflow",
+    "color-contrast-rendered",
+    "focus-order"
+  ],
+  "next_action": "Ask the user to accept a source-text-only review or move the audit to a rendered-browser surface."
+}

@@ -1,0 +1,53 @@
+{
+  "$schema": "../../../schemas/dravux-report.schema.json",
+  "contract_version": "0.1.0",
+  "audit_id": "DRV-DEMO-REPAIRED-001",
+  "target": {
+    "name": "Dravux synthetic GitHub demo page",
+    "state": "repaired",
+    "location": "demos/github/repaired/index.html",
+    "input_type": "SOURCE_CODE"
+  },
+  "scope": {
+    "included": [
+      "page language",
+      "image alt presence",
+      "button text contrast",
+      "button target size",
+      "visible focus rule presence"
+    ],
+    "excluded": [
+      "browser runtime",
+      "framework behavior",
+      "external resources"
+    ],
+    "required_manual_checks": [
+      "keyboard",
+      "screen-reader",
+      "zoom-reflow",
+      "state-coverage"
+    ],
+    "manual_checks_completed": [],
+    "applicability_reason": null
+  },
+  "automated_result": "PASS",
+  "final_status": "INCOMPLETE",
+  "findings": [],
+  "errors": [],
+  "evidence_log": [
+    {
+      "type": "COMMAND_OUTPUT",
+      "description": "Bounded deterministic demo audit completed with 0 normative finding(s).",
+      "locator": "scripts/audit_demo_html.py"
+    }
+  ],
+  "run": {
+    "started_at": "1970-01-01T00:00:00Z",
+    "completed_at": "1970-01-01T00:00:00Z",
+    "tooling": [
+      "Dravux demo HTML audit 1.0.1",
+      "Python standard library"
+    ],
+    "environment": "Deterministic offline source fixture"
+  }
+}

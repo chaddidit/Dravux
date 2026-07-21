@@ -1,0 +1,24 @@
+{
+  "$schema": "../../schemas/dravux-report.schema.json",
+  "contract_version": "0.1.0",
+  "audit_id": "DRV-ERROR-PASS-001",
+  "target": {"name": "Failed scanner", "state": "crashed", "location": "synthetic", "input_type": "WEBSITE"},
+  "scope": {
+    "included": ["automated scanner"],
+    "excluded": [],
+    "required_manual_checks": [],
+    "manual_checks_completed": [],
+    "applicability_reason": null
+  },
+  "automated_result": "ERROR",
+  "final_status": "VERIFIED PASS",
+  "findings": [],
+  "errors": [{"code": "SCANNER_CRASH", "message": "Scanner did not complete.", "stage": "deterministic-check"}],
+  "evidence_log": [{"type": "TOOL_OUTPUT", "description": "Scanner exited unexpectedly.", "locator": "synthetic stderr"}],
+  "run": {
+    "started_at": "2026-07-16T14:11:00Z",
+    "completed_at": "2026-07-16T14:11:01Z",
+    "tooling": ["Synthetic scanner 1.0"],
+    "environment": "Synthetic invalid fixture"
+  }
+}

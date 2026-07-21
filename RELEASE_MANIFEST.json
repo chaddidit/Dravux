@@ -1,0 +1,689 @@
+{
+  "archive_root": "Dravux-1.0.1",
+  "files": [
+    {
+      "mode": "0644",
+      "path": ".agents/plugins/marketplace.json",
+      "sha256": "2d13e9e7cfca2e702d713ab671983cf828adbd14c759a5deb965c5ae8dd2c1f4",
+      "size": 362
+    },
+    {
+      "mode": "0644",
+      "path": ".claude-plugin/marketplace.json",
+      "sha256": "5acfccadc1cc007203574240b8bfa3144608ac746b688aa151f29136a2d2968a",
+      "size": 434
+    },
+    {
+      "mode": "0644",
+      "path": ".gitattributes",
+      "sha256": "a45232128bfa4a160be344e534e0476f3d4bbe7f4e05741f52530d30840a8464",
+      "size": 86
+    },
+    {
+      "mode": "0644",
+      "path": ".github/workflows/ci.yml",
+      "sha256": "2e6da7ca62ad4aee61d257e530a2fa493600d314691e9fc36581b8f9904e2b79",
+      "size": 253
+    },
+    {
+      "mode": "0644",
+      "path": ".gitignore",
+      "sha256": "7078b12a6cfbaa91c91ad0e1d576bf92a77310cc8ca5b5f025011ad4d3a58fc3",
+      "size": 319
+    },
+    {
+      "mode": "0644",
+      "path": "CHANGELOG.md",
+      "sha256": "ed26c190f4b737e048ec6dcb0372e881cdad64797d24f4831f8928bbac5b64fc",
+      "size": 1342
+    },
+    {
+      "mode": "0644",
+      "path": "LICENSE",
+      "sha256": "0b18e70cf471990a3e63027804713d3a375f42454ddde2fccd22396c38d205ef",
+      "size": 1067
+    },
+    {
+      "mode": "0644",
+      "path": "README.md",
+      "sha256": "705ba75f1f7d2d2838055956005de2432e1615c2a1040a9af3f0e18b67df51bb",
+      "size": 13205
+    },
+    {
+      "mode": "0644",
+      "path": "THIRD_PARTY_NOTICES.md",
+      "sha256": "db67ce04fa1971f43649517cd02a3ea14304e6c6d230dc3870c7fcd353674247",
+      "size": 1225
+    },
+    {
+      "mode": "0644",
+      "path": "VERSION",
+      "sha256": "44e161e4495cac2cf7858043e9e6418e9579f0ddcfae826f9a372622968ce066",
+      "size": 6
+    },
+    {
+      "mode": "0644",
+      "path": "adapters/chatgpt/README.md",
+      "sha256": "a93bb884ca31e2f7074442636d1f5bd668c4d07a74f5eb4a733249185340285e",
+      "size": 1188
+    },
+    {
+      "mode": "0644",
+      "path": "adapters/claude/README.md",
+      "sha256": "c88746d99df82611277bdd34002a6317335882895a99b956eda99dac69bfb603",
+      "size": 2882
+    },
+    {
+      "mode": "0644",
+      "path": "adapters/codex/README.md",
+      "sha256": "3c47e5441154f8b20ba7e1a55b39921377f72d380ebf4f15bffeb4fb5c773104",
+      "size": 2112
+    },
+    {
+      "mode": "0644",
+      "path": "adapters/github-copilot/README.md",
+      "sha256": "c2687a78368fe2d549dd690c77e3ebff41d64d2bcbc44cfeb478994d7544e366",
+      "size": 309
+    },
+    {
+      "mode": "0644",
+      "path": "adapters/github-copilot/copilot-instructions.md",
+      "sha256": "4b6b123743ddc2e7dc318fe7e07dfdabd2557694b07f61a9aa48d7d2c9a78956",
+      "size": 916
+    },
+    {
+      "mode": "0644",
+      "path": "config/local-paths.example.json",
+      "sha256": "838970f5a76e7f6e5b2b31e900c707a48856c9c1fe2323f8466d247ed69b8a6e",
+      "size": 171
+    },
+    {
+      "mode": "0644",
+      "path": "demos/github/.github/copilot-instructions.md",
+      "sha256": "96fcc5805b921e1927976cf69d2070c1d67058cc595223fe126bc0958de76383",
+      "size": 436
+    },
+    {
+      "mode": "0644",
+      "path": "demos/github/.github/pull_request_template.md",
+      "sha256": "38f8b281c103ecc0009be49ef919725b7c79d1cac8380825f4dfe1b22b9d8b2c",
+      "size": 351
+    },
+    {
+      "mode": "0644",
+      "path": "demos/github/.github/workflows/dravux-demo.yml",
+      "sha256": "3a1da7a3cc2ab963470e8df98662bee8c6be956968f58d5b437144b824f7f009",
+      "size": 778
+    },
+    {
+      "mode": "0644",
+      "path": "demos/github/README.md",
+      "sha256": "747fae92192885eaae33df06cb80b1633878b7a06adef2d2e75a0d8c0991cb57",
+      "size": 842
+    },
+    {
+      "mode": "0644",
+      "path": "demos/github/broken/index.html",
+      "sha256": "1ef6fc9d259d92bd145c91908099d898c00a4169cf4159b8cebad0b633a29fb8",
+      "size": 1175
+    },
+    {
+      "mode": "0644",
+      "path": "demos/github/expected-results.md",
+      "sha256": "9a065aaba5ada1c52c438cfe9ec5fad7ddf5877d57846695f2315a8c9db02572",
+      "size": 815
+    },
+    {
+      "mode": "0644",
+      "path": "demos/github/expected/broken-report.json",
+      "sha256": "23daf835cdf26bf6f6c0640659de95805acf84795746ba9de1971d50c57f3017",
+      "size": 8950
+    },
+    {
+      "mode": "0644",
+      "path": "demos/github/expected/repaired-report.json",
+      "sha256": "f4e383d8d41c63a78f0b6891576e4569eb2b567bef53c8c2191edadc03c2e11f",
+      "size": 1355
+    },
+    {
+      "mode": "0644",
+      "path": "demos/github/live/index.html",
+      "sha256": "ff3c3595917a73c677d270567858133e37fc4fc8c8d0c42872cf211db4fa6a79",
+      "size": 1173
+    },
+    {
+      "mode": "0644",
+      "path": "demos/github/manual-verification-checklist.md",
+      "sha256": "25bd0a197c324e10596de530538e7d92308fab561f4d3a784edfadd098b85ef2",
+      "size": 689
+    },
+    {
+      "mode": "0644",
+      "path": "demos/github/offline-fallback.md",
+      "sha256": "58963af4d9345793576304265c303ae46faa669aeb8ee5ce2e4c06be9d150dec",
+      "size": 483
+    },
+    {
+      "mode": "0644",
+      "path": "demos/github/optional-accessibility-scanner.md",
+      "sha256": "b74a500f253d05b70195ed26e8d62aece66c946b91e9411608861d70207cf139",
+      "size": 976
+    },
+    {
+      "mode": "0644",
+      "path": "demos/github/repair.diff",
+      "sha256": "408f70118fb6469a28a2c5446a9ae438db143c83a284f443ffabd814cecb8260",
+      "size": 1880
+    },
+    {
+      "mode": "0644",
+      "path": "demos/github/repaired/index.html",
+      "sha256": "db0b63b76a345d1d7a9bd97983459bc8db41bcbc575d8d343f102fa9c3a4793c",
+      "size": 1150
+    },
+    {
+      "mode": "0644",
+      "path": "demos/github/reset-instructions.md",
+      "sha256": "471ad313ad0fc1857ed0020ddbdce2e1afabf1dcd6fc976552298c3725480554",
+      "size": 548
+    },
+    {
+      "mode": "0755",
+      "path": "demos/github/reset_demo.py",
+      "sha256": "1dbc863ac18ec63d7a752062b6df6369e6c216495eb76e982f8d7f5c40b1fedc",
+      "size": 804
+    },
+    {
+      "mode": "0644",
+      "path": "demos/github/runbook-5-7-minutes.md",
+      "sha256": "6a26908f4ee0d232a5feb6e2e3ab74a21190b82408a50c72ec556351b935c629",
+      "size": 1980
+    },
+    {
+      "mode": "0644",
+      "path": "demos/github/shared/synthetic-product.svg",
+      "sha256": "154dc14e04fbfe542e9d218573416d5d19f714b235a713344fb6a119d6537c3d",
+      "size": 587
+    },
+    {
+      "mode": "0644",
+      "path": "demos/live-site/README.md",
+      "sha256": "bb844307a7b41498aad6c0ca277e293969bad40a51d97404f2f041630c46080a",
+      "size": 1073
+    },
+    {
+      "mode": "0644",
+      "path": "demos/live-site/acquisition-evidence-template.md",
+      "sha256": "01e6611364f88e4c27876c37d201ffa665b6a35852849866206a5e1dbc40c687",
+      "size": 2277
+    },
+    {
+      "mode": "0644",
+      "path": "demos/live-site/offline-fallback.md",
+      "sha256": "2b059583ba740e1dc1db6f01a35a351f2a43c7a797c9718507031cf4d42446a5",
+      "size": 682
+    },
+    {
+      "mode": "0644",
+      "path": "demos/live-site/runbook-3-5-minutes.md",
+      "sha256": "a15fceafc489b076e6fdf4a6b9f613e9867ccb1f3d2896a28711a38013536670",
+      "size": 994
+    },
+    {
+      "mode": "0644",
+      "path": "demos/shared/demo-preflight.md",
+      "sha256": "bf3b049ec2ff89d388d666d173269f770047e55f773146119d298eaf21406694",
+      "size": 445
+    },
+    {
+      "mode": "0644",
+      "path": "demos/shared/evidence-card-template.md",
+      "sha256": "84ec99075e97506d3f6908db52bba80d9cde872c27ebfa97a13606c7cf3bb0f2",
+      "size": 243
+    },
+    {
+      "mode": "0644",
+      "path": "docs/manual-verification-checklist.md",
+      "sha256": "3b772f4990488278b35e3e4d92bd4aed5b4e81f1cc488a15cd595b15b2e319f6",
+      "size": 1322
+    },
+    {
+      "mode": "0644",
+      "path": "docs/quickstart.md",
+      "sha256": "693aee5ffb56b777219ff8bb18d1c129f1da6a49c0d4d88e7f0e36efaea440af",
+      "size": 2173
+    },
+    {
+      "mode": "0644",
+      "path": "docs/release-checklist.md",
+      "sha256": "07d0a1beba2daeeef82e6e896db0a627d15be6c3542c66049a2f90b132f52795",
+      "size": 1427
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/ambiguous/advisory-only.json",
+      "sha256": "665c2f933ae35d83dddc7d49f3c30bac5d6f00e67050e8828150aa567b31b288",
+      "size": 2501
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/ambiguous/ambiguous-evidence.json",
+      "sha256": "2c2e6472e8bebd83c1716391c5ac4f23a0cd6c1dbcab20b3b91d857c3e817461",
+      "size": 2441
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/ambiguous/missing-evidence.json",
+      "sha256": "fc881e0ae754db644452e6381ce79ff9b285c648f6b23010513401591be2be34",
+      "size": 1255
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/ambiguous/unsupported-input.json",
+      "sha256": "96ea531894afb88682bfc08c974a57504aa7b1a31747f0ea59a4310a9ad9c8e2",
+      "size": 1463
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/failing/known-fail.json",
+      "sha256": "1ee5fe22b6eee12a1798a0952fe442ab0d5b522f7f063f7b94a47d2acc0dddfa",
+      "size": 2681
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/failing/manual-fail-after-automation-pass.json",
+      "sha256": "a2b826197480078fa7d09c2f5b7973ab2a651326b7909a92e74df0850201febd",
+      "size": 3049
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/hostile/advisory-fail.invalid.json",
+      "sha256": "e83e558bace954c0728cd605b25f521d3dfbd372e95a4c09c37df53a7e514bfc",
+      "size": 1717
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/hostile/duplicate-ids.invalid.json",
+      "sha256": "6b6f6c82e1a6f257dba2473cb8990c3eb7bf115b25ee72898cf6be2bc9de3375",
+      "size": 2643
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/hostile/duplicate-manual-checks.invalid.json",
+      "sha256": "978323947a478aa8bade3405620699ac9c37ff9eb4a85ca4413c46d3f6c9cbb1",
+      "size": 978
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/hostile/error-to-verified-pass.invalid.json",
+      "sha256": "a5d15b9e20fad10ffa940d54cc3e5755e424d8d615e0501a82c85389000ab4be",
+      "size": 926
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/hostile/invalid-audit-id.invalid.json",
+      "sha256": "1d81eae795c226e200af4f54ca6d7f17bfbfa72e1edfd3989c0611b26f33352c",
+      "size": 907
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/hostile/invalid-finding-id.invalid.json",
+      "sha256": "02033a8f6846111862dc473d09dcf9ee239579784b6b83ab3a35c5af82bde3d5",
+      "size": 1996
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/hostile/invalid-semver.invalid.json",
+      "sha256": "50161de2c762d9e628495624bf9090f038706b0af1812df9d826e67a3ebcd4b4",
+      "size": 918
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/hostile/invalid-timestamp.invalid.json",
+      "sha256": "b4af3e059af1a8f939a794ee9afb77f0528d87b13d875001492497b8808e922c",
+      "size": 910
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/hostile/invalid-uri.invalid.json",
+      "sha256": "a6dcf816e9d6865a33a36a25f416c7804711f2a18543eada9d9f56c619e0219e",
+      "size": 1981
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/hostile/malformed-output.invalid.json",
+      "sha256": "c1ab6d11369114327b647b7a0bf71f4913c386b815d53000d902e2ae6c70b593",
+      "size": 542
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/hostile/pass-with-pending-manual.invalid.json",
+      "sha256": "9c5a4baa8b3b39b8e0e1162efabe1980145e25257ab6d91109ecb089861187dc",
+      "size": 869
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/hostile/prompt-injection.json",
+      "sha256": "240ba85566d1b6f0e64b0ff725b0e14b09b0d0a846c8a13dbab6b5589f1a36b2",
+      "size": 1147
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/hostile/semantic-counterexamples.json",
+      "sha256": "30d0665c785d70b2b6c1fc0deb8f1025da0e07fd54958acc1f844fefc4878b63",
+      "size": 7342
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/hostile/top-level-array.invalid.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "size": 3
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/hostile/unknown-property.invalid.json",
+      "sha256": "76ce0655c0d5db1230ece2bad39298243186ea45e312d527dd3be6a258e64a82",
+      "size": 998
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/hostile/unsupported-contract-version.invalid.json",
+      "sha256": "287c9db01dae3fa2bad9e0c8cad91072f3949acdb0fa7454051dd652668b09fc",
+      "size": 977
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/manifest.json",
+      "sha256": "cfe55e0d2f6ddc9147a5a24cfd57d9c2dcf79abe1bca34d3f491df4cf6134b44",
+      "size": 2919
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/operational/README.md",
+      "sha256": "dfb9b0cc7cd1388053e46a69a25a1a45af86919347433a70ff557f2095f1b566",
+      "size": 637
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/operational/validator-unavailable.preflight.json",
+      "sha256": "cf5a071e727609409d48feb65106268af4fa1a06256d6d534c1723ddb066c99e",
+      "size": 867
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/passing/automation-pass-manual-incomplete.json",
+      "sha256": "642af89c790159c2379f54339666404c35b491667b1f14fdf9b20ca8f75d6c3d",
+      "size": 1096
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/passing/false-positive-resistance.json",
+      "sha256": "6f79f9b4807bd8798f2e2b4cd44be4e5e1e15f1bf883493cd566d840afbfbe6c",
+      "size": 1135
+    },
+    {
+      "mode": "0644",
+      "path": "fixtures/passing/known-pass.json",
+      "sha256": "5bad2a08cfed2c573b2c8f46a5a20e7801bc4ab019184ea064bb73d7ca0392e4",
+      "size": 1352
+    },
+    {
+      "mode": "0755",
+      "path": "install.sh",
+      "sha256": "142b3838f711c2bbf82124a8c00a01861cd3474832920d70cda65e363bc96418",
+      "size": 4354
+    },
+    {
+      "mode": "0644",
+      "path": "plugins/dravux/.claude-plugin/plugin.json",
+      "sha256": "fdd409f6b77ef6e9c31a0b758f24a593eaf4c1b4a8a759f3ae8f4621797b7b23",
+      "size": 292
+    },
+    {
+      "mode": "0644",
+      "path": "plugins/dravux/.codex-plugin/plugin.json",
+      "sha256": "7a63a0e662e02fabf43e1a92c3d01f4214ff8928720fdc24b277acbc55f065be",
+      "size": 879
+    },
+    {
+      "mode": "0644",
+      "path": "plugins/dravux/LICENSE",
+      "sha256": "0b18e70cf471990a3e63027804713d3a375f42454ddde2fccd22396c38d205ef",
+      "size": 1067
+    },
+    {
+      "mode": "0644",
+      "path": "plugins/dravux/THIRD_PARTY_NOTICES.md",
+      "sha256": "db67ce04fa1971f43649517cd02a3ea14304e6c6d230dc3870c7fcd353674247",
+      "size": 1225
+    },
+    {
+      "mode": "0644",
+      "path": "plugins/dravux/skills/dravux/SKILL.md",
+      "sha256": "bf8ba06152199b3a35c6305e45d455a6a758437688cb8b1686aa0274ad7b42be",
+      "size": 13025
+    },
+    {
+      "mode": "0644",
+      "path": "plugins/dravux/skills/dravux/agents/openai.yaml",
+      "sha256": "bfe991df04c25de10c9c6449946c9e80f746763455aa962cdd45a1a82d4f40e7",
+      "size": 223
+    },
+    {
+      "mode": "0644",
+      "path": "plugins/dravux/skills/dravux/assets/preflight-template.json",
+      "sha256": "d498eff922280017d919d8f1169daef47420791efedd5846d172a8722ed1ffc3",
+      "size": 898
+    },
+    {
+      "mode": "0644",
+      "path": "plugins/dravux/skills/dravux/assets/report-template.json",
+      "sha256": "7c37d20cd929182d74ac76662eaa79bbf2a09e0f5736b3795ecb370b828f9953",
+      "size": 1022
+    },
+    {
+      "mode": "0644",
+      "path": "plugins/dravux/skills/dravux/assets/run-envelope-template.json",
+      "sha256": "64c54d878cf9a75f54c1d68eec6f5a6b287d5602fa30d8c400a47866664312f7",
+      "size": 3015
+    },
+    {
+      "mode": "0644",
+      "path": "plugins/dravux/skills/dravux/fixtures/hostile/unknown-property.invalid.json",
+      "sha256": "a81d4b74a1a5705f536e46b13432ec93038f981ed0d9f0c244d8090a9dd073c3",
+      "size": 962
+    },
+    {
+      "mode": "0644",
+      "path": "plugins/dravux/skills/dravux/fixtures/passing/known-pass.json",
+      "sha256": "5bad2a08cfed2c573b2c8f46a5a20e7801bc4ab019184ea064bb73d7ca0392e4",
+      "size": 1352
+    },
+    {
+      "mode": "0644",
+      "path": "plugins/dravux/skills/dravux/references/execution-gates.md",
+      "sha256": "2fad8b33fdcf7eaedd763db99a4caf718456593c845bf8d16486f8b1937c6b53",
+      "size": 3148
+    },
+    {
+      "mode": "0644",
+      "path": "plugins/dravux/skills/dravux/references/input-capabilities.md",
+      "sha256": "27dc58d19022e8348c3561960085f7d5a563db3f015ac465a4c41e85406142bf",
+      "size": 5107
+    },
+    {
+      "mode": "0644",
+      "path": "plugins/dravux/skills/dravux/references/manual-checks.md",
+      "sha256": "27cf2e82ba7fbf8277188bcc8c64d888af5dc0d845cafeae6f4ab3ac82de58c2",
+      "size": 2590
+    },
+    {
+      "mode": "0644",
+      "path": "plugins/dravux/skills/dravux/references/surface-modes.md",
+      "sha256": "c6fe9e067d7328881170495dc5ce6b1299c06d6fc327b8a69992694e7251090c",
+      "size": 3195
+    },
+    {
+      "mode": "0644",
+      "path": "plugins/dravux/skills/dravux/references/verdict-and-evidence.md",
+      "sha256": "2dbac48c861526eb4074ef57545f08b7776c14bc4d3b0b14e1c2ade9562b72aa",
+      "size": 4124
+    },
+    {
+      "mode": "0644",
+      "path": "plugins/dravux/skills/dravux/references/wcag-2.2-map.md",
+      "sha256": "456c38cd2e917803e1df7a2c3f414c690e84242f65b664ae738da17cc247612a",
+      "size": 1902
+    },
+    {
+      "mode": "0644",
+      "path": "plugins/dravux/skills/dravux/schemas/dravux-preflight.schema.json",
+      "sha256": "f6d9cabebaa8d9fd39eba2241ceca50086da255b388a0c75247b303ec0e04d9e",
+      "size": 3014
+    },
+    {
+      "mode": "0644",
+      "path": "plugins/dravux/skills/dravux/schemas/dravux-report.schema.json",
+      "sha256": "acd4a032b97a17e6329510dd6c5873e7bb46ff97c974f1401a423ceba5b92dae",
+      "size": 7270
+    },
+    {
+      "mode": "0644",
+      "path": "plugins/dravux/skills/dravux/schemas/dravux-run.schema.json",
+      "sha256": "bee6beca3120b93736982bd3051521683fa765157bc2fab73396e8547df3c284",
+      "size": 2281
+    },
+    {
+      "mode": "0644",
+      "path": "plugins/dravux/skills/dravux/schemas/finding.schema.json",
+      "sha256": "01773057d5998ee1e220189d1579d3e22cf7036a5d57edabf40911b180ce1fed",
+      "size": 7340
+    },
+    {
+      "mode": "0644",
+      "path": "plugins/dravux/skills/dravux/scripts/dravux_contract.py",
+      "sha256": "05c81c2748e693baca39f1f44cd7a85780a5674730c0e55d86ee0f98ac5ad973",
+      "size": 25095
+    },
+    {
+      "mode": "0644",
+      "path": "plugins/dravux/skills/dravux/scripts/dravux_run.py",
+      "sha256": "eb62b75055d267310602996f919f765840c77190be7b250ac39b272e45239aa8",
+      "size": 25685
+    },
+    {
+      "mode": "0644",
+      "path": "schemas/dravux-preflight.schema.json",
+      "sha256": "f6d9cabebaa8d9fd39eba2241ceca50086da255b388a0c75247b303ec0e04d9e",
+      "size": 3014
+    },
+    {
+      "mode": "0644",
+      "path": "schemas/dravux-report.schema.json",
+      "sha256": "acd4a032b97a17e6329510dd6c5873e7bb46ff97c974f1401a423ceba5b92dae",
+      "size": 7270
+    },
+    {
+      "mode": "0644",
+      "path": "schemas/dravux-run.schema.json",
+      "sha256": "bee6beca3120b93736982bd3051521683fa765157bc2fab73396e8547df3c284",
+      "size": 2281
+    },
+    {
+      "mode": "0644",
+      "path": "schemas/finding.schema.json",
+      "sha256": "01773057d5998ee1e220189d1579d3e22cf7036a5d57edabf40911b180ce1fed",
+      "size": 7340
+    },
+    {
+      "mode": "0755",
+      "path": "scripts/audit_demo_html.py",
+      "sha256": "8d3359501d352b476742f11faf9b4ac58aaa5febd25916a93cb82ee60f89b51b",
+      "size": 14390
+    },
+    {
+      "mode": "0755",
+      "path": "scripts/build_release.py",
+      "sha256": "617500d4fdce69989e0bcf08439fa9a62fdd3c90a322f259d94b697199ccdbdb",
+      "size": 5103
+    },
+    {
+      "mode": "0755",
+      "path": "scripts/run_tests.py",
+      "sha256": "287722517dd69fcd8b3fb6fe99c3881bac339bb7654d0a2b64539e6a41f86f52",
+      "size": 454
+    },
+    {
+      "mode": "0755",
+      "path": "scripts/validate_report.py",
+      "sha256": "7548c0e6198301f51955eb42087849a8669cdfff81c796427c9931b2daa6dd73",
+      "size": 404
+    },
+    {
+      "mode": "0755",
+      "path": "scripts/verify_distribution.py",
+      "sha256": "df1740e72fbb6144bdf60040bdebf0a3a54890d20b869d814c195bffefa30dc4",
+      "size": 8383
+    },
+    {
+      "mode": "0644",
+      "path": "tests/test_contract.py",
+      "sha256": "21238399a985255aea1e192ca14050da58738eba316c8433d31b7d5fd7003676",
+      "size": 21703
+    },
+    {
+      "mode": "0644",
+      "path": "tests/test_demos.py",
+      "sha256": "f2a26f47ec01540b270e09fd428b41825c597e701364b177cb9b1b45c2af991e",
+      "size": 4974
+    },
+    {
+      "mode": "0644",
+      "path": "tests/test_distribution.py",
+      "sha256": "e1690760cd8c6b8c4ebaf5385ba583c58719a0a10ef1d7272c4c362f4eb342d9",
+      "size": 14187
+    },
+    {
+      "mode": "0644",
+      "path": "tests/test_live_site.py",
+      "sha256": "4aa2b032514dda580a7f918d6bacf8278e4642d1ecf01804b2d5af38ac15542b",
+      "size": 1431
+    },
+    {
+      "mode": "0644",
+      "path": "tests/test_operational.py",
+      "sha256": "252efae2bd70ef682df845943045e50fc5930367cc6c35145b9dff98b085be9a",
+      "size": 9151
+    },
+    {
+      "mode": "0644",
+      "path": "tests/test_package.py",
+      "sha256": "656e2550e9dc6890f23e792669a9dd63462e489209e0253e8a89e518d50ad49f",
+      "size": 16801
+    },
+    {
+      "mode": "0644",
+      "path": "tests/test_skill_portability.py",
+      "sha256": "98ac2b96d1bababecb3d0593e32cbad29e12cc731faee520e7256147213d8aeb",
+      "size": 6985
+    },
+    {
+      "mode": "0755",
+      "path": "verify-install.sh",
+      "sha256": "a6d8f919a50a9771fcc47022b062c678cf8bf90f3cfbbdb3bb82736c45eddfe0",
+      "size": 3120
+    },
+    {
+      "mode": "0755",
+      "path": "verify-release.sh",
+      "sha256": "d05c661fd9264ce0dd5fb9039a5ebb175ec00492243d5770e5060bd602b9f2cf",
+      "size": 544
+    }
+  ],
+  "manifest_self_excluded": true,
+  "operational_contract_version": "1.0.0",
+  "package": "dravux",
+  "package_version": "1.0.1",
+  "preflight_contract_version": "1.0.0",
+  "report_contract_version": "0.1.0"
+}

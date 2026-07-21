@@ -1,0 +1,99 @@
+{
+  "$schema": "../schemas/dravux-run.schema.json",
+  "run_contract_version": "1.0.0",
+  "package_version": "1.0.1",
+  "preflight": {
+    "preflight_version": "1.0.0",
+    "package_version": "1.0.1",
+    "surface": {
+      "provider": "Example provider",
+      "product": "Example chat surface",
+      "mode": "Chat"
+    },
+    "target": {
+      "input_type": "WEBSITE",
+      "location": "https://example.com/"
+    },
+    "requested_mode": "RENDERED_DOM",
+    "capabilities": {
+      "code_execution": true,
+      "bundled_files": true,
+      "validator_execution": "AVAILABLE",
+      "acquisition": "CONVERTED_TEXT",
+      "screenshots": false,
+      "manual_evidence": false
+    },
+    "selected_mode": "SOURCE_TEXT",
+    "limitation_acknowledged": true,
+    "required_manual_checks": [
+      "keyboard",
+      "screen-reader",
+      "zoom-reflow",
+      "color-contrast-rendered",
+      "focus-order"
+    ],
+    "next_action": "Repeat the audit on a rendered-DOM surface, then complete the listed manual checks."
+  },
+  "acquisition": {
+    "attempted": true,
+    "succeeded": true,
+    "method": "CONVERTED_TEXT",
+    "requested_location": "https://example.com/",
+    "final_location": "https://example.com/",
+    "redirect_chain": [],
+    "response_status": 200,
+    "acquired_at": "2026-07-20T21:00:00Z",
+    "tool": "Example converted-text retrieval",
+    "content_sha256": "8c9ddc0ea2005e09dd8a37e46da22f6ac6dd93c2c79f957cc380f8ed1ddf02c5",
+    "error": null
+  },
+  "report": {
+    "contract_version": "0.1.0",
+    "audit_id": "DRV-SOURCE-TEXT-ACCEPTED-001",
+    "target": {
+      "name": "Example public homepage",
+      "state": "Public, unauthenticated, one accepted converted-text retrieval",
+      "location": "https://example.com/",
+      "input_type": "WEBSITE"
+    },
+    "scope": {
+      "included": [
+        "Retrieved text observations and advisory hypotheses only."
+      ],
+      "excluded": [
+        "Raw HTML and DOM attributes.",
+        "Rendered layout, computed styles, and color contrast.",
+        "Keyboard, focus, interaction, and assistive-technology behavior."
+      ],
+      "required_manual_checks": [
+        "keyboard",
+        "screen-reader",
+        "zoom-reflow",
+        "color-contrast-rendered",
+        "focus-order"
+      ],
+      "manual_checks_completed": [],
+      "applicability_reason": null
+    },
+    "automated_result": "PASS",
+    "final_status": "INCOMPLETE",
+    "findings": [],
+    "errors": [],
+    "evidence_log": [
+      {
+        "type": "SOURCE",
+        "description": "One converted-text representation was retrieved; no rendered DOM was available.",
+        "locator": "https://example.com/"
+      }
+    ],
+    "run": {
+      "started_at": "2026-07-20T21:00:00Z",
+      "completed_at": "2026-07-20T21:00:05Z",
+      "tooling": [
+        "Dravux operational contract 1.0.0",
+        "Example converted-text retrieval"
+      ],
+      "environment": "Example chat surface with sandboxed code execution and converted-text retrieval only"
+    }
+  }
+}

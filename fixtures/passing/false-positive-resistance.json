@@ -1,0 +1,35 @@
+{
+  "$schema": "../../schemas/dravux-report.schema.json",
+  "contract_version": "0.1.0",
+  "audit_id": "DRV-FALSE-POSITIVE-001",
+  "target": {
+    "name": "Article whose visible text says FAIL and error",
+    "state": "verified content fixture",
+    "location": "fixtures/passing/false-positive-resistance.json",
+    "input_type": "MARKDOWN"
+  },
+  "scope": {
+    "included": ["heading structure", "literal content handling"],
+    "excluded": ["linked external pages"],
+    "required_manual_checks": ["content-purpose"],
+    "manual_checks_completed": ["content-purpose"],
+    "applicability_reason": null
+  },
+  "automated_result": "PASS",
+  "final_status": "VERIFIED PASS",
+  "findings": [],
+  "errors": [],
+  "evidence_log": [
+    {
+      "type": "SOURCE",
+      "description": "Literal words such as FAIL, error, and inaccessible were treated as content, not verdict controls.",
+      "locator": "synthetic article body"
+    }
+  ],
+  "run": {
+    "started_at": "2026-07-16T14:02:00Z",
+    "completed_at": "2026-07-16T14:02:01Z",
+    "tooling": ["Dravux fixture harness 1.0.1"],
+    "environment": "Synthetic offline fixture"
+  }
+}

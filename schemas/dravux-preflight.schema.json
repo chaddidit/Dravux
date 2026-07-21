@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Dravux capability preflight profile",
+  "$comment": "Mode ranking, bundle self-test, and limitation-acknowledgement decisions are enforced by scripts/dravux_run.py.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "preflight_version",
+    "package_version",
+    "surface",
+    "target",
+    "requested_mode",
+    "capabilities",
+    "selected_mode",
+    "limitation_acknowledged",
+    "required_manual_checks",
+    "next_action"
+  ],
+  "properties": {
+    "$schema": {"type": "string", "minLength": 1},
+    "preflight_version": {"const": "1.0.0"},
+    "package_version": {"const": "1.0.1"},
+    "surface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "product", "mode"],
+      "properties": {
+        "provider": {"type": "string", "minLength": 1},
+        "product": {"type": "string", "minLength": 1},
+        "mode": {"type": "string", "minLength": 1}
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input_type", "location"],
+      "properties": {
+        "input_type": {"enum": ["WEBSITE", "SOURCE_CODE", "MARKDOWN", "STRUCTURED_CONTENT", "SVG", "IMAGE_METADATA", "PDF", "SCREENSHOT", "GITHUB_ARTIFACT", "UNSUPPORTED"]},
+        "location": {"type": "string", "minLength": 1}
+      }
+    },
+    "requested_mode": {"$ref": "#/$defs/mode"},
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code_execution", "bundled_files", "validator_execution", "acquisition", "screenshots", "manual_evidence"],
+      "properties": {
+        "code_execution": {"type": "boolean"},
+        "bundled_files": {"type": "boolean"},
+        "validator_execution": {"enum": ["AVAILABLE", "UNAVAILABLE"]},
+        "acquisition": {"enum": ["NONE", "FILES_ONLY", "CONVERTED_TEXT", "RAW_SOURCE", "RENDERED_BROWSER", "RENDERED_DOM", "INTERACTIVE_BROWSER"]},
+        "screenshots": {"type": "boolean"},
+        "manual_evidence": {"type": "boolean"}
+      }
+    },
+    "selected_mode": {"$ref": "#/$defs/mode"},
+    "limitation_acknowledged": {"type": "boolean"},
+    "required_manual_checks": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "next_action": {"type": "string", "minLength": 1}
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "target": {
+            "properties": {
+              "input_type": {"const": "WEBSITE"}
+            },
+            "required": ["input_type"]
+          }
+        },
+        "required": ["target"]
+      },
+      "then": {
+        "properties": {
+          "requested_mode": {
+            "enum": ["RENDERED_BROWSER", "RENDERED_DOM", "INTERACTIVE"]
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "mode": {"enum": ["CONTRACT_ONLY", "FILE_STATIC", "SOURCE_TEXT", "RAW_SOURCE", "RENDERED_BROWSER", "RENDERED_DOM", "INTERACTIVE"]}
+  }
+}

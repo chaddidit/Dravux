@@ -1,0 +1,5 @@
+{
+  "worklog_path": "${DRAVUX_WORKLOG_PATH}",
+  "output_directory": "./out",
+  "notes": "Copy to local-paths.json for private local use. Never commit real local paths."
+}

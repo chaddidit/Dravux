@@ -1,0 +1,24 @@
+{
+  "$schema": "../../schemas/dravux-report.schema.json",
+  "contract_version": "0.1.0",
+  "audit_id": "DRV-PENDING-MANUAL-001",
+  "target": {"name": "Automated-only page", "state": "scanner complete", "location": "synthetic", "input_type": "WEBSITE"},
+  "scope": {
+    "included": ["automated DOM scan"],
+    "excluded": [],
+    "required_manual_checks": ["keyboard", "screen-reader"],
+    "manual_checks_completed": [],
+    "applicability_reason": null
+  },
+  "automated_result": "PASS",
+  "final_status": "VERIFIED PASS",
+  "findings": [],
+  "errors": [],
+  "evidence_log": [{"type": "TOOL_OUTPUT", "description": "Automated rules passed.", "locator": "synthetic output"}],
+  "run": {
+    "started_at": "2026-07-16T14:12:00Z",
+    "completed_at": "2026-07-16T14:12:01Z",
+    "tooling": ["Synthetic scanner 1.0"],
+    "environment": "Synthetic invalid fixture"
+  }
+}

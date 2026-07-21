@@ -1,0 +1,75 @@
+{
+  "$schema": "../../schemas/dravux-report.schema.json",
+  "contract_version": "0.1.0",
+  "audit_id": "DRV-KNOWN-FAIL-001",
+  "target": {
+    "name": "Synthetic low-contrast call-to-action",
+    "state": "broken fixture",
+    "location": "fixtures/failing/known-fail.json",
+    "input_type": "SOURCE_CODE"
+  },
+  "scope": {
+    "included": ["normal-size button text contrast"],
+    "excluded": ["other component states"],
+    "required_manual_checks": ["state-coverage"],
+    "manual_checks_completed": [],
+    "applicability_reason": null
+  },
+  "automated_result": "FAIL",
+  "final_status": "VERIFIED FAIL",
+  "findings": [
+    {
+      "finding_id": "DRV-CONTRAST-001",
+      "target_and_state": "Synthetic CTA in broken default state",
+      "input_type": "SOURCE_CODE",
+      "standard": {
+        "name": "Web Content Accessibility Guidelines",
+        "version": "2.2",
+        "success_criterion": "1.4.3 Contrast (Minimum)",
+        "url": "https://www.w3.org/TR/WCAG22/#contrast-minimum"
+      },
+      "classification": "NORMATIVE",
+      "severity": "HIGH",
+      "title": "Button text contrast is below the minimum ratio",
+      "evidence": [
+        {
+          "type": "SOURCE",
+          "description": "Computed foreground #777777 on background #FFFFFF is approximately 4.48:1 for normal text.",
+          "locator": "synthetic button inline style"
+        }
+      ],
+      "reproduction_steps": [
+        "Open the broken synthetic component.",
+        "Calculate the contrast between #777777 text and #FFFFFF background.",
+        "Confirm the ratio is below 4.5:1 for normal text."
+      ],
+      "user_impact": "People with low vision may be unable to read the primary action label.",
+      "recommended_repair": "Use a foreground/background pair that meets at least 4.5:1 in every applicable state.",
+      "verification_steps": [
+        "Recalculate the repaired default-state ratio.",
+        "Manually verify hover, focus, active, disabled, high-contrast, and real text-size states."
+      ],
+      "confidence": "HIGH",
+      "manual_review_required": true,
+      "source": {
+        "title": "WCAG 2.2 Success Criterion 1.4.3",
+        "url": "https://www.w3.org/TR/WCAG22/#contrast-minimum"
+      },
+      "status": "OPEN"
+    }
+  ],
+  "errors": [],
+  "evidence_log": [
+    {
+      "type": "COMMAND_OUTPUT",
+      "description": "Deterministic contrast calculation reproduced the failure.",
+      "locator": "synthetic contrast fixture"
+    }
+  ],
+  "run": {
+    "started_at": "2026-07-16T14:03:00Z",
+    "completed_at": "2026-07-16T14:03:01Z",
+    "tooling": ["Dravux contrast calculation 1.0.1"],
+    "environment": "Synthetic offline fixture"
+  }
+}

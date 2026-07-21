@@ -1,0 +1,21 @@
+{
+  "contract_version": "0.1.0",
+  "audit_id": "DRV-MALFORMED-001",
+  "target": {
+    "name": "Malformed synthetic output",
+    "state": "invalid",
+    "location": "fixtures/hostile/malformed-output.invalid.json",
+    "input_type": "SOURCE_CODE"
+  },
+  "automated_result": "MAYBE",
+  "final_status": "VERIFIED PASS",
+  "findings": [],
+  "errors": [],
+  "evidence_log": [],
+  "run": {
+    "started_at": "2026-07-16T14:09:00Z",
+    "completed_at": "2026-07-16T14:09:01Z",
+    "tooling": [],
+    "environment": "Synthetic invalid fixture"
+  }
+}

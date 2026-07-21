@@ -1,0 +1,43 @@
+{
+  "contract_version": "0.1.0",
+  "audit_id": "DRV-HOSTILE-STRUCT-001",
+  "target": {
+    "name": "Structural hostile fixture",
+    "state": "static",
+    "location": "fixtures/hostile",
+    "input_type": "STRUCTURED_CONTENT",
+    "extra_target_prop": "x"
+  },
+  "scope": {
+    "included": [
+      "structural contract"
+    ],
+    "excluded": [],
+    "required_manual_checks": [
+      "keyboard"
+    ],
+    "manual_checks_completed": [],
+    "applicability_reason": null
+  },
+  "automated_result": "PASS",
+  "final_status": "INCOMPLETE",
+  "findings": [],
+  "errors": [],
+  "evidence_log": [
+    {
+      "type": "COMMAND_OUTPUT",
+      "description": "Synthetic structural fixture for validator alignment.",
+      "locator": "fixtures/hostile"
+    }
+  ],
+  "run": {
+    "started_at": "1970-01-01T00:00:00Z",
+    "completed_at": "1970-01-01T00:00:00Z",
+    "tooling": [
+      "fixture"
+    ],
+    "environment": "Deterministic offline fixture",
+    "note": "x"
+  },
+  "unexpected_top_level": "x"
+}

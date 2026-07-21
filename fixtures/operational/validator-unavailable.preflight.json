@@ -1,0 +1,33 @@
+{
+  "$schema": "../../schemas/dravux-preflight.schema.json",
+  "preflight_version": "1.0.0",
+  "package_version": "1.0.1",
+  "surface": {
+    "provider": "Example provider",
+    "product": "Ordinary chat",
+    "mode": "Chat"
+  },
+  "target": {
+    "input_type": "WEBSITE",
+    "location": "https://example.com/"
+  },
+  "requested_mode": "RENDERED_DOM",
+  "capabilities": {
+    "code_execution": false,
+    "bundled_files": false,
+    "validator_execution": "UNAVAILABLE",
+    "acquisition": "CONVERTED_TEXT",
+    "screenshots": false,
+    "manual_evidence": false
+  },
+  "selected_mode": "SOURCE_TEXT",
+  "limitation_acknowledged": false,
+  "required_manual_checks": [
+    "keyboard",
+    "screen-reader",
+    "zoom-reflow",
+    "color-contrast-rendered",
+    "focus-order"
+  ],
+  "next_action": "Move the task to a surface that can execute the bundled validator."
+}

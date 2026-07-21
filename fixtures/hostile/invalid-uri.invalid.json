@@ -1,0 +1,77 @@
+{
+  "contract_version": "0.1.0",
+  "audit_id": "DRV-HOSTILE-STRUCT-001",
+  "target": {
+    "name": "Structural hostile fixture",
+    "state": "static",
+    "location": "fixtures/hostile",
+    "input_type": "STRUCTURED_CONTENT"
+  },
+  "scope": {
+    "included": [
+      "structural contract"
+    ],
+    "excluded": [],
+    "required_manual_checks": [
+      "keyboard"
+    ],
+    "manual_checks_completed": [],
+    "applicability_reason": null
+  },
+  "automated_result": "PASS",
+  "final_status": "INCOMPLETE",
+  "findings": [
+    {
+      "finding_id": "DRV-HOSTILE-F-001",
+      "target_and_state": "fixtures/hostile (static)",
+      "input_type": "STRUCTURED_CONTENT",
+      "standard": {
+        "name": "Web Content Accessibility Guidelines",
+        "version": "2.2",
+        "success_criterion": "1.1.1 Non-text Content",
+        "url": "www.w3.org/TR/WCAG22/#non-text-content"
+      },
+      "classification": "NORMATIVE",
+      "severity": "LOW",
+      "title": "Synthetic structural finding",
+      "evidence": [
+        {
+          "type": "SOURCE",
+          "description": "Synthetic evidence.",
+          "locator": "fixtures/hostile"
+        }
+      ],
+      "reproduction_steps": [
+        "Load the fixture."
+      ],
+      "user_impact": "None; synthetic.",
+      "recommended_repair": "None; synthetic.",
+      "verification_steps": [
+        "Re-validate the fixture."
+      ],
+      "confidence": "HIGH",
+      "manual_review_required": false,
+      "source": {
+        "title": "WCAG 2.2",
+        "url": "relative/path.html"
+      },
+      "status": "OPEN"
+    }
+  ],
+  "errors": [],
+  "evidence_log": [
+    {
+      "type": "COMMAND_OUTPUT",
+      "description": "Synthetic structural fixture for validator alignment.",
+      "locator": "fixtures/hostile"
+    }
+  ],
+  "run": {
+    "started_at": "1970-01-01T00:00:00Z",
+    "completed_at": "1970-01-01T00:00:00Z",
+    "tooling": [
+      "fixture"
+    ],
+    "environment": "Deterministic offline fixture"
+  }
+}

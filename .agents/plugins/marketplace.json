@@ -1,0 +1,20 @@
+{
+  "name": "dravux",
+  "interface": {
+    "displayName": "Dravux Project"
+  },
+  "plugins": [
+    {
+      "name": "dravux",
+      "source": {
+        "source": "local",
+        "path": "./plugins/dravux"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

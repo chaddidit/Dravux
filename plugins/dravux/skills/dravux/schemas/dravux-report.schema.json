@@ -1,0 +1,199 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Dravux accessibility audit report",
+  "$comment": "Cross-item uniqueness and subset invariants are enforced by scripts/dravux_contract.py; all representable structural and verdict invariants are also published here.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "audit_id",
+    "target",
+    "scope",
+    "automated_result",
+    "final_status",
+    "findings",
+    "errors",
+    "evidence_log",
+    "run"
+  ],
+  "properties": {
+    "$schema": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"},
+    "contract_version": {"type": "string", "const": "0.1.0"},
+    "audit_id": {"type": "string", "minLength": 1, "pattern": "^DRV-[A-Z0-9][A-Z0-9._-]*$"},
+    "target": {"$ref": "#/$defs/target"},
+    "scope": {"$ref": "#/$defs/scope"},
+    "automated_result": {"enum": ["PASS", "FAIL", "ERROR"]},
+    "final_status": {"enum": ["VERIFIED PASS", "VERIFIED FAIL", "INCOMPLETE", "NOT APPLICABLE"]},
+    "findings": {
+      "type": "array",
+      "items": {"$ref": "finding.schema.json"}
+    },
+    "errors": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/error"}
+    },
+    "evidence_log": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/evidence"}
+    },
+    "run": {"$ref": "#/$defs/run"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"automated_result": {"const": "ERROR"}}},
+      "then": {
+        "properties": {
+          "errors": {"minItems": 1},
+          "final_status": {"enum": ["VERIFIED FAIL", "INCOMPLETE", "NOT APPLICABLE"]}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"automated_result": {"const": "FAIL"}}},
+      "then": {
+        "properties": {
+          "findings": {"contains": {"properties": {"classification": {"const": "NORMATIVE"}}}},
+          "final_status": {"enum": ["VERIFIED FAIL", "INCOMPLETE"]}
+        }
+      }
+    },
+    {
+      "if": {
+        "required": ["automated_result", "final_status"],
+        "properties": {
+          "automated_result": {"const": "PASS"},
+          "final_status": {"not": {"const": "VERIFIED FAIL"}}
+        }
+      },
+      "then": {
+        "properties": {
+          "findings": {
+            "not": {
+              "contains": {
+                "required": ["classification"],
+                "properties": {"classification": {"const": "NORMATIVE"}}
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"final_status": {"const": "VERIFIED FAIL"}}},
+      "then": {
+        "properties": {
+          "findings": {"contains": {"properties": {"classification": {"const": "NORMATIVE"}, "status": {"const": "OPEN"}}}}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"final_status": {"const": "VERIFIED PASS"}}},
+      "then": {"properties": {"automated_result": {"const": "PASS"}, "errors": {"maxItems": 0}, "findings": {"maxItems": 0}}}
+    },
+    {
+      "if": {"properties": {"final_status": {"const": "NOT APPLICABLE"}}},
+      "then": {
+        "properties": {
+          "automated_result": {"const": "ERROR"},
+          "findings": {"maxItems": 0},
+          "scope": {"properties": {"applicability_reason": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"}}},
+          "errors": {
+            "minItems": 1,
+            "items": {"allOf": [{"$ref": "#/$defs/error"}, {"properties": {"code": {"const": "NOT_APPLICABLE"}}}]}
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "final_status": {"const": "VERIFIED FAIL"},
+          "automated_result": {"enum": ["PASS", "ERROR"]}
+        }
+      },
+      "then": {
+        "properties": {
+          "scope": {"properties": {"manual_checks_completed": {"minItems": 1}}},
+          "findings": {
+            "contains": {
+              "properties": {
+                "classification": {"const": "NORMATIVE"},
+                "manual_review_required": {"const": true},
+                "evidence": {"contains": {"properties": {"type": {"const": "MANUAL_OBSERVATION"}}}}
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"target": {"properties": {"input_type": {"const": "UNSUPPORTED"}}}}},
+      "then": {
+        "properties": {
+          "automated_result": {"const": "ERROR"},
+          "final_status": {"enum": ["INCOMPLETE", "NOT APPLICABLE"]}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "inputType": {
+      "enum": ["WEBSITE", "SOURCE_CODE", "MARKDOWN", "STRUCTURED_CONTENT", "SVG", "IMAGE_METADATA", "PDF", "SCREENSHOT", "GITHUB_ARTIFACT", "UNSUPPORTED"]
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "state", "location", "input_type"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"},
+        "state": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"},
+        "location": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"},
+        "input_type": {"$ref": "#/$defs/inputType"}
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["included", "excluded", "required_manual_checks", "manual_checks_completed", "applicability_reason"],
+      "properties": {
+        "included": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"}},
+        "excluded": {"type": "array", "items": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"}},
+        "required_manual_checks": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"}},
+        "manual_checks_completed": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"}},
+        "applicability_reason": {"type": ["string", "null"]}
+      }
+    },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message", "stage"],
+      "properties": {
+        "code": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"},
+        "message": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"},
+        "stage": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"}
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "description", "locator"],
+      "properties": {
+        "type": {"enum": ["DOM", "SOURCE", "SCREENSHOT", "TOOL_OUTPUT", "COMMAND_OUTPUT", "MANUAL_OBSERVATION", "DOCUMENT_STRUCTURE"]},
+        "description": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"},
+        "locator": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"}
+      }
+    },
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["started_at", "completed_at", "tooling", "environment"],
+      "properties": {
+        "started_at": {"type": "string", "format": "date-time"},
+        "completed_at": {"type": "string", "format": "date-time"},
+        "tooling": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"}},
+        "environment": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"}
+      }
+    }
+  }
+}

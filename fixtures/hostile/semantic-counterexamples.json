@@ -1,0 +1,175 @@
+{
+  "cases": [
+    {
+      "name": "unsupported-cannot-pass",
+      "base": "passing/known-pass.json",
+      "mutations": [
+        {"path": ["target", "input_type"], "value": "UNSUPPORTED"}
+      ],
+      "expected_violation": "UNSUPPORTED input requires automated ERROR"
+    },
+    {
+      "name": "private-guidance-cannot-be-normative",
+      "base": "failing/known-fail.json",
+      "mutations": [
+        {"path": ["findings", 0, "standard"], "value": {"name": "Internal design preference", "version": "draft", "success_criterion": "Make it delightful", "url": "https://example.test/style-guide"}},
+        {"path": ["findings", 0, "source"], "value": {"title": "Internal style guide", "url": "https://example.test/style-guide"}}
+      ],
+      "expected_violation": "must identify WCAG"
+    },
+    {
+      "name": "pass-to-verified-fail-needs-manual-evidence",
+      "base": "failing/known-fail.json",
+      "mutations": [
+        {"path": ["automated_result"], "value": "PASS"},
+        {"path": ["scope", "required_manual_checks"], "value": []},
+        {"path": ["scope", "manual_checks_completed"], "value": []}
+      ],
+      "expected_violation": "requires a completed manual check and normative MANUAL_OBSERVATION evidence"
+    },
+    {
+      "name": "automated-pass-cannot-hide-normative-failure",
+      "base": "failing/known-fail.json",
+      "mutations": [
+        {"path": ["automated_result"], "value": "PASS"},
+        {"path": ["final_status"], "value": "INCOMPLETE"}
+      ],
+      "expected_violation": "automated PASS cannot contain normative findings"
+    },
+    {
+      "name": "verified-pass-cannot-carry-findings",
+      "base": "failing/known-fail.json",
+      "mutations": [
+        {"path": ["automated_result"], "value": "PASS"},
+        {"path": ["final_status"], "value": "VERIFIED PASS"},
+        {"path": ["scope", "required_manual_checks"], "value": []},
+        {"path": ["scope", "manual_checks_completed"], "value": []},
+        {"path": ["findings", 0, "status"], "value": "VERIFIED"}
+      ],
+      "expected_violation": "VERIFIED PASS cannot contain findings"
+    },
+    {
+      "name": "tool-error-cannot-be-not-applicable",
+      "base": "passing/known-pass.json",
+      "mutations": [
+        {"path": ["automated_result"], "value": "ERROR"},
+        {"path": ["final_status"], "value": "NOT APPLICABLE"},
+        {"path": ["scope", "applicability_reason"], "value": "The tool stopped before testing the supported target."},
+        {"path": ["errors"], "value": [{"code": "TOOL_ERROR", "message": "The tool stopped.", "stage": "automation"}]}
+      ],
+      "expected_violation": "only structured NOT_APPLICABLE errors"
+    },
+    {
+      "name": "malformed-url-is-a-violation-not-an-exception",
+      "base": "failing/known-fail.json",
+      "mutations": [
+        {"path": ["findings", 0, "source", "url"], "value": "https://[invalid"}
+      ],
+      "expected_violation": "absolute HTTP(S) URL"
+    },
+    {
+      "name": "non-string-manual-check-is-a-violation-not-an-exception",
+      "base": "passing/known-pass.json",
+      "mutations": [
+        {"path": ["scope", "manual_checks_completed"], "value": [{}]}
+      ],
+      "expected_violation": "must be a non-empty string"
+    },
+    {
+      "name": "not-applicable-cannot-carry-findings",
+      "base": "failing/known-fail.json",
+      "mutations": [
+        {"path": ["automated_result"], "value": "ERROR"},
+        {"path": ["final_status"], "value": "NOT APPLICABLE"},
+        {"path": ["scope", "applicability_reason"], "value": "The declared check does not apply."},
+        {"path": ["errors"], "value": [{"code": "NOT_APPLICABLE", "message": "The declared check does not apply.", "stage": "scope"}]}
+      ],
+      "expected_violation": "NOT APPLICABLE cannot contain findings"
+    },
+    {
+      "name": "nonexistent-wcag-number-is-rejected",
+      "base": "failing/known-fail.json",
+      "mutations": [
+        {"path": ["findings", 0, "standard", "success_criterion"], "value": "4.999.999 Fictional Criterion"},
+        {"path": ["findings", 0, "standard", "url"], "value": "https://www.w3.org/TR/WCAG22/#fictional-criterion"},
+        {"path": ["findings", 0, "source", "url"], "value": "https://www.w3.org/TR/WCAG22/#fictional-criterion"}
+      ],
+      "expected_violation": "must use a supported WCAG 2.2 criterion"
+    },
+    {
+      "name": "malformed-port-is-rejected",
+      "base": "failing/known-fail.json",
+      "mutations": [
+        {"path": ["findings", 0, "standard", "url"], "value": "https://www.w3.org:invalid/TR/WCAG22/#contrast-minimum"},
+        {"path": ["findings", 0, "source", "url"], "value": "https://www.w3.org:invalid/TR/WCAG22/#contrast-minimum"}
+      ],
+      "expected_violation": "absolute HTTP(S) URL"
+    },
+    {
+      "name": "verified-fail-needs-open-normative-finding",
+      "base": "failing/known-fail.json",
+      "mutations": [
+        {"path": ["findings", 0, "status"], "value": "REPAIRED"}
+      ],
+      "expected_violation": "requires at least one OPEN normative finding"
+    },
+    {
+      "name": "criterion-url-fragment-must-match",
+      "base": "failing/known-fail.json",
+      "mutations": [
+        {"path": ["findings", 0, "standard", "url"], "value": "https://www.w3.org/TR/WCAG22/#focus-visible"}
+      ],
+      "expected_violation": "url fragment must match"
+    },
+    {
+      "name": "normative-w3c-hostname-must-be-canonical",
+      "base": "failing/known-fail.json",
+      "mutations": [
+        {"path": ["findings", 0, "standard", "url"], "value": "https://WWW.W3.ORG/TR/WCAG22/#contrast-minimum"},
+        {"path": ["findings", 0, "source", "url"], "value": "https://WWW.W3.ORG/TR/WCAG22/#contrast-minimum"}
+      ],
+      "expected_violation": "must be a W3C WCAG 2.2 criterion URL"
+    },
+    {
+      "name": "normative-w3c-scheme-must-be-canonical",
+      "base": "failing/known-fail.json",
+      "mutations": [
+        {"path": ["findings", 0, "standard", "url"], "value": "HTTPS://www.w3.org/TR/WCAG22/#contrast-minimum"},
+        {"path": ["findings", 0, "source", "url"], "value": "HTTPS://www.w3.org/TR/WCAG22/#contrast-minimum"}
+      ],
+      "expected_violation": "must be a W3C WCAG 2.2 criterion URL"
+    },
+    {
+      "name": "criterion-url-cannot-contain-a-query",
+      "base": "failing/known-fail.json",
+      "mutations": [
+        {"path": ["findings", 0, "standard", "url"], "value": "https://www.w3.org/TR/WCAG22/?view=1#contrast-minimum"}
+      ],
+      "expected_violation": "must be a W3C WCAG 2.2 criterion URL"
+    },
+    {
+      "name": "normative-source-needs-a-path",
+      "base": "failing/known-fail.json",
+      "mutations": [
+        {"path": ["findings", 0, "source", "url"], "value": "https://www.w3.org"}
+      ],
+      "expected_violation": "authoritative W3C source"
+    },
+    {
+      "name": "standard-url-must-be-a-string",
+      "base": "failing/known-fail.json",
+      "mutations": [
+        {"path": ["findings", 0, "standard", "url"], "value": 123}
+      ],
+      "expected_violation": "standard.url must be a non-empty string"
+    },
+    {
+      "name": "enum-values-must-be-strings",
+      "base": "failing/known-fail.json",
+      "mutations": [
+        {"path": ["findings", 0, "classification"], "value": {"value": "NORMATIVE"}}
+      ],
+      "expected_violation": "classification is invalid"
+    }
+  ]
+}

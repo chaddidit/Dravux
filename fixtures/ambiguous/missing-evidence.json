@@ -1,0 +1,41 @@
+{
+  "$schema": "../../schemas/dravux-report.schema.json",
+  "contract_version": "0.1.0",
+  "audit_id": "DRV-MISSING-EVIDENCE-001",
+  "target": {
+    "name": "Screenshot reported as a keyboard failure",
+    "state": "screenshot only",
+    "location": "fixtures/ambiguous/missing-evidence.json",
+    "input_type": "SCREENSHOT"
+  },
+  "scope": {
+    "included": ["available screenshot"],
+    "excluded": ["DOM", "live interaction", "keyboard session"],
+    "required_manual_checks": ["keyboard"],
+    "manual_checks_completed": [],
+    "applicability_reason": null
+  },
+  "automated_result": "ERROR",
+  "final_status": "INCOMPLETE",
+  "findings": [],
+  "errors": [
+    {
+      "code": "MISSING_INTERACTION_EVIDENCE",
+      "message": "A screenshot cannot prove keyboard operability or focus order.",
+      "stage": "capability-check"
+    }
+  ],
+  "evidence_log": [
+    {
+      "type": "SCREENSHOT",
+      "description": "Only static pixels were supplied; no interaction evidence exists.",
+      "locator": "synthetic screenshot reference"
+    }
+  ],
+  "run": {
+    "started_at": "2026-07-16T14:05:00Z",
+    "completed_at": "2026-07-16T14:05:01Z",
+    "tooling": ["Dravux capability check 1.0.1"],
+    "environment": "Synthetic screenshot-only fixture"
+  }
+}

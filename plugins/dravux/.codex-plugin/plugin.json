@@ -1,0 +1,23 @@
+{
+  "name": "dravux",
+  "version": "1.0.1",
+  "description": "Capability-aware accessibility testing with validated run receipts and manual-review boundaries.",
+  "author": {
+    "name": "Dravux Project"
+  },
+  "license": "MIT",
+  "keywords": ["accessibility", "wcag", "audit", "evidence"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Dravux",
+    "shortDescription": "Capability-aware accessibility audits.",
+    "longDescription": "Preflight the active surface, run scoped accessibility checks, and return validated evidence receipts without hiding manual boundaries.",
+    "developerName": "Dravux Project",
+    "category": "Productivity",
+    "capabilities": ["Read", "Validate"],
+    "defaultPrompt": [
+      "Preflight this surface, then run a read-only Dravux accessibility audit.",
+      "Validate this Dravux report without editing files."
+    ]
+  }
+}

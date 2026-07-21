@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Dravux operational run envelope",
+  "$comment": "Cross-document evidence-mode and verdict invariants are enforced by scripts/dravux_run.py.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run_contract_version", "package_version", "preflight", "acquisition", "report"],
+  "properties": {
+    "$schema": {"type": "string", "minLength": 1},
+    "run_contract_version": {"const": "1.0.0"},
+    "package_version": {"const": "1.0.1"},
+    "preflight": {"$ref": "dravux-preflight.schema.json"},
+    "acquisition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["attempted", "succeeded", "method", "requested_location", "final_location", "redirect_chain", "response_status", "acquired_at", "tool", "content_sha256", "error"],
+      "properties": {
+        "attempted": {"type": "boolean"},
+        "succeeded": {"type": "boolean"},
+        "method": {"enum": ["NONE", "FILES_ONLY", "CONVERTED_TEXT", "RAW_SOURCE", "RENDERED_BROWSER", "RENDERED_DOM", "INTERACTIVE_BROWSER"]},
+        "requested_location": {"type": "string", "minLength": 1},
+        "final_location": {"type": ["string", "null"]},
+        "redirect_chain": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "response_status": {"type": ["integer", "null"], "minimum": 100, "maximum": 599},
+        "acquired_at": {"type": ["string", "null"], "format": "date-time"},
+        "tool": {"type": ["string", "null"]},
+        "content_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+        "error": {"type": ["string", "null"]}
+      }
+    },
+    "report": {"$ref": "dravux-report.schema.json"}
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "preflight": {
+            "properties": {
+              "capabilities": {
+                "properties": {"manual_evidence": {"const": false}}
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "report": {
+            "properties": {
+              "scope": {
+                "properties": {"manual_checks_completed": {"maxItems": 0}}
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

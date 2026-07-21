@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Dravux finding",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "finding_id",
+    "target_and_state",
+    "input_type",
+    "standard",
+    "classification",
+    "severity",
+    "title",
+    "evidence",
+    "reproduction_steps",
+    "user_impact",
+    "recommended_repair",
+    "verification_steps",
+    "confidence",
+    "manual_review_required",
+    "source",
+    "status"
+  ],
+  "properties": {
+    "finding_id": {"type": "string", "minLength": 1, "pattern": "^DRV-[A-Z0-9][A-Z0-9._-]*$"},
+    "target_and_state": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"},
+    "input_type": {"$ref": "#/$defs/inputType"},
+    "standard": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/standard"}
+      ]
+    },
+    "classification": {"enum": ["NORMATIVE", "ADVISORY"]},
+    "severity": {"enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO"]},
+    "title": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"},
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/evidence"}
+    },
+    "reproduction_steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"}
+    },
+    "user_impact": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"},
+    "recommended_repair": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"},
+    "verification_steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"}
+    },
+    "confidence": {"enum": ["HIGH", "MEDIUM", "LOW"]},
+    "manual_review_required": {"type": "boolean"},
+    "source": {"$ref": "#/$defs/source"},
+    "status": {"enum": ["OPEN", "REPAIRED", "VERIFIED"]}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"classification": {"const": "NORMATIVE"}}},
+      "then": {
+        "properties": {
+          "standard": {
+            "$ref": "#/$defs/normativeStandard"
+          },
+          "source": {
+            "allOf": [
+              {"$ref": "#/$defs/source"},
+              {"properties": {"url": {"pattern": "^https://(?:[^/]+\\.)?w3\\.org/[^\\s]*$"}}}
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "inputType": {
+      "enum": [
+        "WEBSITE",
+        "SOURCE_CODE",
+        "MARKDOWN",
+        "STRUCTURED_CONTENT",
+        "SVG",
+        "IMAGE_METADATA",
+        "PDF",
+        "SCREENSHOT",
+        "GITHUB_ARTIFACT",
+        "UNSUPPORTED"
+      ]
+    },
+    "standard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "success_criterion", "url"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"},
+        "version": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"},
+        "success_criterion": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"},
+        "url": {"type": "string", "format": "uri", "pattern": "^https?://[A-Za-z0-9.-]+(?::[0-9]+)?(?:[/?#][^\\s]*)?$"}
+      }
+    },
+    "normativeStandard": {
+      "allOf": [
+        {"$ref": "#/$defs/standard"},
+        {
+          "properties": {
+            "name": {"const": "Web Content Accessibility Guidelines"},
+            "version": {"const": "2.2"}
+          },
+          "oneOf": [
+            {"properties": {"success_criterion": {"const": "1.1.1 Non-text Content"}, "url": {"const": "https://www.w3.org/TR/WCAG22/#non-text-content"}}},
+            {"properties": {"success_criterion": {"const": "1.2.2 Captions (Prerecorded)"}, "url": {"const": "https://www.w3.org/TR/WCAG22/#captions-prerecorded"}}},
+            {"properties": {"success_criterion": {"const": "1.3.1 Info and Relationships"}, "url": {"const": "https://www.w3.org/TR/WCAG22/#info-and-relationships"}}},
+            {"properties": {"success_criterion": {"const": "1.4.1 Use of Color"}, "url": {"const": "https://www.w3.org/TR/WCAG22/#use-of-color"}}},
+            {"properties": {"success_criterion": {"const": "1.4.3 Contrast (Minimum)"}, "url": {"const": "https://www.w3.org/TR/WCAG22/#contrast-minimum"}}},
+            {"properties": {"success_criterion": {"const": "1.4.10 Reflow"}, "url": {"const": "https://www.w3.org/TR/WCAG22/#reflow"}}},
+            {"properties": {"success_criterion": {"const": "1.4.11 Non-text Contrast"}, "url": {"const": "https://www.w3.org/TR/WCAG22/#non-text-contrast"}}},
+            {"properties": {"success_criterion": {"const": "1.4.13 Content on Hover or Focus"}, "url": {"const": "https://www.w3.org/TR/WCAG22/#content-on-hover-or-focus"}}},
+            {"properties": {"success_criterion": {"const": "2.1.1 Keyboard"}, "url": {"const": "https://www.w3.org/TR/WCAG22/#keyboard"}}},
+            {"properties": {"success_criterion": {"const": "2.1.2 No Keyboard Trap"}, "url": {"const": "https://www.w3.org/TR/WCAG22/#no-keyboard-trap"}}},
+            {"properties": {"success_criterion": {"const": "2.4.3 Focus Order"}, "url": {"const": "https://www.w3.org/TR/WCAG22/#focus-order"}}},
+            {"properties": {"success_criterion": {"const": "2.4.7 Focus Visible"}, "url": {"const": "https://www.w3.org/TR/WCAG22/#focus-visible"}}},
+            {"properties": {"success_criterion": {"const": "2.4.11 Focus Not Obscured (Minimum)"}, "url": {"const": "https://www.w3.org/TR/WCAG22/#focus-not-obscured-minimum"}}},
+            {"properties": {"success_criterion": {"const": "2.5.8 Target Size (Minimum)"}, "url": {"const": "https://www.w3.org/TR/WCAG22/#target-size-minimum"}}},
+            {"properties": {"success_criterion": {"const": "3.1.1 Language of Page"}, "url": {"const": "https://www.w3.org/TR/WCAG22/#language-of-page"}}},
+            {"properties": {"success_criterion": {"const": "3.2.1 On Focus"}, "url": {"const": "https://www.w3.org/TR/WCAG22/#on-focus"}}},
+            {"properties": {"success_criterion": {"const": "3.2.2 On Input"}, "url": {"const": "https://www.w3.org/TR/WCAG22/#on-input"}}},
+            {"properties": {"success_criterion": {"const": "3.3.1 Error Identification"}, "url": {"const": "https://www.w3.org/TR/WCAG22/#error-identification"}}},
+            {"properties": {"success_criterion": {"const": "3.3.2 Labels or Instructions"}, "url": {"const": "https://www.w3.org/TR/WCAG22/#labels-or-instructions"}}},
+            {"properties": {"success_criterion": {"const": "4.1.2 Name, Role, Value"}, "url": {"const": "https://www.w3.org/TR/WCAG22/#name-role-value"}}}
+          ]
+        }
+      ]
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "description", "locator"],
+      "properties": {
+        "type": {"enum": ["DOM", "SOURCE", "SCREENSHOT", "TOOL_OUTPUT", "COMMAND_OUTPUT", "MANUAL_OBSERVATION", "DOCUMENT_STRUCTURE"]},
+        "description": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"},
+        "locator": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "url"],
+      "properties": {
+        "title": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"},
+        "url": {"type": "string", "format": "uri", "pattern": "^https?://[A-Za-z0-9.-]+(?::[0-9]+)?(?:[/?#][^\\s]*)?$"}
+      }
+    }
+  }
+}

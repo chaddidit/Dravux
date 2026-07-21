@@ -1,0 +1,29 @@
+name: Dravux demo audit
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  accessibility-evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+      - name: Run Dravux contract tests
+        run: python3 -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Audit the live synthetic page
+        run: >-
+          python3 scripts/audit_demo_html.py
+          demos/github/live/index.html
+          --state pull-request
+          --output /tmp/dravux-report.json
+          --fail-on-findings
+      - name: Validate the report contract
+        if: always()
+        run: python3 scripts/validate_report.py /tmp/dravux-report.json

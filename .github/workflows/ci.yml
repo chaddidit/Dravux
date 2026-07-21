@@ -1,0 +1,16 @@
+name: Dravux offline verification
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify release structure
+        run: sh verify-release.sh
