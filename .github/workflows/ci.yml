@@ -11,6 +11,17 @@ jobs:
   test:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Export clean release tree
+        run: |
+          mkdir -p "$RUNNER_TEMP/dravux-release"
+          git archive HEAD | tar -x -C "$RUNNER_TEMP/dravux-release"
+
       - name: Verify release structure
+        working-directory: ${{ runner.temp }}/dravux-release
         run: sh verify-release.sh
