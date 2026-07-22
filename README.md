@@ -1,4 +1,4 @@
-# Dravux 1.0.1
+# Dravux
 
 **Evidence-first accessibility testing for AI agents.**
 
