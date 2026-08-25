@@ -1,0 +1,89 @@
+{
+  "$schema": "../../schemas/dravux-run.schema.json",
+  "run_contract_version": "1.2.0",
+  "package_version": "1.0.2",
+  "preflight": {
+    "preflight_version": "1.0.0",
+    "package_version": "1.0.2",
+    "surface": {
+      "provider": "Example provider",
+      "product": "Example local agent",
+      "mode": "CLI"
+    },
+    "target": {
+      "input_type": "SVG",
+      "location": "fixtures/operational/decorative-spacer.svg"
+    },
+    "requested_mode": "FILE_STATIC",
+    "capabilities": {
+      "code_execution": true,
+      "bundled_files": true,
+      "validator_execution": "AVAILABLE",
+      "acquisition": "FILES_ONLY",
+      "screenshots": false,
+      "manual_evidence": false
+    },
+    "selected_mode": "FILE_STATIC",
+    "limitation_acknowledged": false,
+    "required_manual_checks": [],
+    "next_action": "Record the bounded not-applicable outcome without claiming an accessibility pass."
+  },
+  "acquisition": {
+    "attempted": true,
+    "succeeded": true,
+    "method": "FILES_ONLY",
+    "requested_location": "fixtures/operational/decorative-spacer.svg",
+    "final_location": "fixtures/operational/decorative-spacer.svg",
+    "redirect_chain": [],
+    "response_status": null,
+    "acquired_at": "2026-08-21T20:00:01Z",
+    "tool": "Dravux fixture reader",
+    "content_sha256": "bceb866132eb99a484f7d02553fca0c69b0e9be70a5349e27e3ef76ce9babb7b",
+    "error": null
+  },
+  "execution": {
+    "completed": true,
+    "failure_stage": null,
+    "error": null
+  },
+  "report": {
+    "contract_version": "0.2.0",
+    "audit_id": "DRV-GENUINE-NA-001",
+    "target": {
+      "name": "Decorative spacer SVG fixture",
+      "state": "Acquired static file with no user-facing content or behavior",
+      "location": "fixtures/operational/decorative-spacer.svg",
+      "input_type": "SVG"
+    },
+    "scope": {
+      "included": ["Direct static inspection of the declared decorative spacer"],
+      "excluded": ["Any asset other than the declared fixture"],
+      "required_manual_checks": [],
+      "manual_checks_completed": [],
+      "applicability_reason": "The acquired fixture is a declared decorative spacer with no user-facing information, control, or behavior to evaluate."
+    },
+    "automated_result": "ERROR",
+    "final_status": "NOT APPLICABLE",
+    "findings": [],
+    "errors": [
+      {
+        "code": "NOT_APPLICABLE",
+        "message": "The declared checks do not apply to this acquired decorative spacer.",
+        "stage": "applicability"
+      }
+    ],
+    "evidence_log": [
+      {
+        "type": "SOURCE",
+        "description": "Static inspection found only the declared decorative spacer artifact.",
+        "locator": "fixtures/operational/decorative-spacer.svg"
+      }
+    ],
+    "run": {
+      "started_at": "2026-08-21T20:00:00Z",
+      "completed_at": "2026-08-21T20:00:02Z",
+      "tooling": ["Dravux operational contract 1.2.0"],
+      "environment": "Synthetic offline fixture"
+    }
+  }
+}

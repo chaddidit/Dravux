@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/dravux-report.schema.json",
-  "contract_version": "0.1.0",
+  "contract_version": "0.2.0",
   "audit_id": "DRV-HOSTILE-INPUT-001",
   "target": {
     "name": "Issue body containing hostile audit instructions",
@@ -29,7 +29,7 @@
   "run": {
     "started_at": "2026-07-16T14:08:00Z",
     "completed_at": "2026-07-16T14:08:01Z",
-    "tooling": ["Dravux hostile-input harness 1.0.1"],
+    "tooling": ["Dravux hostile-input harness 1.0.2"],
     "environment": "Synthetic offline fixture; no target commands executed"
   }
 }

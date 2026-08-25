@@ -1,0 +1,27 @@
+{
+  "$schema": "../../schemas/dravux-preflight.schema.json",
+  "preflight_version": "1.0.0",
+  "package_version": "1.0.2",
+  "surface": {
+    "provider": "Example provider",
+    "product": "Example local agent",
+    "mode": "CLI"
+  },
+  "target": {
+    "input_type": "UNSUPPORTED",
+    "location": "synthetic-design-file.bin"
+  },
+  "requested_mode": "FILE_STATIC",
+  "capabilities": {
+    "code_execution": true,
+    "bundled_files": true,
+    "validator_execution": "AVAILABLE",
+    "acquisition": "FILES_ONLY",
+    "screenshots": false,
+    "manual_evidence": false
+  },
+  "selected_mode": "FILE_STATIC",
+  "limitation_acknowledged": false,
+  "required_manual_checks": [],
+  "next_action": "Request a supported SVG, screenshot, PDF, source file, or structured export."
+}

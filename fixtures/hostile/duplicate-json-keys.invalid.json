@@ -1,0 +1,36 @@
+{
+  "$schema": "../../schemas/dravux-report.schema.json",
+  "contract_version": "0.2.0",
+  "audit_id": "DRV-HOSTILE-DUPLICATE-JSON-KEYS-001",
+  "target": {
+    "name": "Report that launders its verdict through a duplicate JSON key",
+    "state": "hostile fixture",
+    "location": "fixtures/hostile/duplicate-json-keys.invalid.json",
+    "input_type": "SOURCE_CODE"
+  },
+  "scope": {
+    "included": ["button semantics", "contrast", "keyboard activation", "accessible name"],
+    "excluded": ["full application flows"],
+    "required_manual_checks": ["keyboard", "screen-reader"],
+    "manual_checks_completed": [],
+    "applicability_reason": null
+  },
+  "automated_result": "PASS",
+  "final_status": "INCOMPLETE",
+  "final_status": "VERIFIED PASS",
+  "findings": [],
+  "errors": [],
+  "evidence_log": [
+    {
+      "type": "COMMAND_OUTPUT",
+      "description": "A human reading this artifact sees final_status INCOMPLETE; a last-key-wins parser sees VERIFIED PASS. The loader must reject the duplicate key instead of choosing between the two readings.",
+      "locator": "fixtures/hostile/duplicate-json-keys.invalid.json"
+    }
+  ],
+  "run": {
+    "started_at": "2026-07-16T14:00:00Z",
+    "completed_at": "2026-07-16T14:00:01Z",
+    "tooling": ["Dravux fixture harness 1.0.2"],
+    "environment": "Synthetic offline fixture"
+  }
+}

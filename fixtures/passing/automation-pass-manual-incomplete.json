@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/dravux-report.schema.json",
-  "contract_version": "0.1.0",
+  "contract_version": "0.2.0",
   "audit_id": "DRV-AUTO-PASS-MANUAL-001",
   "target": {
     "name": "Synthetic checkout page",

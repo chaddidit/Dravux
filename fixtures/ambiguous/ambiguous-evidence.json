@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/dravux-report.schema.json",
-  "contract_version": "0.1.0",
+  "contract_version": "0.2.0",
   "audit_id": "DRV-AMBIGUOUS-001",
   "target": {
     "name": "Marketing image with context-dependent alt purpose",
@@ -57,7 +57,7 @@
   "run": {
     "started_at": "2026-07-16T14:04:00Z",
     "completed_at": "2026-07-16T14:04:01Z",
-    "tooling": ["Dravux metadata inspection 1.0.1"],
+    "tooling": ["Dravux metadata inspection 1.0.2"],
     "environment": "Synthetic source-only fixture"
   }
 }

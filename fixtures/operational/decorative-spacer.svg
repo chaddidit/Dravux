@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Dravux bounded fixture: a purely decorative layout spacer. It conveys no information,
+     exposes no control, and has no behavior, so no accessibility check applies to it.
+     Referenced by fixtures/operational/genuine-not-applicable.run.json. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1" viewBox="0 0 1 1" role="presentation" aria-hidden="true" focusable="false">
+  <rect width="1" height="1" fill="none"/>
+</svg>

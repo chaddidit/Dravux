@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/dravux-report.schema.json",
-  "contract_version": "0.1.0",
+  "contract_version": "0.2.0",
   "audit_id": "DRV-UNSUPPORTED-001",
   "target": {
     "name": "Opaque proprietary binary design file",
@@ -16,11 +16,11 @@
     "applicability_reason": "Direct inspection of a proprietary binary design file is outside Dravux's supported inputs without a proven reader."
   },
   "automated_result": "ERROR",
-  "final_status": "NOT APPLICABLE",
+  "final_status": "INCOMPLETE",
   "findings": [],
   "errors": [
     {
-      "code": "NOT_APPLICABLE",
+      "code": "UNSUPPORTED_INPUT",
       "message": "No reader is available for this proprietary binary design format; request a supported SVG, screenshot, or structured export.",
       "stage": "capability-check"
     }
@@ -35,7 +35,7 @@
   "run": {
     "started_at": "2026-07-16T14:06:00Z",
     "completed_at": "2026-07-16T14:06:01Z",
-    "tooling": ["Dravux capability check 1.0.1"],
+    "tooling": ["Dravux capability check 1.0.2"],
     "environment": "Synthetic unsupported-input fixture"
   }
 }

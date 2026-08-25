@@ -1,6 +1,6 @@
 {
   "$schema": "../../../schemas/dravux-report.schema.json",
-  "contract_version": "0.1.0",
+  "contract_version": "0.2.0",
   "audit_id": "DRV-DEMO-BROKEN-001",
   "target": {
     "name": "Dravux synthetic GitHub demo page",
@@ -236,7 +236,7 @@
     "started_at": "1970-01-01T00:00:00Z",
     "completed_at": "1970-01-01T00:00:00Z",
     "tooling": [
-      "Dravux demo HTML audit 1.0.1",
+      "Dravux demo HTML audit 1.0.2",
       "Python standard library"
     ],
     "environment": "Deterministic offline source fixture"

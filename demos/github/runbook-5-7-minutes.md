@@ -6,16 +6,18 @@ Run from the Dravux package root.
 
 Say: "This is a synthetic page with known failures. The scanner can prove only the rules it runs. Manual checks remain separate."
 
-Reset the live page:
+Stage the demo page in a disposable location. `demos/github/live/index.html` is verified by the
+release manifest, so resetting it in place would make `verify-release.sh` fail afterwards; the
+`out/` folder is ignored by verification.
 
 ```bash
-python3 demos/github/reset_demo.py --state broken
+python3 demos/github/reset_demo.py --state broken --destination out/github-demo/index.html
 ```
 
 ## 0:45-1:45 - Show FAIL
 
 ```bash
-python3 scripts/audit_demo_html.py demos/github/live/index.html --state broken --output out/github-demo/broken-report.json
+python3 scripts/audit_demo_html.py out/github-demo/index.html --state broken --output out/github-demo/broken-report.json
 python3 scripts/validate_report.py out/github-demo/broken-report.json
 ```
 
@@ -30,7 +32,7 @@ Ask the room which findings are normative versus advisory. Have the AI explain o
 Use the documented patch or copy the repaired state:
 
 ```bash
-python3 demos/github/reset_demo.py --state repaired
+python3 demos/github/reset_demo.py --state repaired --destination out/github-demo/index.html
 ```
 
 Narrate the changes: `lang`, explicit decorative `alt`, higher contrast, two 44px targets with spacing, and a visible focus rule.
@@ -38,7 +40,7 @@ Narrate the changes: `lang`, explicit decorative `alt`, higher contrast, two 44p
 ## 4:30-5:30 - Rerun
 
 ```bash
-python3 scripts/audit_demo_html.py demos/github/live/index.html --state repaired --output out/github-demo/repaired-report.json
+python3 scripts/audit_demo_html.py out/github-demo/index.html --state repaired --output out/github-demo/repaired-report.json
 python3 scripts/validate_report.py out/github-demo/repaired-report.json
 ```
 

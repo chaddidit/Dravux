@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/dravux-report.schema.json",
-  "contract_version": "0.1.0",
+  "contract_version": "0.2.0",
   "audit_id": "DRV-MISSING-EVIDENCE-001",
   "target": {
     "name": "Screenshot reported as a keyboard failure",
@@ -35,7 +35,7 @@
   "run": {
     "started_at": "2026-07-16T14:05:00Z",
     "completed_at": "2026-07-16T14:05:01Z",
-    "tooling": ["Dravux capability check 1.0.1"],
+    "tooling": ["Dravux capability check 1.0.2"],
     "environment": "Synthetic screenshot-only fixture"
   }
 }

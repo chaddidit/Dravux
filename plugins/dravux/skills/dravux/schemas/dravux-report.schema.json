@@ -17,8 +17,8 @@
     "run"
   ],
   "properties": {
-    "$schema": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"},
-    "contract_version": {"type": "string", "const": "0.1.0"},
+    "$schema": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"},
+    "contract_version": {"type": "string", "const": "0.2.0"},
     "audit_id": {"type": "string", "minLength": 1, "pattern": "^DRV-[A-Z0-9][A-Z0-9._-]*$"},
     "target": {"$ref": "#/$defs/target"},
     "scope": {"$ref": "#/$defs/scope"},
@@ -40,6 +40,10 @@
     "run": {"$ref": "#/$defs/run"}
   },
   "allOf": [
+    {
+      "if": {"properties": {"automated_result": {"const": "PASS"}}},
+      "then": {"properties": {"errors": {"maxItems": 0}}}
+    },
     {
       "if": {"properties": {"automated_result": {"const": "ERROR"}}},
       "then": {
@@ -89,7 +93,7 @@
     },
     {
       "if": {"properties": {"final_status": {"const": "VERIFIED PASS"}}},
-      "then": {"properties": {"automated_result": {"const": "PASS"}, "errors": {"maxItems": 0}, "findings": {"maxItems": 0}}}
+      "then": {"properties": {"automated_result": {"const": "PASS"}, "errors": {"maxItems": 0}, "findings": {"maxItems": 0}, "scope": {"properties": {"required_manual_checks": {"minItems": 1}, "manual_checks_completed": {"minItems": 1}}}}}
     },
     {
       "if": {"properties": {"final_status": {"const": "NOT APPLICABLE"}}},
@@ -97,7 +101,7 @@
         "properties": {
           "automated_result": {"const": "ERROR"},
           "findings": {"maxItems": 0},
-          "scope": {"properties": {"applicability_reason": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"}}},
+          "scope": {"properties": {"applicability_reason": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"}}},
           "errors": {
             "minItems": 1,
             "items": {"allOf": [{"$ref": "#/$defs/error"}, {"properties": {"code": {"const": "NOT_APPLICABLE"}}}]}
@@ -132,7 +136,7 @@
       "then": {
         "properties": {
           "automated_result": {"const": "ERROR"},
-          "final_status": {"enum": ["INCOMPLETE", "NOT APPLICABLE"]}
+          "final_status": {"const": "INCOMPLETE"}
         }
       }
     }
@@ -146,9 +150,9 @@
       "additionalProperties": false,
       "required": ["name", "state", "location", "input_type"],
       "properties": {
-        "name": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"},
-        "state": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"},
-        "location": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"},
+        "name": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"},
+        "state": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"},
+        "location": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"},
         "input_type": {"$ref": "#/$defs/inputType"}
       }
     },
@@ -157,11 +161,11 @@
       "additionalProperties": false,
       "required": ["included", "excluded", "required_manual_checks", "manual_checks_completed", "applicability_reason"],
       "properties": {
-        "included": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"}},
-        "excluded": {"type": "array", "items": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"}},
-        "required_manual_checks": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"}},
-        "manual_checks_completed": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"}},
-        "applicability_reason": {"type": ["string", "null"]}
+        "included": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"}},
+        "excluded": {"type": "array", "items": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"}},
+        "required_manual_checks": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"}},
+        "manual_checks_completed": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"}},
+        "applicability_reason": {"type": ["string", "null"], "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"}
       }
     },
     "error": {
@@ -169,9 +173,9 @@
       "additionalProperties": false,
       "required": ["code", "message", "stage"],
       "properties": {
-        "code": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"},
-        "message": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"},
-        "stage": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"}
+        "code": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"},
+        "message": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"},
+        "stage": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"}
       }
     },
     "evidence": {
@@ -180,9 +184,11 @@
       "required": ["type", "description", "locator"],
       "properties": {
         "type": {"enum": ["DOM", "SOURCE", "SCREENSHOT", "TOOL_OUTPUT", "COMMAND_OUTPUT", "MANUAL_OBSERVATION", "DOCUMENT_STRUCTURE"]},
-        "description": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"},
-        "locator": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"}
-      }
+        "description": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"},
+        "locator": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"},
+        "manual_check_id": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"}
+      },
+      "allOf": [{"if": {"properties": {"type": {"const": "MANUAL_OBSERVATION"}}}, "then": {"required": ["manual_check_id"]}, "else": {"not": {"required": ["manual_check_id"]}}}]
     },
     "run": {
       "type": "object",
@@ -191,8 +197,8 @@
       "properties": {
         "started_at": {"type": "string", "format": "date-time"},
         "completed_at": {"type": "string", "format": "date-time"},
-        "tooling": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"}},
-        "environment": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"}
+        "tooling": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"}},
+        "environment": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"}
       }
     }
   }
