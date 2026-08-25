@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/dravux-report.schema.json",
-  "contract_version": "0.1.0",
+  "contract_version": "0.2.0",
   "audit_id": "DRV-MANUAL-FAIL-001",
   "target": {
     "name": "Synthetic modal with an automated clean scan",
@@ -34,6 +34,7 @@
       "evidence": [
         {
           "type": "MANUAL_OBSERVATION",
+          "manual_check_id": "keyboard-focus-order",
           "description": "After the modal opens, pressing Tab moves focus to the obscured page before reaching the modal controls.",
           "locator": "Synthetic modal, open state, first Tab press"
         }
@@ -67,6 +68,7 @@
     },
     {
       "type": "MANUAL_OBSERVATION",
+      "manual_check_id": "keyboard-focus-order",
       "description": "The required keyboard review reproduced a normative focus-order failure.",
       "locator": "Synthetic modal manual-check record"
     }
@@ -74,7 +76,7 @@
   "run": {
     "started_at": "2026-07-16T15:30:00Z",
     "completed_at": "2026-07-16T15:31:00Z",
-    "tooling": ["Dravux fixture harness 1.0.1", "manual keyboard review"],
+    "tooling": ["Dravux fixture harness 1.0.2", "manual keyboard review"],
     "environment": "Synthetic offline fixture"
   }
 }

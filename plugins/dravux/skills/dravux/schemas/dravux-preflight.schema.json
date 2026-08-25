@@ -17,17 +17,17 @@
     "next_action"
   ],
   "properties": {
-    "$schema": {"type": "string", "minLength": 1},
+    "$schema": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"},
     "preflight_version": {"const": "1.0.0"},
-    "package_version": {"const": "1.0.1"},
+    "package_version": {"const": "1.0.2"},
     "surface": {
       "type": "object",
       "additionalProperties": false,
       "required": ["provider", "product", "mode"],
       "properties": {
-        "provider": {"type": "string", "minLength": 1},
-        "product": {"type": "string", "minLength": 1},
-        "mode": {"type": "string", "minLength": 1}
+        "provider": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"},
+        "product": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"},
+        "mode": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"}
       }
     },
     "target": {
@@ -36,7 +36,7 @@
       "required": ["input_type", "location"],
       "properties": {
         "input_type": {"enum": ["WEBSITE", "SOURCE_CODE", "MARKDOWN", "STRUCTURED_CONTENT", "SVG", "IMAGE_METADATA", "PDF", "SCREENSHOT", "GITHUB_ARTIFACT", "UNSUPPORTED"]},
-        "location": {"type": "string", "minLength": 1}
+        "location": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"}
       }
     },
     "requested_mode": {"$ref": "#/$defs/mode"},
@@ -58,9 +58,9 @@
     "required_manual_checks": {
       "type": "array",
       "uniqueItems": true,
-      "items": {"type": "string", "minLength": 1}
+      "items": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"}
     },
-    "next_action": {"type": "string", "minLength": 1}
+    "next_action": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"}
   },
   "allOf": [
     {

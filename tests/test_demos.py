@@ -1,4 +1,5 @@
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -95,6 +96,38 @@ class DemoTests(unittest.TestCase):
         self.assertNotIn("GH_TOKEN", workflow)
         self.assertNotIn("secrets.", workflow)
         self.assertIn("permissions:\n  contents: read", workflow)
+
+    def test_workflows_are_pinned_bounded_and_cover_supported_pythons(self):
+        root_workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+        demo_workflow = (
+            ROOT / "demos" / "github" / ".github" / "workflows" / "dravux-demo.yml"
+        ).read_text(encoding="utf-8")
+        checkout = "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1"
+        setup = "actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0"
+
+        for name, workflow in (("root", root_workflow), ("demo", demo_workflow)):
+            with self.subTest(workflow=name):
+                self.assertEqual(workflow.count(checkout), 1)
+                self.assertEqual(workflow.count(setup), 1)
+                self.assertEqual(workflow.count("persist-credentials: false"), 1)
+                self.assertIn("permissions:\n  contents: read", workflow)
+                self.assertNotIn(": write", workflow)
+                self.assertRegex(workflow, r"timeout-minutes: [1-9][0-9]*")
+                self.assertIn('PYTHONDONTWRITEBYTECODE: "1"', workflow)
+                self.assertIn('PYTHONUTF8: "1"', workflow)
+                self.assertNotRegex(workflow, r"uses:\s*actions/(?:checkout|setup-python)@v[0-9]")
+                for line in workflow.splitlines():
+                    if "python3 " in line:
+                        self.assertIn("python3 -B ", line, line)
+
+        matrix = root_workflow.split("matrix:", 1)[1].split("steps:", 1)[0]
+        self.assertEqual(
+            re.findall(r"- os: ([^\s]+)\n\s+python-version: \"([^\"]+)\"", matrix),
+            [("ubuntu-latest", "3.8"), ("ubuntu-latest", "3.13"), ("macos-latest", "3.13")],
+        )
+        self.assertIn("python-version: ${{ matrix.python-version }}", root_workflow)
+        self.assertIn("${{ runner.temp }}/dravux-report.json", demo_workflow)
+        self.assertNotIn("/tmp/", demo_workflow)
 
 
 if __name__ == "__main__":

@@ -21,14 +21,14 @@
   "evidence_log": [
     {
       "type": "DOCUMENT_STRUCTURE",
-      "description": "A future contract version must not validate as Dravux 1.0.1.",
+      "description": "A future contract version must not validate as Dravux 1.0.2.",
       "locator": "contract_version"
     }
   ],
   "run": {
     "started_at": "2026-07-20T00:00:00Z",
     "completed_at": "2026-07-20T00:00:01Z",
-    "tooling": ["Dravux contract fixture 1.0.1"],
+    "tooling": ["Dravux contract fixture 1.0.2"],
     "environment": "Offline synthetic fixture"
   }
 }

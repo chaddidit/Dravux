@@ -1,10 +1,10 @@
 {
   "$schema": "../schemas/dravux-run.schema.json",
-  "run_contract_version": "1.0.0",
-  "package_version": "1.0.1",
+  "run_contract_version": "1.2.0",
+  "package_version": "1.0.2",
   "preflight": {
     "preflight_version": "1.0.0",
-    "package_version": "1.0.1",
+    "package_version": "1.0.2",
     "surface": {
       "provider": "Example provider",
       "product": "Example chat surface",
@@ -47,8 +47,13 @@
     "content_sha256": "8c9ddc0ea2005e09dd8a37e46da22f6ac6dd93c2c79f957cc380f8ed1ddf02c5",
     "error": null
   },
+  "execution": {
+    "completed": true,
+    "failure_stage": null,
+    "error": null
+  },
   "report": {
-    "contract_version": "0.1.0",
+    "contract_version": "0.2.0",
     "audit_id": "DRV-SOURCE-TEXT-ACCEPTED-001",
     "target": {
       "name": "Example public homepage",
@@ -90,7 +95,7 @@
       "started_at": "2026-07-20T21:00:00Z",
       "completed_at": "2026-07-20T21:00:05Z",
       "tooling": [
-        "Dravux operational contract 1.0.0",
+        "Dravux operational contract 1.2.0",
         "Example converted-text retrieval"
       ],
       "environment": "Example chat surface with sandboxed code execution and converted-text retrieval only"

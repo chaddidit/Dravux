@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/dravux-report.schema.json",
-  "contract_version": "0.1.0",
+  "contract_version": "0.2.0",
   "audit_id": "DRV-KNOWN-PASS-001",
   "target": {
     "name": "Synthetic accessible button component",
@@ -27,14 +27,21 @@
     },
     {
       "type": "MANUAL_OBSERVATION",
+      "manual_check_id": "keyboard",
       "description": "Synthetic keyboard and screen-reader checks are recorded complete for this bounded fixture.",
+      "locator": "fixture scope.manual_checks_completed"
+    },
+    {
+      "type": "MANUAL_OBSERVATION",
+      "manual_check_id": "screen-reader",
+      "description": "Synthetic screen-reader checks are recorded complete for this bounded fixture.",
       "locator": "fixture scope.manual_checks_completed"
     }
   ],
   "run": {
     "started_at": "2026-07-16T14:00:00Z",
     "completed_at": "2026-07-16T14:00:01Z",
-    "tooling": ["Dravux fixture harness 1.0.1"],
+    "tooling": ["Dravux fixture harness 1.0.2"],
     "environment": "Synthetic offline fixture"
   }
 }

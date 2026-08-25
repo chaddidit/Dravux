@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/dravux-report.schema.json",
-  "contract_version": "0.1.0",
+  "contract_version": "0.2.0",
   "audit_id": "DRV-ADVISORY-FAIL-001",
   "target": {"name": "Dense content layout", "state": "static", "location": "synthetic", "input_type": "SCREENSHOT"},
   "scope": {
@@ -37,7 +37,7 @@
   "run": {
     "started_at": "2026-07-16T14:13:00Z",
     "completed_at": "2026-07-16T14:13:01Z",
-    "tooling": ["Dravux fixture harness 1.0.1"],
+    "tooling": ["Dravux fixture harness 1.0.2"],
     "environment": "Synthetic invalid fixture"
   }
 }

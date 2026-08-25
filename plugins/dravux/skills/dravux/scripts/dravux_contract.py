@@ -5,6 +5,7 @@ import argparse
 from collections import Counter
 import datetime
 import json
+import math
 import re
 import sys
 import urllib.parse
@@ -13,7 +14,7 @@ from typing import Any, Collection, Dict, List
 
 
 AUTOMATED_RESULTS = {"PASS", "FAIL", "ERROR"}
-CONTRACT_VERSION = "0.1.0"
+CONTRACT_VERSION = "0.2.0"
 FINAL_STATUSES = {"VERIFIED PASS", "VERIFIED FAIL", "INCOMPLETE", "NOT APPLICABLE"}
 INPUT_TYPES = {
     "WEBSITE",
@@ -40,6 +41,21 @@ EVIDENCE_TYPES = {
     "MANUAL_OBSERVATION",
     "DOCUMENT_STRUCTURE",
 }
+
+MAX_JSON_BYTES = 4 * 1024 * 1024
+MAX_JSON_DEPTH = 64
+MAX_JSON_CONTAINER_ITEMS = 10_000
+MAX_JSON_AGGREGATE_ITEMS = 100_000
+MAX_JSON_STRING_CHARACTERS = 256 * 1024
+MAX_JSON_NUMBER_CHARACTERS = 128
+MAX_JSON_STRUCTURAL_TOKENS = 300_000
+
+# references/manual-checks.md names manual-check categories in prose only; it defines
+# no machine-readable baseline token set. The two shipped VERIFIED PASS fixtures declare
+# disjoint tokens ({"keyboard", "screen-reader"} for source code, {"content-purpose"} for
+# markdown), so no non-empty token baseline holds for both. The baseline is therefore a
+# minimum count of declared manual checks: automation alone can never earn VERIFIED PASS.
+MINIMUM_BASELINE_MANUAL_CHECKS = 1
 
 REPORT_REQUIRED = {
     "contract_version",
@@ -77,7 +93,8 @@ TARGET_KEYS = {"name", "state", "location", "input_type"}
 SCOPE_KEYS = {"included", "excluded", "required_manual_checks", "manual_checks_completed", "applicability_reason"}
 STANDARD_KEYS = {"name", "version", "success_criterion", "url"}
 SOURCE_KEYS = {"title", "url"}
-EVIDENCE_KEYS = {"type", "description", "locator"}
+EVIDENCE_REQUIRED = {"type", "description", "locator"}
+EVIDENCE_ALLOWED = EVIDENCE_REQUIRED | {"manual_check_id"}
 ERROR_KEYS = {"code", "message", "stage"}
 RUN_KEYS = {"started_at", "completed_at", "tooling", "environment"}
 
@@ -85,7 +102,7 @@ SEMVER_PATTERN = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
 ID_PATTERN = re.compile(r"^DRV-[A-Z0-9][A-Z0-9._-]*$")
 DATE_TIME_PATTERN = re.compile(
     r"^(?P<base>[0-9]{4}-[0-9]{2}-[0-9]{2}[Tt][0-9]{2}:[0-9]{2}:[0-9]{2})"
-    r"(?:\.(?P<fraction>[0-9]+))?(?P<zone>[Zz]|[+-][0-9]{2}:[0-9]{2})$"
+    r"(?:\.(?P<fraction>[0-9]+))?(?P<zone>[Zz]|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
 )
 SUPPORTED_WCAG_22_CRITERIA = {
     "1.1.1 Non-text Content": "non-text-content",
@@ -114,12 +131,22 @@ WCAG_VERSION = "2.2"
 URL_HOST_PATTERN = re.compile(r"^[A-Za-z0-9.-]+$")
 
 
+def _quoted(value: Any) -> str:
+    """Render untrusted text as a single-line ASCII JSON literal for a diagnostic.
+
+    Error messages quote attacker-authored key names and list items. Escaping every control
+    character and non-ASCII codepoint keeps a hostile value from forging an extra line in the
+    validator's own output or reordering the line it sits on.
+    """
+    return json.dumps(str(value))
+
+
 def _reject_unknown(obj: Any, allowed: set, label: str, errors: List[str]) -> None:
     if not isinstance(obj, dict):
         return
     unknown = sorted(set(obj) - allowed)
     if unknown:
-        errors.append(f"{label} contains unknown properties: {', '.join(unknown)}")
+        errors.append(f"{label} contains unknown properties: {', '.join(_quoted(key) for key in unknown)}")
 
 
 def _parse_rfc3339_datetime(value: Any):
@@ -202,11 +229,18 @@ def _reject_duplicates(value: Any, label: str, errors: List[str]) -> None:
     strings = [item for item in value if isinstance(item, str)]
     duplicates = sorted(item for item, count in Counter(strings).items() if count > 1)
     if duplicates:
-        errors.append(f"{label} contains duplicate entries: {', '.join(duplicates)}")
+        errors.append(f"{label} contains duplicate entries: {', '.join(_quoted(item) for item in duplicates)}")
+
+
+# Codepoints outside the C0 range that still break a rendered receipt into
+# extra lines under str.splitlines(): DEL, NEL, LINE SEPARATOR, PARAGRAPH SEPARATOR.
+_FORBIDDEN_CODEPOINTS = frozenset({0x7F, 0x85, 0x2028, 0x2029})
 
 
 def _is_nonempty_string(value: Any) -> bool:
-    return isinstance(value, str) and bool(value.strip())
+    if not isinstance(value, str) or not value.strip():
+        return False
+    return not any(ord(ch) < 0x20 or ord(ch) in _FORBIDDEN_CODEPOINTS for ch in value)
 
 
 def _is_string_member(value: Any, allowed: Collection[str]) -> bool:
@@ -241,8 +275,8 @@ def _validate_evidence(value: Any, label: str, errors: List[str], minimum: int =
         errors.append(f"{label} must contain at least {minimum} item(s)")
     for index, item in enumerate(value):
         item_label = f"{label}[{index}]"
-        _require_keys(item, EVIDENCE_KEYS, item_label, errors)
-        _reject_unknown(item, EVIDENCE_KEYS, item_label, errors)
+        _require_keys(item, EVIDENCE_REQUIRED, item_label, errors)
+        _reject_unknown(item, EVIDENCE_ALLOWED, item_label, errors)
         if not isinstance(item, dict):
             continue
         if not _is_string_member(item.get("type"), EVIDENCE_TYPES):
@@ -250,6 +284,11 @@ def _validate_evidence(value: Any, label: str, errors: List[str], minimum: int =
         for key in ("description", "locator"):
             if not _is_nonempty_string(item.get(key)):
                 errors.append(f"{item_label}.{key} must be a non-empty string")
+        if item.get("type") == "MANUAL_OBSERVATION":
+            if not _is_nonempty_string(item.get("manual_check_id")):
+                errors.append(f"{item_label}.manual_check_id is required for MANUAL_OBSERVATION evidence")
+        elif "manual_check_id" in item:
+            errors.append(f"{item_label}.manual_check_id is allowed only for MANUAL_OBSERVATION evidence")
 
 
 def _validate_finding(finding: Any, index: int, errors: List[str]) -> None:
@@ -375,14 +414,17 @@ def validate_report(report: Any) -> List[str]:
         _reject_duplicates(scope.get("required_manual_checks"), "scope.required_manual_checks", errors)
         _reject_duplicates(scope.get("manual_checks_completed"), "scope.manual_checks_completed", errors)
         reason = scope.get("applicability_reason")
-        if reason is not None and not isinstance(reason, str):
-            errors.append("scope.applicability_reason must be a string or null")
+        if reason is not None and not _is_nonempty_string(reason):
+            errors.append("scope.applicability_reason must be null or a non-empty string without control characters")
         required = scope.get("required_manual_checks")
         completed = scope.get("manual_checks_completed")
         if isinstance(required, list) and isinstance(completed, list):
             unknown = sorted(_string_set(completed) - _string_set(required))
             if unknown:
-                errors.append(f"scope.manual_checks_completed includes undeclared checks: {', '.join(unknown)}")
+                errors.append(
+                    "scope.manual_checks_completed includes undeclared checks: "
+                    + ", ".join(_quoted(item) for item in unknown)
+                )
 
     automated = report.get("automated_result")
     final = report.get("final_status")
@@ -401,7 +443,7 @@ def validate_report(report: Any) -> List[str]:
     ids = [f.get("finding_id") for f in findings if isinstance(f, dict) and _is_nonempty_string(f.get("finding_id"))]
     duplicates = sorted(item for item, count in Counter(ids).items() if count > 1)
     if duplicates:
-        errors.append(f"finding IDs must be unique: {', '.join(duplicates)}")
+        errors.append(f"finding IDs must be unique: {', '.join(_quoted(item) for item in duplicates)}")
 
     error_items = report.get("errors")
     if not isinstance(error_items, list):
@@ -417,6 +459,36 @@ def validate_report(report: Any) -> List[str]:
                     errors.append(f"{label}.{key} must be a non-empty string")
 
     _validate_evidence(report.get("evidence_log"), "evidence_log", errors)
+
+    manual_observations = [
+        item
+        for item in (report.get("evidence_log") if isinstance(report.get("evidence_log"), list) else [])
+        if isinstance(item, dict) and item.get("type") == "MANUAL_OBSERVATION"
+    ] + [
+        item
+        for finding in findings
+        if isinstance(finding, dict) and isinstance(finding.get("evidence"), list)
+        for item in finding["evidence"]
+        if isinstance(item, dict) and item.get("type") == "MANUAL_OBSERVATION"
+    ]
+    required_manual = _string_set(scope.get("required_manual_checks")) if isinstance(scope, dict) else set()
+    completed_manual = _string_set(scope.get("manual_checks_completed")) if isinstance(scope, dict) else set()
+    bound_manual = {
+        item.get("manual_check_id")
+        for item in manual_observations
+        if _is_nonempty_string(item.get("manual_check_id"))
+    }
+    for manual_id in sorted(bound_manual):
+        if manual_id not in required_manual:
+            errors.append(f"MANUAL_OBSERVATION manual_check_id is not declared: {_quoted(manual_id)}")
+        if manual_id not in completed_manual:
+            errors.append(f"MANUAL_OBSERVATION manual_check_id is not completed: {_quoted(manual_id)}")
+    unbound_completed = sorted(completed_manual - bound_manual)
+    if unbound_completed:
+        errors.append(
+            "each completed manual check requires matching MANUAL_OBSERVATION evidence: "
+            + ", ".join(_quoted(item) for item in unbound_completed)
+        )
 
     run = report.get("run")
     _require_keys(run, RUN_KEYS, "run", errors)
@@ -446,13 +518,15 @@ def validate_report(report: Any) -> List[str]:
         errors.append("automated FAIL can only map to VERIFIED FAIL or INCOMPLETE")
     if automated == "ERROR" and not error_items:
         errors.append("automated ERROR requires at least one structured error")
+    if automated == "PASS" and error_items:
+        errors.append("automated PASS cannot contain structured errors")
     if automated == "ERROR" and not _is_string_member(final, {"VERIFIED FAIL", "INCOMPLETE", "NOT APPLICABLE"}):
         errors.append("automated ERROR can only map to VERIFIED FAIL, INCOMPLETE, or NOT APPLICABLE")
     if isinstance(target, dict) and target.get("input_type") == "UNSUPPORTED":
         if automated != "ERROR":
             errors.append("UNSUPPORTED input requires automated ERROR")
-        if not _is_string_member(final, {"INCOMPLETE", "NOT APPLICABLE"}):
-            errors.append("UNSUPPORTED input can only end INCOMPLETE or NOT APPLICABLE")
+        if final != "INCOMPLETE":
+            errors.append("UNSUPPORTED input can only end INCOMPLETE")
     if final == "VERIFIED FAIL" and not normative:
         errors.append("VERIFIED FAIL requires reproducible normative evidence")
     if final == "VERIFIED FAIL" and not any(finding.get("status") == "OPEN" for finding in normative):
@@ -485,7 +559,15 @@ def validate_report(report: Any) -> List[str]:
             completed = _string_set(scope.get("manual_checks_completed"))
             pending = sorted(required - completed)
             if pending:
-                errors.append(f"VERIFIED PASS requires completed manual checks: {', '.join(pending)}")
+                errors.append(
+                    "VERIFIED PASS requires completed manual checks: " + ", ".join(_quoted(item) for item in pending)
+                )
+            if len(required) < MINIMUM_BASELINE_MANUAL_CHECKS:
+                errors.append(
+                    "VERIFIED PASS requires at least "
+                    f"{MINIMUM_BASELINE_MANUAL_CHECKS} declared manual check(s) in "
+                    "scope.required_manual_checks; automation alone cannot verify a pass"
+                )
     if final == "NOT APPLICABLE":
         reason = scope.get("applicability_reason") if isinstance(scope, dict) else None
         if not _is_nonempty_string(reason):
@@ -499,17 +581,168 @@ def validate_report(report: Any) -> List[str]:
     return errors
 
 
-def load_report(path: Path) -> Dict[str, Any]:
+def _reject_duplicate_keys(pairs: List[Any]) -> Dict[str, Any]:
+    """Build an object from JSON key/value pairs, rejecting any repeated key.
+
+    Repeated keys let a report display one verdict to a human reader while the last
+    occurrence silently decides the parsed value.
+    """
+    result: Dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON key: {_quoted(key)}")
+        result[key] = value
+    return result
+
+
+def _reject_json_constant(value: str) -> Any:
+    raise ValueError(f"invalid JSON constant: {value}")
+
+
+def _parse_json_integer(token: str) -> int:
+    if len(token) > MAX_JSON_NUMBER_CHARACTERS:
+        raise ValueError(
+            f"JSON number exceeds the {MAX_JSON_NUMBER_CHARACTERS}-character limit"
+        )
+    return int(token)
+
+
+def _parse_json_float(token: str) -> float:
+    if len(token) > MAX_JSON_NUMBER_CHARACTERS:
+        raise ValueError(
+            f"JSON number exceeds the {MAX_JSON_NUMBER_CHARACTERS}-character limit"
+        )
+    value = float(token)
+    if not math.isfinite(value):
+        raise ValueError("JSON number must be finite")
+    return value
+
+
+def _enforce_json_lexical_limits(text: str) -> None:
+    """Bound nesting and structural work before the standard parser allocates objects."""
+    depth = 0
+    structural_tokens = 0
+    in_string = False
+    escaped = False
+    for character in text:
+        if in_string:
+            if escaped:
+                escaped = False
+            elif character == "\\":
+                escaped = True
+            elif character == '"':
+                in_string = False
+            continue
+        if character == '"':
+            in_string = True
+            continue
+        if character in "{}[],:":
+            structural_tokens += 1
+            if structural_tokens > MAX_JSON_STRUCTURAL_TOKENS:
+                raise ValueError(
+                    "JSON input exceeds the "
+                    f"{MAX_JSON_STRUCTURAL_TOKENS}-structural-token limit"
+                )
+        if character in "[{":
+            depth += 1
+            if depth > MAX_JSON_DEPTH:
+                raise ValueError(f"JSON input exceeds the depth limit of {MAX_JSON_DEPTH}")
+        elif character in "]}":
+            depth -= 1
+
+
+def _enforce_json_value_limits(value: Any) -> None:
+    """Validate decoded values iteratively so hostile nesting cannot recurse here."""
+    aggregate_items = 0
+    stack = [(value, 0)]
+    while stack:
+        current, depth = stack.pop()
+        if depth > MAX_JSON_DEPTH:
+            raise ValueError(f"JSON input exceeds the depth limit of {MAX_JSON_DEPTH}")
+        if isinstance(current, str):
+            if len(current) > MAX_JSON_STRING_CHARACTERS:
+                raise ValueError(
+                    "JSON string exceeds the "
+                    f"{MAX_JSON_STRING_CHARACTERS}-character limit"
+                )
+            continue
+        if isinstance(current, dict):
+            size = len(current)
+            if size > MAX_JSON_CONTAINER_ITEMS:
+                raise ValueError(
+                    f"JSON object exceeds the {MAX_JSON_CONTAINER_ITEMS}-item limit"
+                )
+            aggregate_items += size
+            if aggregate_items > MAX_JSON_AGGREGATE_ITEMS:
+                raise ValueError(
+                    "JSON input exceeds the "
+                    f"{MAX_JSON_AGGREGATE_ITEMS}-aggregate-item limit"
+                )
+            for key, item in current.items():
+                if len(key) > MAX_JSON_STRING_CHARACTERS:
+                    raise ValueError(
+                        "JSON object key exceeds the "
+                        f"{MAX_JSON_STRING_CHARACTERS}-character limit"
+                    )
+                stack.append((item, depth + 1))
+            continue
+        if isinstance(current, list):
+            size = len(current)
+            if size > MAX_JSON_CONTAINER_ITEMS:
+                raise ValueError(
+                    f"JSON array exceeds the {MAX_JSON_CONTAINER_ITEMS}-item limit"
+                )
+            aggregate_items += size
+            if aggregate_items > MAX_JSON_AGGREGATE_ITEMS:
+                raise ValueError(
+                    "JSON input exceeds the "
+                    f"{MAX_JSON_AGGREGATE_ITEMS}-aggregate-item limit"
+                )
+            stack.extend((item, depth + 1) for item in current)
+
+
+def _read_json_bytes(handle: Any) -> bytes:
+    payload = handle.read(MAX_JSON_BYTES + 1)
+    if isinstance(payload, str):
+        payload = payload.encode("utf-8", "strict")
+    if not isinstance(payload, bytes):
+        raise ValueError("JSON input stream did not return bytes")
+    if len(payload) > MAX_JSON_BYTES:
+        raise ValueError(f"JSON input exceeds the {MAX_JSON_BYTES}-byte limit")
+    return payload
+
+
+def strict_json_load(handle: Any) -> Any:
+    """Parse JSON from an open handle under the single strict ingress policy.
+
+    Rejects duplicate object keys and the non-standard NaN/Infinity constants.
+    Every external JSON ingress point must route through this function so one
+    entry point cannot be more permissive than another.
+    """
+    payload = _read_json_bytes(handle)
+    text = payload.decode("utf-8", "strict")
+    _enforce_json_lexical_limits(text)
+    value = json.loads(
+        text,
+        object_pairs_hook=_reject_duplicate_keys,
+        parse_int=_parse_json_integer,
+        parse_float=_parse_json_float,
+        parse_constant=_reject_json_constant,
+    )
+    _enforce_json_value_limits(value)
+    return value
+
+
+def load_json_path(path: Path) -> Any:
+    """Strictly load JSON from a filesystem path, or from stdin when path is '-'."""
     if str(path) == "-":
-        return json.load(
-            sys.stdin,
-            parse_constant=lambda value: (_ for _ in ()).throw(ValueError(f"invalid JSON constant: {value}")),
-        )
-    with path.open("r", encoding="utf-8") as handle:
-        return json.load(
-            handle,
-            parse_constant=lambda value: (_ for _ in ()).throw(ValueError(f"invalid JSON constant: {value}")),
-        )
+        return strict_json_load(getattr(sys.stdin, "buffer", sys.stdin))
+    with path.open("rb") as handle:
+        return strict_json_load(handle)
+
+
+def load_report(path: Path) -> Dict[str, Any]:
+    return load_json_path(path)
 
 
 def build_parser() -> argparse.ArgumentParser:

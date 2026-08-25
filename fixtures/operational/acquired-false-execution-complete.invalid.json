@@ -1,0 +1,110 @@
+{
+  "$schema": "../../schemas/dravux-run.schema.json",
+  "run_contract_version": "1.2.0",
+  "package_version": "1.0.2",
+  "preflight": {
+    "preflight_version": "1.0.0",
+    "package_version": "1.0.2",
+    "surface": {
+      "provider": "Example provider",
+      "product": "Example chat surface",
+      "mode": "Chat"
+    },
+    "target": {
+      "input_type": "WEBSITE",
+      "location": "https://example.com/"
+    },
+    "requested_mode": "RENDERED_DOM",
+    "capabilities": {
+      "code_execution": true,
+      "bundled_files": true,
+      "validator_execution": "AVAILABLE",
+      "acquisition": "CONVERTED_TEXT",
+      "screenshots": false,
+      "manual_evidence": false
+    },
+    "selected_mode": "SOURCE_TEXT",
+    "limitation_acknowledged": true,
+    "required_manual_checks": [
+      "keyboard",
+      "screen-reader",
+      "zoom-reflow",
+      "color-contrast-rendered",
+      "focus-order"
+    ],
+    "next_action": "Repeat the audit on a rendered-DOM surface, then complete the listed manual checks."
+  },
+  "acquisition": {
+    "attempted": true,
+    "succeeded": false,
+    "method": "CONVERTED_TEXT",
+    "requested_location": "https://example.com/",
+    "final_location": null,
+    "redirect_chain": [],
+    "response_status": null,
+    "acquired_at": null,
+    "tool": null,
+    "content_sha256": null,
+    "error": "The target refused the retrieval attempt."
+  },
+  "execution": {
+    "completed": true,
+    "failure_stage": null,
+    "error": null
+  },
+  "report": {
+    "contract_version": "0.2.0",
+    "audit_id": "DRV-ACQUIRED-FALSE-EXECUTION-COMPLETE-001",
+    "target": {
+      "name": "Example public homepage",
+      "state": "Public, unauthenticated, one accepted converted-text retrieval",
+      "location": "https://example.com/",
+      "input_type": "WEBSITE"
+    },
+    "scope": {
+      "included": [
+        "Retrieved text observations and advisory hypotheses only."
+      ],
+      "excluded": [
+        "Raw HTML and DOM attributes.",
+        "Rendered layout, computed styles, and color contrast.",
+        "Keyboard, focus, interaction, and assistive-technology behavior."
+      ],
+      "required_manual_checks": [
+        "keyboard",
+        "screen-reader",
+        "zoom-reflow",
+        "color-contrast-rendered",
+        "focus-order"
+      ],
+      "manual_checks_completed": [],
+      "applicability_reason": null
+    },
+    "automated_result": "ERROR",
+    "final_status": "INCOMPLETE",
+    "findings": [],
+    "errors": [
+      {
+        "code": "ACQUISITION_FAILED",
+        "message": "The target could not be retrieved, so no page was ever examined.",
+        "stage": "acquisition"
+      }
+    ],
+    "evidence_log": [
+      {
+        "type": "SOURCE",
+        "description": "One converted-text representation was retrieved; no rendered DOM was available.",
+        "locator": "https://example.com/"
+      }
+    ],
+    "run": {
+      "started_at": "2026-07-20T21:00:00Z",
+      "completed_at": "2026-07-20T21:00:05Z",
+      "tooling": [
+        "Dravux operational contract 1.2.0",
+        "Example converted-text retrieval"
+      ],
+      "environment": "Example chat surface with sandboxed code execution and converted-text retrieval only"
+    }
+  }
+}

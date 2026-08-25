@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/dravux-report.schema.json",
-  "contract_version": "0.1.0",
+  "contract_version": "0.2.0",
   "audit_id": "DRV-PENDING-MANUAL-001",
   "target": {"name": "Automated-only page", "state": "scanner complete", "location": "synthetic", "input_type": "WEBSITE"},
   "scope": {

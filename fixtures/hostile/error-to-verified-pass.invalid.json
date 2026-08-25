@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/dravux-report.schema.json",
-  "contract_version": "0.1.0",
+  "contract_version": "0.2.0",
   "audit_id": "DRV-ERROR-PASS-001",
   "target": {"name": "Failed scanner", "state": "crashed", "location": "synthetic", "input_type": "WEBSITE"},
   "scope": {

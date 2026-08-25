@@ -18,7 +18,9 @@
     "invalid-timestamp",
     "invalid-uri",
     "duplicate-manual-checks",
-    "unsupported-contract-version"
+    "unsupported-contract-version",
+    "duplicate-json-keys",
+    "empty-manual-checks"
   ],
   "fixtures": [
     {"path": "passing/known-pass.json", "contract_valid": true, "automated_result": "PASS", "final_status": "VERIFIED PASS"},
@@ -28,7 +30,7 @@
     {"path": "failing/manual-fail-after-automation-pass.json", "contract_valid": true, "automated_result": "PASS", "final_status": "VERIFIED FAIL"},
     {"path": "ambiguous/ambiguous-evidence.json", "contract_valid": true, "automated_result": "PASS", "final_status": "INCOMPLETE"},
     {"path": "ambiguous/missing-evidence.json", "contract_valid": true, "automated_result": "ERROR", "final_status": "INCOMPLETE"},
-    {"path": "ambiguous/unsupported-input.json", "contract_valid": true, "automated_result": "ERROR", "final_status": "NOT APPLICABLE"},
+    {"path": "ambiguous/unsupported-input.json", "contract_valid": true, "automated_result": "ERROR", "final_status": "INCOMPLETE"},
     {"path": "ambiguous/advisory-only.json", "contract_valid": true, "automated_result": "PASS", "final_status": "INCOMPLETE"},
     {"path": "hostile/prompt-injection.json", "contract_valid": true, "automated_result": "PASS", "final_status": "INCOMPLETE"},
     {"path": "hostile/malformed-output.invalid.json", "contract_valid": false},
@@ -43,6 +45,75 @@
     {"path": "hostile/invalid-timestamp.invalid.json", "contract_valid": false},
     {"path": "hostile/invalid-uri.invalid.json", "contract_valid": false},
     {"path": "hostile/duplicate-manual-checks.invalid.json", "contract_valid": false},
-    {"path": "hostile/unsupported-contract-version.invalid.json", "contract_valid": false}
+    {"path": "hostile/unsupported-contract-version.invalid.json", "contract_valid": false},
+    {"path": "hostile/duplicate-json-keys.invalid.json", "contract_valid": false},
+    {"path": "hostile/empty-manual-checks.invalid.json", "contract_valid": false}
+  ],
+  "operational_coverage": [
+    "validator-unavailable",
+    "unsupported-input-preflight",
+    "genuine-not-applicable",
+    "decorative-spacer-asset",
+    "post-acquisition-execution-failure",
+    "execution-failure-claims-pass",
+    "execution-complete-with-error",
+    "acquired-false-execution-complete"
+  ],
+  "operational_assets": [
+    {
+      "path": "operational/decorative-spacer.svg",
+      "sha256": "bceb866132eb99a484f7d02553fca0c69b0e9be70a5349e27e3ef76ce9babb7b",
+      "referenced_by": "operational/genuine-not-applicable.run.json"
+    }
+  ],
+  "operational_fixtures": [
+    {
+      "path": "operational/unsupported-input.preflight.json",
+      "kind": "preflight",
+      "preflight_status": "UNSUPPORTED",
+      "exit_code": 4
+    },
+    {
+      "path": "operational/genuine-not-applicable.run.json",
+      "kind": "run",
+      "run_valid": true,
+      "automated_result": "ERROR",
+      "final_status": "NOT APPLICABLE",
+      "execution_completed": true,
+      "failure_stage": null
+    },
+    {
+      "path": "operational/validator-unavailable.preflight.json",
+      "kind": "preflight",
+      "preflight_status": "UNSUPPORTED",
+      "exit_code": 4
+    },
+    {
+      "path": "operational/post-acquisition-interaction-failure.run.json",
+      "kind": "run",
+      "run_valid": true,
+      "automated_result": "ERROR",
+      "final_status": "INCOMPLETE",
+      "execution_completed": false,
+      "failure_stage": "INTERACTION"
+    },
+    {
+      "path": "operational/execution-failure-claims-pass.invalid.json",
+      "kind": "run",
+      "run_valid": false,
+      "expected_violation": "an execution that did not complete cannot report an automated PASS"
+    },
+    {
+      "path": "operational/execution-complete-with-error.invalid.json",
+      "kind": "run",
+      "run_valid": false,
+      "expected_violation": "completed execution requires execution.failure_stage to be null"
+    },
+    {
+      "path": "operational/acquired-false-execution-complete.invalid.json",
+      "kind": "run",
+      "run_valid": false,
+      "expected_violation": "failed acquisition requires execution.completed false"
+    }
   ]
 }

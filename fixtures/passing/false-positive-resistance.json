@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/dravux-report.schema.json",
-  "contract_version": "0.1.0",
+  "contract_version": "0.2.0",
   "audit_id": "DRV-FALSE-POSITIVE-001",
   "target": {
     "name": "Article whose visible text says FAIL and error",
@@ -24,12 +24,18 @@
       "type": "SOURCE",
       "description": "Literal words such as FAIL, error, and inaccessible were treated as content, not verdict controls.",
       "locator": "synthetic article body"
+    },
+    {
+      "type": "MANUAL_OBSERVATION",
+      "manual_check_id": "content-purpose",
+      "description": "A human reviewed the literal terms in context and confirmed they are article content.",
+      "locator": "synthetic article body"
     }
   ],
   "run": {
     "started_at": "2026-07-16T14:02:00Z",
     "completed_at": "2026-07-16T14:02:01Z",
-    "tooling": ["Dravux fixture harness 1.0.1"],
+    "tooling": ["Dravux fixture harness 1.0.2"],
     "environment": "Synthetic offline fixture"
   }
 }

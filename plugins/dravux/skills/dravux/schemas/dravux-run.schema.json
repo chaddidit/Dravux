@@ -1,14 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Dravux operational run envelope",
-  "$comment": "Cross-document evidence-mode and verdict invariants are enforced by scripts/dravux_run.py.",
+  "$comment": "Cross-document evidence-mode, execution, and verdict invariants are enforced by scripts/dravux_run.py.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["run_contract_version", "package_version", "preflight", "acquisition", "report"],
+  "required": ["run_contract_version", "package_version", "preflight", "acquisition", "execution", "report"],
   "properties": {
-    "$schema": {"type": "string", "minLength": 1},
-    "run_contract_version": {"const": "1.0.0"},
-    "package_version": {"const": "1.0.1"},
+    "$schema": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"},
+    "run_contract_version": {"const": "1.2.0"},
+    "package_version": {"const": "1.0.2"},
     "preflight": {"$ref": "dravux-preflight.schema.json"},
     "acquisition": {
       "type": "object",
@@ -18,19 +18,78 @@
         "attempted": {"type": "boolean"},
         "succeeded": {"type": "boolean"},
         "method": {"enum": ["NONE", "FILES_ONLY", "CONVERTED_TEXT", "RAW_SOURCE", "RENDERED_BROWSER", "RENDERED_DOM", "INTERACTIVE_BROWSER"]},
-        "requested_location": {"type": "string", "minLength": 1},
-        "final_location": {"type": ["string", "null"]},
-        "redirect_chain": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "requested_location": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"},
+        "final_location": {"type": ["string", "null"], "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"},
+        "redirect_chain": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"}},
         "response_status": {"type": ["integer", "null"], "minimum": 100, "maximum": 599},
         "acquired_at": {"type": ["string", "null"], "format": "date-time"},
-        "tool": {"type": ["string", "null"]},
+        "tool": {"type": ["string", "null"], "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"},
         "content_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
-        "error": {"type": ["string", "null"]}
+        "error": {"type": ["string", "null"], "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"}
+      }
+    },
+    "execution": {
+      "$comment": "Acquiring the target and completing the audit are separate events; this records the second one.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["completed", "failure_stage", "error"],
+      "properties": {
+        "completed": {"type": "boolean"},
+        "failure_stage": {"enum": ["ACQUISITION", "INTERACTION", "AUDIT_EXECUTION", "EVIDENCE_CAPTURE", "REPORT_ASSEMBLY", "TOOLING", null]},
+        "error": {"type": ["string", "null"], "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"}
       }
     },
     "report": {"$ref": "dravux-report.schema.json"}
   },
   "allOf": [
+    {
+      "$comment": "RENDERED_BROWSER needs screenshot capability; a completed rendered-browser run also needs at least one recorded SCREENSHOT evidence item. A run that never acquired or never finished cannot honestly have one.",
+      "if": {"properties": {"preflight": {"properties": {"selected_mode": {"const": "RENDERED_BROWSER"}}}}},
+      "then": {
+        "properties": {
+          "preflight": {"properties": {"capabilities": {"properties": {"screenshots": {"const": true}}}}}
+        },
+        "if": {"properties": {"execution": {"properties": {"completed": {"const": true}}}}},
+        "then": {
+          "properties": {
+            "report": {"properties": {"evidence_log": {"contains": {"properties": {"type": {"const": "SCREENSHOT"}}}}}}
+          }
+        }
+      }
+    },
+    {
+      "$comment": "CONTRACT_ONLY validates report structure only: no acquisition, no findings, no errors, no target verdict, and only TOOL_OUTPUT or COMMAND_OUTPUT diagnostic evidence.",
+      "if": {"properties": {"preflight": {"properties": {"selected_mode": {"const": "CONTRACT_ONLY"}}}}},
+      "then": {
+        "properties": {
+          "acquisition": {"properties": {"attempted": {"const": false}, "succeeded": {"const": false}, "method": {"const": "NONE"}}},
+          "execution": {"properties": {"completed": {"const": true}}},
+          "report": {
+            "properties": {
+              "automated_result": {"const": "PASS"},
+              "final_status": {"const": "INCOMPLETE"},
+              "findings": {"maxItems": 0},
+              "errors": {"maxItems": 0},
+              "evidence_log": {"items": {"properties": {"type": {"enum": ["TOOL_OUTPUT", "COMMAND_OUTPUT"]}}}}
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "A failed acquisition has no target to cite: no findings, and only TOOL_OUTPUT or COMMAND_OUTPUT diagnostic evidence.",
+      "if": {"properties": {"acquisition": {"properties": {"succeeded": {"const": false}}}}},
+      "then": {
+        "properties": {
+          "report": {
+            "properties": {
+              "findings": {"maxItems": 0},
+              "evidence_log": {"items": {"properties": {"type": {"enum": ["TOOL_OUTPUT", "COMMAND_OUTPUT"]}}}}
+            }
+          }
+        }
+      }
+    },
     {
       "if": {
         "properties": {
@@ -50,6 +109,56 @@
               "scope": {
                 "properties": {"manual_checks_completed": {"maxItems": 0}}
               }
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "A completed execution carries no failure.",
+      "if": {
+        "required": ["execution"],
+        "properties": {
+          "execution": {
+            "required": ["completed"],
+            "properties": {"completed": {"const": true}}
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "execution": {
+            "properties": {
+              "failure_stage": {"const": null},
+              "error": {"const": null}
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "An execution that did not complete must name its stage and its error, and can never carry a pass.",
+      "if": {
+        "required": ["execution"],
+        "properties": {
+          "execution": {
+            "required": ["completed"],
+            "properties": {"completed": {"const": false}}
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "execution": {
+            "properties": {
+              "failure_stage": {"type": "string", "minLength": 1},
+              "error": {"type": "string", "minLength": 1}
+            }
+          },
+          "report": {
+            "properties": {
+              "automated_result": {"not": {"const": "PASS"}},
+              "final_status": {"not": {"enum": ["VERIFIED PASS", "VERIFIED_PASS"]}}
             }
           }
         }

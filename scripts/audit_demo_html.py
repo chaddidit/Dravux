@@ -13,8 +13,12 @@ from typing import Dict, List, Optional, Tuple
 
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
+PACKAGE_VERSION = (PACKAGE_ROOT / "VERSION").read_text(encoding="utf-8").strip()
 REPORT_SCHEMA = PACKAGE_ROOT / "schemas" / "dravux-report.schema.json"
 SKILL_SCRIPTS = PACKAGE_ROOT / "plugins" / "dravux" / "skills" / "dravux" / "scripts"
+# Importing the skill's validator would otherwise leave a __pycache__ directory inside the
+# manifest-verified skill tree; dravux_run.py carries the same guard for the same reason.
+sys.dont_write_bytecode = True
 sys.path.insert(0, str(SKILL_SCRIPTS))
 
 from dravux_contract import validate_report  # noqa: E402
@@ -268,7 +272,7 @@ def audit_html(source: Path, state: str) -> Dict[str, object]:
     final = "VERIFIED FAIL" if findings else "INCOMPLETE"
     audit_slug = re.sub(r"[^A-Z0-9]+", "-", state.upper()).strip("-") or "STATE"
     report: Dict[str, object] = {
-        "contract_version": "0.1.0",
+        "contract_version": "0.2.0",
         "audit_id": f"DRV-DEMO-{audit_slug}-001",
         "target": {
             "name": "Dravux synthetic GitHub demo page",
@@ -297,7 +301,7 @@ def audit_html(source: Path, state: str) -> Dict[str, object]:
         "run": {
             "started_at": "1970-01-01T00:00:00Z",
             "completed_at": "1970-01-01T00:00:00Z",
-            "tooling": ["Dravux demo HTML audit 1.0.1", "Python standard library"],
+            "tooling": [f"Dravux demo HTML audit {PACKAGE_VERSION}", "Python standard library"],
             "environment": "Deterministic offline source fixture",
         },
     }

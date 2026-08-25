@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/dravux-report.schema.json",
-  "contract_version": "0.1.0",
+  "contract_version": "0.2.0",
   "audit_id": "DRV-ADVISORY-ONLY-001",
   "target": {
     "name": "Dense settings panel",
@@ -57,7 +57,7 @@
   "run": {
     "started_at": "2026-07-16T14:07:00Z",
     "completed_at": "2026-07-16T14:07:01Z",
-    "tooling": ["Dravux static evidence review 1.0.1"],
+    "tooling": ["Dravux static evidence review 1.0.2"],
     "environment": "Synthetic static-screenshot fixture"
   }
 }

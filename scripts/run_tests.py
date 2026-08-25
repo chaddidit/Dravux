@@ -7,6 +7,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+# The tests import modules from scripts/ and from the skill tree; never leave bytecode beside them.
+sys.dont_write_bytecode = True
 
 
 def main() -> int:

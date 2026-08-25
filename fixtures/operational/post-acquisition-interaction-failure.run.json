@@ -1,0 +1,114 @@
+{
+  "$schema": "../../schemas/dravux-run.schema.json",
+  "run_contract_version": "1.2.0",
+  "package_version": "1.0.2",
+  "preflight": {
+    "preflight_version": "1.0.0",
+    "package_version": "1.0.2",
+    "surface": {
+      "provider": "Example provider",
+      "product": "Example browser-controlled surface",
+      "mode": "Interactive browser"
+    },
+    "target": {
+      "input_type": "WEBSITE",
+      "location": "https://example.com/"
+    },
+    "requested_mode": "INTERACTIVE",
+    "capabilities": {
+      "code_execution": true,
+      "bundled_files": true,
+      "validator_execution": "AVAILABLE",
+      "acquisition": "INTERACTIVE_BROWSER",
+      "screenshots": true,
+      "manual_evidence": false
+    },
+    "selected_mode": "INTERACTIVE",
+    "limitation_acknowledged": false,
+    "required_manual_checks": [
+      "keyboard",
+      "screen-reader",
+      "zoom-reflow",
+      "color-contrast-rendered",
+      "focus-order"
+    ],
+    "next_action": "Repair or replace the interaction tooling, then repeat the audit from the beginning."
+  },
+  "acquisition": {
+    "attempted": true,
+    "succeeded": true,
+    "method": "INTERACTIVE_BROWSER",
+    "requested_location": "https://example.com/",
+    "final_location": "https://example.com/",
+    "redirect_chain": [],
+    "response_status": 200,
+    "acquired_at": "2026-07-21T15:02:00Z",
+    "tool": "Example interactive browser session",
+    "content_sha256": "3f8c8f0f7c8a4d0f5f2e0d3a9b1c6e7d4a5b8c9d0e1f2a3b4c5d6e7f8091a2b3",
+    "error": null
+  },
+  "execution": {
+    "completed": false,
+    "failure_stage": "INTERACTION",
+    "error": "Scripted keyboard input stopped being delivered to the page after the first focus move, so the keyboard traversal never ran."
+  },
+  "report": {
+    "contract_version": "0.2.0",
+    "audit_id": "DRV-EXECUTION-FAILED-INTERACTION-001",
+    "target": {
+      "name": "Example public homepage",
+      "state": "Public, unauthenticated, page loaded in an interactive browser session",
+      "location": "https://example.com/",
+      "input_type": "WEBSITE"
+    },
+    "scope": {
+      "included": [
+        "Scripted interaction and rendered DOM checks supported by recorded tooling evidence."
+      ],
+      "excluded": [
+        "Human assistive-technology usability, cognition, meaning, and complete conformance claims.",
+        "Every check that depended on the interaction tooling that failed."
+      ],
+      "required_manual_checks": [
+        "keyboard",
+        "screen-reader",
+        "zoom-reflow",
+        "color-contrast-rendered",
+        "focus-order"
+      ],
+      "manual_checks_completed": [],
+      "applicability_reason": null
+    },
+    "automated_result": "ERROR",
+    "final_status": "INCOMPLETE",
+    "findings": [],
+    "errors": [
+      {
+        "code": "EXECUTION_FAILED",
+        "message": "The page was acquired, but keyboard interaction malfunctioned before the audit finished; no accessibility conclusion is established.",
+        "stage": "interaction"
+      }
+    ],
+    "evidence_log": [
+      {
+        "type": "TOOL_OUTPUT",
+        "description": "The interaction driver reported that key events were accepted but never dispatched to the page.",
+        "locator": "interactive session log, keyboard traversal step 2"
+      },
+      {
+        "type": "DOM",
+        "description": "The page was retrieved and its rendered DOM was reachable before the interaction step failed.",
+        "locator": "https://example.com/"
+      }
+    ],
+    "run": {
+      "started_at": "2026-07-21T15:02:00Z",
+      "completed_at": "2026-07-21T15:04:30Z",
+      "tooling": [
+        "Dravux operational contract 1.2.0",
+        "Example interactive browser session"
+      ],
+      "environment": "Example browser-controlled surface with sandboxed code execution and an interactive browser session"
+    }
+  }
+}
