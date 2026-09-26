@@ -208,6 +208,7 @@ class PackageTests(unittest.TestCase):
         guides = {
             "README.md": ("## Verify a downloaded artifact before using it", "## The 60-second self-test"),
             "START_HERE.md": ("## Verify the artifact before any route", "## Path 1"),
+            "SECURITY.md": ("## Before you extract, upload, install, or run a download", "## What the integrity checks prove"),
             "docs/quickstart.md": ("## Artifact integrity gate", "## Quick self-test"),
             "INSTALLERS/README.md": ("## Integrity gate", "Using Claude Code or the Codex command line"),
             "INSTALLERS/Claude-Chat-Cowork/README.md": ("## Integrity gate", "## Steps"),
@@ -224,7 +225,14 @@ class PackageTests(unittest.TestCase):
                     text.lower(),
                     r"checksums?[^.\n]{0,120}prove[^.\n]{0,120}(?:untampered|authentic)",
                 )
-        self.assertIn("source checkout intentionally has no installer ZIPs", (ROOT / "README.md").read_text(encoding="utf-8"))
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn("source checkout intentionally has no installer ZIPs", readme)
+        self.assertIn("SECURITY.md", readme)
+        self.assertNotIn("dravux.com", readme.lower())
+        self.assertIn("SECURITY.md", (ROOT / "START_HERE.md").read_text(encoding="utf-8"))
+        security = (ROOT / "SECURITY.md").read_text(encoding="utf-8")
+        self.assertIn("No DNS in the offline validator", security)
+        self.assertIn("docs/portability.md", security)
 
         changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
         self.assertIn("report contract from `0.1.0` to `0.2.0`", changelog)

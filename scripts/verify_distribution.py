@@ -678,6 +678,8 @@ def main():
     for name in ("README.md", "INSTALLERS/README.md", "INSTALLERS/Claude-Chat-Cowork/README.md", "INSTALLERS/Codex-ChatGPT/README.md"):
         require((ROOT / name).is_file(), f"required human-facing document missing: {name}")
     require((ROOT / "START_HERE.md").is_file(), "required human-facing document missing: START_HERE.md")
+    require((ROOT / "SECURITY.md").is_file(), "required human-facing document missing: SECURITY.md")
+    require((ROOT / "docs" / "portability.md").is_file(), "required human-facing document missing: docs/portability.md")
 
     for relative, expected_root in PROJECTED_ARCHIVES.items():
         candidate = ROOT / relative

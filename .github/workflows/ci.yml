@@ -25,6 +25,9 @@ jobs:
             python-version: "3.13"
           - os: macos-latest
             python-version: "3.13"
+          # Windows exercises the OS-agnostic Python core without requiring a local Windows machine.
+          - os: windows-latest
+            python-version: "3.13"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -35,10 +38,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Export clean release tree
+        shell: bash
         run: |
           mkdir -p "$RUNNER_TEMP/dravux-release"
           git archive HEAD | tar -x -C "$RUNNER_TEMP/dravux-release"
 
       - name: Verify release structure
+        shell: bash
         working-directory: ${{ runner.temp }}/dravux-release
         run: sh verify-release.sh

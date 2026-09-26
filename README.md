@@ -2,8 +2,6 @@
 
 **Accessibility checks that tell you what they actually looked at.**
 
-Project website: [dravux.com](https://dravux.com)
-
 Dravux is an add-on for an AI assistant. You ask it to check a page, a design export, or a code
 snippet for accessibility barriers — the things that stop people using screen readers, keyboards,
 magnification, captions, or reduced motion. Dravux makes the assistant declare, before it starts,
@@ -27,9 +25,11 @@ same core. Any new host must declare its capabilities and return `UNSUPPORTED` o
 instead of inferring browser, DOM, screenshot, keyboard, or screen-reader evidence it cannot
 actually obtain.
 
-The generic CLI is already close to macOS and Linux support. Native Windows shell, path, and mode
-handling is a separate portability task; a standalone GUI or browser extension is also a separate
-product layer, though both can reuse the same contracts and validators.
+Validators and contracts are OS-agnostic (Python standard library). macOS and Linux have the
+supported POSIX installers today; Windows is exercised in CI so failures show up without a local
+Windows machine. Native Windows shell installers are still a separate portability task — see
+[docs/portability.md](docs/portability.md). A standalone GUI or browser extension is a separate
+product layer; both can reuse the same contracts and validators.
 
 ## Choose your path
 
@@ -54,11 +54,10 @@ shasum -a 256 dravux.zip
 shasum -a 256 Dravux-OpenAI-Plugin-Source.zip
 ```
 
-Check only the archive you actually received. A checksum record delivered through the same channel,
-the embedded release manifest, and the internal release record can detect corruption or internal
-inconsistency; none authenticates the publisher.
-Dravux 1.0.2 has no cryptographic publisher signature.
+Check only the archive you actually received. That fingerprint check catches corruption in transit; it
+does **not** prove who published the file. Dravux 1.0.2 has no cryptographic publisher signature.
 **Publisher authenticity was not independently verified.**
+Full detail: [SECURITY.md](SECURITY.md).
 
 Only after the downloaded digest matches should you extract an archive. From an extracted engineering
 release, run `sh verify-release.sh` before uploading an embedded installer, installing, or running
@@ -520,7 +519,8 @@ Start a new app session after any install, update, or removal.
 ```text
 Dravux-1.0.2/
 ├── START_HERE.md                   Plain-language entry point
-├── INSTALLERS/                     Guides; built release injects ready-made archives
+├── SECURITY.md                     Integrity gate, residual risks, vulnerability reporting
+├── INSTALLERS/                     Guides; built release includes ready-made archives
 ├── plugins/dravux/skills/dravux/   One canonical shipped skill
 ├── .claude-plugin/                 Claude local marketplace
 ├── .agents/plugins/                Codex local marketplace
@@ -528,7 +528,7 @@ Dravux-1.0.2/
 ├── tests/                          Offline standard-library tests
 ├── scripts/                        Public validator, builder, and demo helpers
 ├── demos/                          Generic offline and bounded live-source examples
-├── docs/                           Quickstart, capabilities matrix, checklists
+├── docs/                           Quickstart, capabilities, portability, checklists
 ├── schemas/                        Compatibility copies of the bundled schemas
 ├── install.sh                      Refuse-overwrite plain installer
 ├── verify-install.sh               Read-only installed-copy verifier
@@ -564,8 +564,10 @@ python3 scripts/build_release.py --output-dir <a folder outside this tree>
 Builds are deterministic: identical input trees produce byte-identical archives. Release archives
 contain zero operating-system metadata; `.DS_Store`, `._*`, `__MACOSX`, `Thumbs.db`, and
 `desktop.ini` are excluded at any depth, and finding one inside an archive is treated as tampering.
-See [docs/quickstart.md](docs/quickstart.md), [docs/release-checklist.md](docs/release-checklist.md),
-and [docs/manual-verification-checklist.md](docs/manual-verification-checklist.md).
+See [docs/quickstart.md](docs/quickstart.md), [docs/portability.md](docs/portability.md),
+[docs/release-checklist.md](docs/release-checklist.md),
+[docs/manual-verification-checklist.md](docs/manual-verification-checklist.md), and
+[SECURITY.md](SECURITY.md).
 
 ## Safety and limitations
 
