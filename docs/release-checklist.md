@@ -5,6 +5,8 @@ builder's own review; record fresh evidence after the final edit and require ind
 
 ## Artifact order and authenticity
 
+Canonical policy: [SECURITY.md](../SECURITY.md). Release gates below must stay consistent with it.
+
 - [ ] Before extracting, uploading, installing, or running any downloaded archive, calculate its SHA-256 digest and compare it with the exact matching entry in the accompanying `SHA256SUMS.txt`; stop on mismatch
 - [ ] Confirm the same-channel checksum, embedded manifest, and internal release record are described only as corruption/internal-consistency checks, never publisher authentication
 - [ ] Record that Dravux 1.0.2 has no cryptographic publisher signature
@@ -55,6 +57,6 @@ VERIFIED: Dravux 1.0.2 release tree passed all offline checks
 
 State only what the package actually enforces.
 
-- Contract string fields reject control characters and Unicode line/paragraph separators, so free text cannot forge lines in the run receipt. Directional-override and other invisible formatting codepoints (for example U+202E) are NOT rejected, so a free-text value can still be visually reordered within its own line by a bidi-aware terminal; the `--json` output is the authoritative form, and validator diagnostics render untrusted text as escaped ASCII literals.
+- Contract string fields reject control characters and Unicode line/paragraph separators, so free text cannot forge lines in the run receipt. Directional-override and other invisible formatting codepoints (for example U+202E) are NOT rejected, so a free-text value can still be visually reordered within its own line by a bidi-aware terminal; some C1 controls are also outside the rejected set. The `--json` output is the authoritative form, and validator diagnostics render untrusted text as escaped ASCII literals. See [SECURITY.md](../SECURITY.md).
 - Bounded JSON ingress is a shipped operational control: input is capped at 4 MiB, each decoded string and object key at 262,144 characters, and numeric tokens at 128 characters, with additional depth, item, and structural-token limits. The schemas do not publish `maxLength`, so schema inspection alone does not describe these loader limits.
 - Reconcile the release inventory against `git status` before committing. The release manifest is built from the working tree, so intentional untracked shipped files must be included in the commit or the pushed tree will not match the manifest.

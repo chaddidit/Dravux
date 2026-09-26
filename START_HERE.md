@@ -30,10 +30,10 @@ line in the accompanying `SHA256SUMS.txt`. Only after it matches should you extr
 extracted engineering release, run `sh verify-release.sh` before uploading an embedded installer,
 installing, or running Dravux.
 
-A same-channel `SHA256SUMS.txt`, the embedded manifest, and the internal release record detect
-corruption or inconsistency only; they do not authenticate the publisher.
+That fingerprint check catches corruption in transit; it does **not** prove who published the file.
 Dravux 1.0.2 has no cryptographic publisher signature.
 **Publisher authenticity was not independently verified.**
+Details: [SECURITY.md](SECURITY.md).
 
 A source checkout intentionally contains no installer ZIPs. Run `sh verify-release.sh` before local
 use, and obtain the separately published `dravux.zip` or OpenAI plugin-source ZIP for a route that
@@ -141,7 +141,8 @@ python3 -B scripts/verify_distribution.py
 ```
 
 Then read, in order: [README.md](README.md) (architecture and reference sections at the end),
-[docs/quickstart.md](docs/quickstart.md), [docs/release-checklist.md](docs/release-checklist.md), and
+[docs/quickstart.md](docs/quickstart.md), [docs/portability.md](docs/portability.md),
+[docs/release-checklist.md](docs/release-checklist.md), [SECURITY.md](SECURITY.md), and
 [docs/capabilities.md](docs/capabilities.md) for exactly which surface can do which kind of
 acquisition.
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Removed the unpublished project-website link from the README front door; GitHub remains the public home until a site is intentionally published.
+- Added root `SECURITY.md` as the canonical integrity, residual-risk, and vulnerability-reporting page; operator guides keep the short disclosure and link there.
+- Added `docs/portability.md` describing the OS-agnostic validator core, POSIX installer path, and Windows-via-CI testing model for maintainers without a Windows machine.
+- Extended CI to `windows-latest` (Python 3.13) with Bash so the offline suite is exercised on Windows without claiming a native PowerShell installer yet.
+- Added GitHub issue templates for bugs, docs, and features so public feedback has a clear path.
+
 ## 1.0.2 — 2026-07-28
 
 - Added the Dravux project website and a public GitHub Issues route for bugs, documentation problems, and feature requests, with a warning not to disclose private or sensitive information publicly.

@@ -7,10 +7,10 @@ This page is the technical quickstart. If you are not working in a terminal, sta
 
 Before extracting, uploading, installing, or running a downloaded archive, keep it unopened and run
 `shasum -a 256 <archive-name>`. Compare that digest with the exact archive entry in the accompanying
-`SHA256SUMS.txt`; continue only when it matches. A same-channel checksum, the embedded manifest, and
-the internal release record detect corruption or inconsistency only and do not authenticate the
-publisher. Dravux 1.0.2 has no cryptographic publisher signature.
+`SHA256SUMS.txt`; continue only when it matches. That fingerprint check catches corruption in
+transit; it does **not** prove who published the file. Dravux 1.0.2 has no cryptographic publisher signature.
 **Publisher authenticity was not independently verified.**
+Details: [SECURITY.md](../SECURITY.md).
 
 After the digest matches, extract the engineering archive and run `sh verify-release.sh` before any
 installer, upload, or Dravux execution. A source checkout intentionally contains no installer ZIPs;
