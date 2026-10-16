@@ -121,6 +121,110 @@ class DistributionTests(unittest.TestCase):
             text=True,
         )
 
+    def test_source_special_file_is_refused_before_copy(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            source = copy_release_tree(base / "release")
+            project = base / "project"
+            project.mkdir()
+            os.mkfifo(source / "plugins/dravux/skills/dravux/hostile-pipe")
+            proc = subprocess.run(["sh", str(source / "install.sh"), "--codex", "--project-dir", str(project)],
+                                  capture_output=True, text=True, timeout=10)
+            self.assertNotEqual(proc.returncode, 0)
+            self.assertIn("special file", proc.stderr)
+            self.assertFalse((project / ".agents").exists())
+
+    def test_staging_special_files_and_symlinks_are_refused(self):
+        for kind in ("symlink", "fifo"):
+            with self.subTest(kind=kind), tempfile.TemporaryDirectory() as tmp:
+                base = Path(tmp)
+                project = base / "project"
+                project.mkdir()
+                wrappers = base / "bin"
+                wrappers.mkdir()
+                sentinel = base / "untouched"
+                sentinel.write_text("untouched")
+                sentinel.chmod(0o600)
+                wrapper = wrappers / "cp"
+                wrapper.write_text("#!" + sys.executable + "\nimport os, subprocess, sys\n"
+                    + "subprocess.run([" + repr(shutil.which("cp")) + "] + sys.argv[1:], check=True)\n"
+                    + "target = os.path.join(sys.argv[-1], 'injected')\n"
+                    + ("os.symlink(" + repr(str(sentinel)) + ", target)\n" if kind == "symlink" else "os.mkfifo(target)\n"))
+                wrapper.chmod(0o755)
+                proc = subprocess.run(["sh", str(ROOT / "install.sh"), "--codex", "--project-dir", str(project)],
+                    env=dict(os.environ, PATH=str(wrappers) + os.pathsep + os.environ["PATH"]),
+                    capture_output=True, text=True, timeout=15)
+                self.assertNotEqual(proc.returncode, 0, proc.stdout)
+                self.assertIn("Staging contains", proc.stderr)
+                self.assertFalse((project / ".agents/skills/dravux").exists())
+                self.assertEqual(sentinel.stat().st_mode & 0o777, 0o600)
+                self.assertEqual(list((project / ".agents/skills").iterdir()), [])
+
+    def test_finalization_refuses_parent_and_staging_substitution(self):
+        for kind in ("symlink-parent", "replacement-parent", "replacement-staging"):
+            with self.subTest(kind=kind), tempfile.TemporaryDirectory() as tmp:
+                base = Path(tmp)
+                project = base / "project"
+                project.mkdir()
+                wrappers = base / "bin"
+                wrappers.mkdir()
+                wrapper = wrappers / "python3"
+                hook = """import os, pathlib, sys
+if len(sys.argv) > 3 and sys.argv[3] == 'finalize':
+    project = pathlib.Path(sys.argv[4])
+    platform = project / sys.argv[5]
+    staging_name = sys.argv[6]
+    if KIND == 'replacement-staging':
+        (platform / 'skills' / staging_name).rename(platform / 'skills' / 'validated-original')
+        substitute = platform / 'skills' / staging_name
+    else:
+        platform.rename(project / 'validated-original')
+        if KIND == 'symlink-parent':
+            outside = project.parent / 'outside'
+            outside.mkdir()
+            platform.symlink_to(outside, target_is_directory=True)
+        substitute = platform / 'skills' / staging_name
+    substitute.mkdir(parents=True)
+    (substitute / 'SKILL.md').write_text('unvalidated substitute')
+os.execv(PYTHON, [PYTHON] + sys.argv[1:])
+""".replace('KIND', repr(kind)).replace('PYTHON', repr(sys.executable))
+                wrapper.write_text("#!" + sys.executable + "\n" + hook)
+                wrapper.chmod(0o755)
+                proc = subprocess.run(["sh", str(ROOT / "install.sh"), "--codex", "--project-dir", str(project)],
+                    env=dict(os.environ, PATH=str(wrappers) + os.pathsep + os.environ["PATH"]),
+                    capture_output=True, text=True, timeout=15)
+                self.assertNotEqual(proc.returncode, 0, proc.stdout)
+                self.assertNotIn("INSTALLED:", proc.stdout)
+                self.assertFalse((project / ".agents/skills/dravux").exists())
+                substitutes = list((project / ".agents/skills").glob(".dravux-install.*/SKILL.md"))
+                self.assertEqual(len(substitutes), 1)
+                self.assertEqual(substitutes[0].read_text(), "unvalidated substitute")
+                self.assertIn("cleanup refused", proc.stderr)
+
+    def test_finalization_refuses_raced_destination(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            project = base / "project"
+            project.mkdir()
+            wrappers = base / "bin"
+            wrappers.mkdir()
+            wrapper = wrappers / "python3"
+            wrapper.write_text("#!" + sys.executable + "\nimport os, sys\n"
+                + "if len(sys.argv) > 3 and sys.argv[3] == 'finalize':\n"
+                + "    destination = os.path.join(sys.argv[4], sys.argv[5], 'skills', 'dravux')\n    os.mkdir(destination)\n"
+                + "    open(os.path.join(destination, 'sentinel'), 'w').write('untouched')\n"
+                + "os.execv(" + repr(sys.executable) + ", [" + repr(sys.executable) + "] + sys.argv[1:])\n")
+            wrapper.chmod(0o755)
+            proc = subprocess.run(["sh", str(ROOT / "install.sh"), "--codex", "--project-dir", str(project)],
+                env=dict(os.environ, PATH=str(wrappers) + os.pathsep + os.environ["PATH"]),
+                capture_output=True, text=True, timeout=15)
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertNotIn("INSTALLED:", proc.stdout)
+            destination = project / ".agents/skills/dravux"
+            self.assertEqual([path.name for path in destination.iterdir()], ["sentinel"])
+            self.assertEqual((destination / "sentinel").read_text(), "untouched")
+            self.assertEqual([path.name for path in destination.parent.iterdir()], ["dravux"])
+
     def test_all_raw_install_destinations_and_unrelated_working_directory(self):
         with tempfile.TemporaryDirectory(prefix="dravux install space ") as tmp:
             base = Path(tmp)
@@ -947,6 +1051,10 @@ class DistributionTests(unittest.TestCase):
                 ("trailing-dot", ["dravux/file."]),
                 ("trailing-space", ["dravux/file "]),
                 ("windows-reserved", ["dravux/CON.txt"]),
+                ("windows-superscript", ["dravux/COM¹.txt"]),
+                ("windows-wildcard", ["dravux/a?.txt"]),
+                ("file-ancestor", ["dravux/a", "dravux/a/b"]),
+                ("folded-file-ancestor", ["dravux/Å", "dravux/a\u030a/b"]),
                 ("backslash", ["dravux\\..\\evil"]),
                 ("drive", ["C:/evil"]),
                 ("dot-segment", ["dravux/./evil"]),

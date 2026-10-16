@@ -88,8 +88,8 @@ version=$(cat "$script_dir/VERSION") \
 [ -f "$source_dir/SKILL.md" ] \
   || fail 3 'The bundled Dravux SKILL.md is missing.'
 
-if [ -n "$(find "$source_dir" -type l -print -quit)" ]; then
-  fail 3 'The bundled skill contains a symlink; nothing was installed.'
+if [ -n "$(find "$source_dir" ! -type d ! -type f -print -quit)" ]; then
+  fail 3 'The bundled skill contains a symlink or special file; nothing was installed.'
 fi
 
 python3 -B "$source_dir/scripts/dravux_contract.py" "$source_dir/assets/report-template.json" >/dev/null \
@@ -152,30 +152,43 @@ parent_dir=$skills_dir
 staging=$(mktemp -d "$parent_dir/.dravux-install.XXXXXX") \
   || fail 5 'Could not create a private staging directory.'
 
+safety_helper=$script_dir/scripts/install_safety.py
+platform_name=${platform_dir##*/}
+staging_name=${staging##*/}
+staging_identity=$(python3 -B "$safety_helper" record "$base_dir" "$platform_name" "$staging_name") \
+  || fail 5 'Could not bind staging to safe install directories; installation stopped.'
+
 cleanup() {
-  if [ -n "${staging-}" ] && [ -d "$staging" ]; then
-    rm -rf -- "$staging"
+  if [ -n "${staging-}" ]; then
+    python3 -B "$safety_helper" cleanup "$base_dir" "$platform_name" "$staging_name" "$staging_identity" \
+      || printf '%s\n' 'WARNING: staging moved or changed; cleanup refused to touch the replacement.' >&2
   fi
 }
 trap cleanup EXIT HUP INT TERM
 
 cp -R "$source_dir"/. "$staging"/ \
-  || fail 5 'Copy failed; the incomplete staging copy was removed.'
+  || fail 5 'Copy failed; installation stopped.'
+if [ -n "$(find "$staging" ! -type d ! -type f -print -quit)" ]; then
+  fail 5 'Staging contains a symlink or special file; nothing was installed.'
+fi
 chmod -R u=rwX,go=rX "$staging" \
-  || fail 5 'Could not set the installed file modes; the incomplete staging copy was removed.'
+  || fail 5 'Could not set the installed file modes; installation stopped.'
 python3 -B "$staging/scripts/dravux_contract.py" "$staging/assets/report-template.json" >/dev/null \
-  || fail 5 'Installed-copy validation failed; the incomplete staging copy was removed.'
+  || fail 5 'Installed-copy validation failed; installation stopped.'
 python3 -B "$staging/scripts/dravux_run.py" validate "$staging/assets/run-envelope-template.json" >/dev/null \
-  || fail 5 'Installed-copy operational validation failed; the incomplete staging copy was removed.'
+  || fail 5 'Installed-copy operational validation failed; installation stopped.'
 
 if [ -e "$destination" ] || [ -L "$destination" ]; then
   fail 4 "Destination appeared during installation; refusing to overwrite: $destination"
 fi
 
 verify_safe_parent_chain "$base_dir" "$platform_dir" "$skills_dir" \
-  || fail 4 'Install parent changed before finalization; the incomplete staging copy was removed.'
+  || fail 4 'Install parent changed before finalization; installation stopped.'
 
-mv "$staging" "$destination" || fail 5 'Could not finalize the installation.'
+# Reopen every component without following links and compare the recorded directory identities.
+python3 -B "$safety_helper" finalize "$base_dir" "$platform_name" "$staging_name" "$staging_identity" \
+  || fail 5 'Could not finalize without redirection or overwriting; installation stopped.'
+
 staging=
 trap - EXIT HUP INT TERM
 

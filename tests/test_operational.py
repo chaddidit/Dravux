@@ -40,6 +40,39 @@ class OperationalContractTests(unittest.TestCase):
             text=True,
         )
 
+    def test_preflight_rejects_acquisition_unsafe_urls(self):
+        from dravux_run import _website_location_problem
+        for location in ("http://169.254.169.254/", "http://metadata.google.internal/",
+                         "http://localhost/", "http://127.1/", "http://[::1]/",
+                         "https://user:password@example.com/", "http://10.0.0.1/"):
+            with self.subTest(location=location):
+                profile = copy.deepcopy(self.preflight)
+                profile["target"]["location"] = location
+                profile["limitation_acknowledged"] = True
+                self.assertTrue(_website_location_problem(location))
+                result = preflight_decision(profile)
+                self.assertEqual(result["status"], "INVALID")
+                self.assertEqual(result["exit_code"], 1)
+
+    def test_text_receipt_escapes_display_controls_without_changing_json(self):
+        from contextlib import redirect_stdout
+        from io import StringIO
+        from dravux_run import _print_run, build_receipt
+        payload = copy.deepcopy(self.run)
+        hostile = "test\u009b31m\u202e\u2066"
+        payload["preflight"]["surface"]["product"] = hostile
+        self.assertEqual(validate_run(payload), [])
+        result = {"valid": True, "receipt": build_receipt(payload)}
+        text = StringIO()
+        with redirect_stdout(text):
+            _print_run(result, False)
+        self.assertNotIn(hostile, text.getvalue())
+        self.assertIn(r"\u009b31m\u202e\u2066", text.getvalue())
+        machine = StringIO()
+        with redirect_stdout(machine):
+            _print_run(result, True)
+        self.assertIn(hostile, json.loads(machine.getvalue())["receipt"]["surface"])
+
     def test_generic_website_text_surface_requires_acknowledgement(self):
         result = preflight_decision(self.preflight)
         self.assertTrue(result["valid"])
@@ -1060,6 +1093,13 @@ class OutputDirectoryContractTests(unittest.TestCase):
             self.assertEqual(result["output_dir"], str(workspace / "dravux-audits" / "homepage-audit"))
             self.assertTrue(Path(result["output_dir"]).is_dir())
             self.assertEqual(sorted(path.name for path in installed.rglob("dravux-audits")), [])
+
+    def test_output_creation_refuses_missing_directory_descriptor_support(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with mock.patch("dravux_run.os.supports_dir_fd", set()):
+                result = resolve_output_dir(Path(tmp), "run-001", True)
+            self.assertNotEqual(result["exit_code"], 0)
+            self.assertFalse((Path(tmp) / "dravux-audits").exists())
 
     def test_strict_mode_refuses_and_creates_nothing(self):
         with tempfile.TemporaryDirectory() as tmp:

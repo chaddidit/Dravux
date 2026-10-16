@@ -13,15 +13,16 @@ Opened issues:
 - [#8](https://github.com/chaddidit/Dravux/issues/8) Windows-native operator path
 - [#9](https://github.com/chaddidit/Dravux/issues/9) Publish GitHub Release artifacts
 
-## Now
+## Implemented in the release candidate, pending merge and publication
 
-1. **Preflight URL policy parity** — Apply the same literal special-address / metadata-host rules
-   used in acquisition validation to website preflight, so `READY` cannot authorize a location
-   acquisition would refuse. See `SECURITY.md` residual risks.
-2. **Receipt display hardening** — Escape or reject C1 controls (and document/enforce bidi policy)
-   on human text receipts; keep `--json` as the authoritative machine form.
-3. **Installer staging scan** — After `cp` in `install.sh`, refuse symlinks/special files in the
-   staging tree before `mv` (parity with `verify-install.sh`).
+1. **#4 Preflight URL policy parity** uses acquisition's literal URL policy.
+2. **#5 Receipt display hardening** escapes terminal controls and bidi formatting in text receipts;
+   JSON remains the authoritative machine form.
+3. **#6 Installer staging scan** rejects symlinks/special files before staged code runs. Source scans
+   also reject special files; finalization atomically refuses an existing destination.
+4. Independent review added regressions for repaired manual evidence, archive extraction conflicts,
+   and unsupported output-directory platforms. These changes still require exact-commit CI and
+   release-owner manual checks; this page does not mark a GitHub issue closed.
 
 ## Next
 

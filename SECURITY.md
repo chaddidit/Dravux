@@ -22,7 +22,7 @@ advisory flow instead.
    `Get-FileHash -Algorithm SHA256 <archive-name>` in PowerShell on Windows).
 3. Compare that digest with the exact matching line in the accompanying `SHA256SUMS.txt`.
 4. Only after it matches, extract. From an extracted engineering release, run
-   `sh verify-release.sh` (Bash on Windows CI or Git Bash) before uploading an embedded installer,
+   `sh verify-release.sh` on macOS/Linux before uploading an embedded installer,
    installing, or running Dravux.
 
 A source checkout intentionally has no installer ZIPs under `INSTALLERS/`. Verify the checkout
@@ -50,10 +50,13 @@ to ship.
 - Contract string fields reject ASCII control characters, `DEL`, `NEL`, and Unicode line/paragraph
   separators so free text cannot forge extra lines in a run receipt.
 - Validator diagnostics quote untrusted keys and values as escaped single-line ASCII literals.
-- Website acquisition records are checked against literal special-address and metadata-host rules
+  Text receipts escape C1 controls and Unicode formatting characters, including bidi overrides;
+  `--json` preserves the authoritative contract values.
+- Website preflight and acquisition records are checked against literal special-address and metadata-host rules
   for the requested URL, redirect hops, and final location.
 - Installers refuse symlink and group-/world-writable parents, refuse overwrite, and do not call
-  `curl`, `wget`, `sudo`, or `eval`.
+  `curl`, `wget`, `sudo`, or `eval`. Source and staging trees reject symlinks and special files
+  before staged validation; exclusive finalization refuses a destination that appears during installation.
 - Audit output is redirected outside skill, checkout, and release trees so a verified tree stays
   verified.
 - Release archives reject unsafe paths, symlink members, OS metadata inside the archive, and
@@ -67,23 +70,15 @@ to ship.
   resolve DNS before the initial request and every redirect hop, and must fail closed unless every
   A/AAAA address is global. See `plugins/dravux/skills/dravux/SKILL.md` and
   `plugins/dravux/skills/dravux/references/input-capabilities.md`.
-- **Bidi and other invisible formatting.** Directional-override and similar codepoints (for example
-  U+202E) are not rejected. Free text can still be visually reordered within its own line on a
-  bidi-aware terminal. Prefer `--json` output as the authoritative machine form.
-- **C1 controls.** Some C1 controls (outside the already-blocked set) are not rejected in contract
-  strings; treat text receipts as untrusted display and prefer `--json` when piping to other tools.
 - **Skill-in-assistant architecture.** Hostile page or fixture text is inert data to the validators.
   An assistant that ignores the skill policy could still follow embedded instructions. That is a
   host/model risk, not something the offline validator can eliminate.
-- **Preflight vs acquisition URL policy.** Acquisition validation applies the literal
-  special-address and metadata-host rules. Preflight currently requires an absolute HTTP(S) URL for
-  website targets; tightening preflight to the same literal policy is tracked work so `READY` cannot
-  authorize a location acquisition would refuse.
 
 ## Platform notes
 
 Python validators and contracts are meant to stay OS-agnostic (standard library only). POSIX shell
 installers (`install.sh`, `verify-install.sh`, `verify-release.sh`) are the supported operator path
 on macOS and Linux today. Native Windows shell entry points are a separate portability task; see
-[docs/portability.md](docs/portability.md). CI exercises the offline suite on Ubuntu, macOS, and
-Windows so Windows behavior can be checked without a local Windows machine.
+[docs/portability.md](docs/portability.md). CI defines full offline gates on Ubuntu/macOS and a scoped contract-validation job on Windows.
+The `output-dir` helper refuses systems without POSIX directory-descriptor support.
+A passing check on the exact release commit is required before claiming platform verification.

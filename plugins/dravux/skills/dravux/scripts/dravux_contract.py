@@ -536,7 +536,8 @@ def validate_report(report: Any) -> List[str]:
         manual_normative = [
             finding
             for finding in normative
-            if finding.get("manual_review_required") is True
+            if finding.get("status") == "OPEN"
+            and finding.get("manual_review_required") is True
             and any(
                 isinstance(item, dict) and item.get("type") == "MANUAL_OBSERVATION"
                 for item in (finding.get("evidence") if isinstance(finding.get("evidence"), list) else [])

@@ -9,6 +9,7 @@ import re
 import stat
 import sys
 import urllib.parse
+import unicodedata
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
@@ -270,6 +271,10 @@ def validate_preflight(profile: Any) -> List[str]:
             errors.append("preflight.target.location must be a non-empty string")
         if target.get("input_type") == "WEBSITE" and not _is_absolute_url(target.get("location")):
             errors.append("preflight.target.location must be an absolute HTTP(S) URL for WEBSITE input")
+        elif target.get("input_type") == "WEBSITE":
+            problem = _website_location_problem(target.get("location"))
+            if problem:
+                errors.append(f"preflight.target.location {problem}")
 
     capabilities = profile.get("capabilities")
     _require_object(capabilities, CAPABILITY_KEYS, CAPABILITY_KEYS, "preflight.capabilities", errors)
@@ -864,6 +869,10 @@ def _open_stable_directory(path: Path) -> Tuple[Any, os.stat_result]:
 
 def _prepare_output_target(parent: Path, audit_id: Any) -> Tuple[Any, str]:
     """Create through a held directory descriptor so a raced symlink cannot redirect writes."""
+    if os.name != "posix" or not all(
+        function in os.supports_dir_fd for function in (os.stat, os.mkdir)
+    ):
+        return None, "Safe output directory creation requires POSIX directory-descriptor support. Nothing was created."
     output_root = parent / OUTPUT_DIR_NAME
     try:
         existed = output_root.exists() or output_root.is_symlink()
@@ -908,7 +917,7 @@ def _prepare_output_target(parent: Path, audit_id: Any) -> Tuple[Any, str]:
             return physical_target, ""
         finally:
             os.close(descriptor)
-    except (OSError, RuntimeError, ValueError) as exc:
+    except (OSError, RuntimeError, ValueError, NotImplementedError) as exc:
         return None, f"The audit folder could not be created safely: {_quoted(exc)}. Nothing was created."
 
 
@@ -1053,6 +1062,16 @@ def _print_preflight(result: Dict[str, Any], json_output: bool) -> None:
         print(f"ERROR: {error}", file=sys.stderr)
 
 
+def _receipt_text(value: Any) -> str:
+    """Escape terminal controls and directional formatting while preserving ordinary text."""
+    return "".join(
+        json.dumps(character, ensure_ascii=True)[1:-1]
+        if unicodedata.category(character) in {"Cc", "Cf", "Cs", "Zl", "Zp"}
+        else character
+        for character in str(value)
+    )
+
+
 def _print_run(result: Dict[str, Any], json_output: bool) -> None:
     if json_output:
         print(json.dumps(result, indent=2, sort_keys=True))
@@ -1074,7 +1093,7 @@ def _print_run(result: Dict[str, Any], json_output: bool) -> None:
         ("Meaning", "meaning"),
         ("Next action", "next_action"),
     ):
-        print(f"{label}: {receipt[key]}")
+        print(f"{label}: {_receipt_text(receipt[key])}")
         if key == "evidence_mode":
             # A valid run only reaches this point with the acknowledgement set when the mode was reduced.
             reduced = MODE_RANK[receipt["evidence_mode"]] < MODE_RANK[receipt["requested_mode"]]
@@ -1089,7 +1108,7 @@ def _print_run(result: Dict[str, Any], json_output: bool) -> None:
             )
             print(f"Execution: {state}")
     remaining = ", ".join(receipt["manual_checks_remaining"]) or "none"
-    print(f"Manual checks remaining: {remaining}")
+    print(f"Manual checks remaining: {_receipt_text(remaining)}")
 
 
 def build_parser() -> argparse.ArgumentParser:

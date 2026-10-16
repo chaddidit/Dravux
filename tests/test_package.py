@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 # Every test module and method counts towards this number; a deleted test must change it, never vanish.
-EXPECTED_TEST_COUNT = 199
+EXPECTED_TEST_COUNT = 207
 SKILL = ROOT / "plugins" / "dravux" / "skills" / "dravux"
 VERSION = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
 sys.path.insert(0, str(SKILL / "scripts"))

@@ -7,22 +7,27 @@ installers may differ by platform; the meaning of a report must not.
 
 | Layer | macOS | Linux | Windows |
 |---|---|---|---|
-| Python validators (`dravux_contract.py`, `dravux_run.py`) | Supported | Supported | Supported in CI (stdlib only) |
-| Offline test suite | Supported | Supported (CI) | Supported in CI |
-| Release verifier (`verify-release.sh`) | Supported | Supported (CI) | Supported in CI via Bash |
-| Plain installers (`install.sh`, `verify-install.sh`) | Supported | Expected | Not a native shell path yet |
+| Python contract, preflight, and run validation | Supported | Supported | Core CI job configured; require a passing run |
+| Full offline test suite | Supported | Supported (CI) | Not supported |
+| Release verifier (`verify-release.sh`) | Supported | Supported (CI) | Not supported |
+| Plain installers (`install.sh`, `verify-install.sh`) | Supported | Supported | Not a native shell path yet |
+| Safe `output-dir` filesystem helper | Supported | Supported | Refused before creation |
 | Claude / Codex / ChatGPT skill install via published ZIPs | Documented | Documented | Documented (host app dependent) |
 | Native `cmd.exe` / PowerShell installer scripts | — | — | Not shipped |
 
-"Supported in CI" means GitHub Actions runs the offline suite on that OS so a macOS-only maintainer
-can still see Windows failures. It does **not** mean every documented click-path was manually
-exercised on a Windows desktop.
+The Windows job runs `tests.test_contract`, `OperationalContractTests`, and
+`ExecutionFailureContractTests`. It does not test shell installers, POSIX modes, safe output-directory
+creation, or full release packaging. A configured job is not evidence of a passing run; inspect the
+checks on the exact release commit. Host-app installation routes still require manual verification.
+
+The installer uses atomic exclusive rename on Linux and macOS. If the OS or filesystem does not
+support that operation, installation fails safely; it never falls back to merging directories.
 
 ## Design rules (keep these)
 
 1. **Validators stay pure Python stdlib.** No POSIX-only calls in the contract or run validators
    except carefully gated filesystem helpers already used for audit-output safety
-   (`O_NOFOLLOW` / `dir_fd` when available).
+   (`O_NOFOLLOW` / `dir_fd` required for `output-dir`; unavailable support is refused).
 2. **Paths in contracts are strings, not host paths.** Report and run JSON must not require a
    particular drive letter or separator to validate.
 3. **Shell is an adapter.** `install.sh` / `verify-*.sh` are the macOS/Linux operator path. A

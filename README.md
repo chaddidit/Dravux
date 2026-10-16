@@ -26,10 +26,28 @@ instead of inferring browser, DOM, screenshot, keyboard, or screen-reader eviden
 actually obtain.
 
 Validators and contracts are OS-agnostic (Python standard library). macOS and Linux have the
-supported POSIX installers today; Windows is exercised in CI so failures show up without a local
-Windows machine. Native Windows shell installers are still a separate portability task — see
+supported POSIX installers today. CI defines a Windows job for contract, preflight, and run
+validation; full release verification and safe `output-dir` creation require macOS/Linux. Native Windows shell installers are still a separate portability task — see
 [docs/portability.md](docs/portability.md). A standalone GUI or browser extension is a separate
 product layer; both can reuse the same contracts and validators.
+
+## Downloads
+
+Get packaged assets from [GitHub Releases](https://github.com/chaddidit/Dravux/releases).
+Use the assets attached to the published version tag. If there is no published version with these
+assets, a packaged release is not yet available.
+
+| Asset | Use it for |
+|---|---|
+| `dravux.zip` | Claude Chat/Cowork custom-skill upload, where enabled |
+| `Dravux-OpenAI-Plugin-Source.zip` | Codex/ChatGPT local plugin source, where the host supports local plugins |
+| `Dravux-1.0.2.zip` | Full engineering release, local installers, offline tests, and both embedded installer ZIPs |
+| `SHA256SUMS.txt` | Compare the matching archive digest before extraction, upload, or execution |
+
+GitHub's automatically generated **Source code** archives are source snapshots, not the packaged
+release. They do not contain the built installer ZIPs. Download `SHA256SUMS.txt` alongside your
+chosen asset and follow the integrity steps below. Checksums detect corruption and inconsistency;
+1.0.2 has no publisher signature and does not independently authenticate its publisher.
 
 ## Choose your path
 
@@ -267,7 +285,8 @@ Everything above is the beginner path. Everything below is the full detail.
 
 ## Requirements
 
-- macOS
+- macOS or Linux for shell installers, full release verification, and `output-dir`
+- Windows: portable Python contract validation only; native installers are not shipped
 - Python 3.8 or newer (`python3 --version`)
 - Claude Chat/Cowork with custom skills enabled, Claude Code, Codex, or ChatGPT Work with the Dravux
   plugin

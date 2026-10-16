@@ -275,6 +275,7 @@ def _has_unsafe_mode(item):
 
 WINDOWS_RESERVED_NAMES = {
     "CON", "PRN", "AUX", "NUL",
+    *(f"{prefix}{number}" for prefix in ("COM", "LPT") for number in "¹²³"),
     *(f"COM{number}" for number in range(1, 10)),
     *(f"LPT{number}" for number in range(1, 10)),
 }
@@ -299,8 +300,8 @@ def _member_name_problem(name):
     if not parts or any(part in {"", ".", ".."} for part in parts):
         return "empty or dot path segment"
     for part in parts:
-        if ":" in part:
-            return "colon in path segment"
+        if any(character in part for character in '<>:"|?*'):
+            return "Windows-invalid character in path segment"
         if part.endswith((".", " ")):
             return "path segment ends in a dot or space"
         if part.split(".", 1)[0].upper() in WINDOWS_RESERVED_NAMES:
@@ -424,6 +425,15 @@ def verify_archive(path, expected_root=None):
                 not collision_sets,
                 f"colliding archive member name in {safe_name}: " + "; ".join(collision_sets),
             )
+            files = {BUILD_RELEASE.collision_key(item.filename) for item in entries if not item.is_dir()}
+            conflicts = []
+            for name in names:
+                parts = name.rstrip("/").split("/")
+                if any(BUILD_RELEASE.collision_key("/".join(parts[:index])) in files
+                       for index in range(1, len(parts))):
+                    conflicts.append(name)
+            require(not conflicts, "archive member has a regular-file ancestor: "
+                    + ", ".join(_quoted(name) for name in conflicts))
             irregular = sorted(item.filename for item in entries if _is_irregular_member(item))
             require(
                 not irregular,

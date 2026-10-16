@@ -46,8 +46,8 @@
     {
       "mode": "0644",
       "path": ".github/workflows/ci.yml",
-      "sha256": "ee7abd020a0aec3a3aa37b9dfa11fd35ce4ca7cb9d7c911e533f4fd313179e8e",
-      "size": 1369
+      "sha256": "e067fc65bc4283d04b394d79f2d2aef0bdc7a31ee6ccaadabb94423658c718b9",
+      "size": 1725
     },
     {
       "mode": "0644",
@@ -58,8 +58,8 @@
     {
       "mode": "0644",
       "path": "CHANGELOG.md",
-      "sha256": "946879f6726cbe4e43e4d42d7a80a31c65c62b86825cef6026887241f1e57694",
-      "size": 12142
+      "sha256": "d4e10e3b1f701f10a9677d8dcd043a27111b0bddfa3374e66e9476dbac118796",
+      "size": 12762
     },
     {
       "mode": "0644",
@@ -88,14 +88,14 @@
     {
       "mode": "0644",
       "path": "README.md",
-      "sha256": "616a4f1b54c23539ab9b15e7e59bb8a5fb4cdebaa9834029eb4332b79b48ebf6",
-      "size": 26169
+      "sha256": "45fa6179200d2d93841a54df75cbc5580527c39d0f054459075aed57689b6ad4",
+      "size": 27467
     },
     {
       "mode": "0644",
       "path": "SECURITY.md",
-      "sha256": "81cc890b8cd6302029d1d945f01b202dea2c77565443f0dd3f91d232e9904eb2",
-      "size": 5377
+      "sha256": "dbd67f32bc079bc9d4eb3e4ecb693946ce9034cfe30ece7ecbe09795ba905e4f",
+      "size": 5025
     },
     {
       "mode": "0644",
@@ -310,8 +310,8 @@
     {
       "mode": "0644",
       "path": "docs/portability.md",
-      "sha256": "61a00a1a756819948723aaf906755811e2b03aa1e2a0d28921090bcbeba200a0",
-      "size": 3160
+      "sha256": "8bffeb2ac8d4fc9de93d222236e45f307598bcd34a07f6db6f302b677a12a854",
+      "size": 3636
     },
     {
       "mode": "0644",
@@ -322,14 +322,14 @@
     {
       "mode": "0644",
       "path": "docs/release-checklist.md",
-      "sha256": "a91433426d4c25e87c7f2693bfdd6a42c968b8b03742d24ff8c878af63aa373b",
-      "size": 4990
+      "sha256": "8f2d75215834372a2bed4721fcae4a685c7267ba86dd038b34800db09fd33e79",
+      "size": 5068
     },
     {
       "mode": "0644",
       "path": "docs/tracked-work.md",
-      "sha256": "15ad5e596ebe9774590c5f35a74ceaf5ba6a8f93ccbeaa7fdd9a19496094cf5f",
-      "size": 2269
+      "sha256": "75663a28ad50f1ceec20ca4cc490847a322caaf353b02f1808ee96c5e4d7b8b2",
+      "size": 2424
     },
     {
       "mode": "0644",
@@ -556,8 +556,8 @@
     {
       "mode": "0755",
       "path": "install.sh",
-      "sha256": "71a02a12f8299efc8ae745a8a082051a8213c029043057ab5590e7da5f1afd3b",
-      "size": 6443
+      "sha256": "dc692deb79329998e159bfc05da31b347919baaec0c7fd70325a416f819b498b",
+      "size": 7213
     },
     {
       "mode": "0644",
@@ -700,14 +700,14 @@
     {
       "mode": "0644",
       "path": "plugins/dravux/skills/dravux/scripts/dravux_contract.py",
-      "sha256": "b6cda47e5a4e0d9f4f1ddef5d3a5e3c335780f5525abfad5576917c87e8525c8",
-      "size": 34650
+      "sha256": "3d5bba7ba23c03c46428ae025c11d7c3508100d77fdb59d7c77a066b001990a6",
+      "size": 34698
     },
     {
       "mode": "0644",
       "path": "plugins/dravux/skills/dravux/scripts/dravux_run.py",
-      "sha256": "e8bc3eca5164afffa70f8e45e6e18ca014ff747e11b9100da38a26de9429f3cb",
-      "size": 51742
+      "sha256": "e4eb73931e657438f372bf74d7924f19b0a954b197b519c5e92006bd2840e512",
+      "size": 52621
     },
     {
       "mode": "0644",
@@ -742,8 +742,14 @@
     {
       "mode": "0755",
       "path": "scripts/build_release.py",
-      "sha256": "4305b8f139b4ce3d1d0713cc398b3119770b88e5040a3e00dbff3abaadf14091",
-      "size": 17273
+      "sha256": "fa68fc1ef17f6137d4cb0dfa0b6b94ebbb992e474d9c94afc11eaea6c52cd457",
+      "size": 17306
+    },
+    {
+      "mode": "0644",
+      "path": "scripts/install_safety.py",
+      "sha256": "f011d3e9d32df49afe801978cd0ac5fa5739dbeba5ed0dca0c5ee304b79c3a06",
+      "size": 3279
     },
     {
       "mode": "0755",
@@ -760,14 +766,14 @@
     {
       "mode": "0755",
       "path": "scripts/verify_distribution.py",
-      "sha256": "67e3a74d199dc2fbe2a06277bddd31e0d79d9f75ccc5d394315230165d8685e6",
-      "size": 33075
+      "sha256": "20a4f1668aa9c9edd736e6e92b0cada0fede531b7afc7104490faec220b272d2",
+      "size": 33768
     },
     {
       "mode": "0644",
       "path": "tests/test_contract.py",
-      "sha256": "38916a8835c5a7de409e91f3775dcc49acdba249d65d9e68ca2a9077beef6146",
-      "size": 36204
+      "sha256": "4a59871a4c9a93c23cad3c2cf9f5c624bac064928e285dae2f8e7dd3726b753a",
+      "size": 36985
     },
     {
       "mode": "0644",
@@ -778,8 +784,8 @@
     {
       "mode": "0644",
       "path": "tests/test_distribution.py",
-      "sha256": "88e14f06593b77defcbaa6fbfabf50b38d71d218ec3d1e4aa8cd8511d0df723b",
-      "size": 64846
+      "sha256": "dcb4defa6dbb701141629af7049d53d7559adf8dbd0a55ec34aa4a19aeeaa25d",
+      "size": 71243
     },
     {
       "mode": "0644",
@@ -790,13 +796,13 @@
     {
       "mode": "0644",
       "path": "tests/test_operational.py",
-      "sha256": "ae03878f15c0df4162e9b484a571450a26b880ec95e1592e21863dc834ae2a0a",
-      "size": 60757
+      "sha256": "2f9b30f3b9fb2f6de257e999f10af3a8423c2d16e2a13534e6d845acdf0c8947",
+      "size": 62882
     },
     {
       "mode": "0644",
       "path": "tests/test_package.py",
-      "sha256": "3d5a7addd065c64db3c47ac1c045f8b315f68e77988cc04b28e928682f758490",
+      "sha256": "f631820654d58600cdac6abe0020d763e5b1fc1285c1a60831d3ebb1004705be",
       "size": 32082
     },
     {

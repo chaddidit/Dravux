@@ -33,6 +33,19 @@ class ContractTests(unittest.TestCase):
     def setUpClass(cls):
         cls.manifest = json.loads((ROOT / "fixtures" / "manifest.json").read_text(encoding="utf-8"))
 
+    def test_repaired_manual_finding_cannot_justify_current_verified_fail(self):
+        report = json.loads((ROOT / "fixtures/failing/manual-fail-after-automation-pass.json").read_text())
+        self.assertEqual(validate_report(report), [])
+        repaired = copy.deepcopy(report["findings"][0])
+        repaired["finding_id"] = "DRV-REPAIRED-MANUAL"
+        repaired["status"] = "REPAIRED"
+        report["findings"].append(repaired)
+        current = report["findings"][0]
+        current["manual_review_required"] = False
+        current["evidence"] = [{"type": "SOURCE", "description": "Source only", "locator": "index.html:1"}]
+        errors = validate_report(report)
+        self.assertTrue(any("requires a completed manual check" in error for error in errors), errors)
+
     def test_manifest_covers_required_cases(self):
         required = {
             "known-pass",

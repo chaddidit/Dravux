@@ -158,6 +158,7 @@ SHIPPED_FILES = (
     "schemas/finding.schema.json",
     "scripts/audit_demo_html.py",
     "scripts/build_release.py",
+    "scripts/install_safety.py",
     "scripts/run_tests.py",
     "scripts/validate_report.py",
     "scripts/verify_distribution.py",
