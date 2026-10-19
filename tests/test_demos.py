@@ -123,7 +123,7 @@ class DemoTests(unittest.TestCase):
         matrix = root_workflow.split("matrix:", 1)[1].split("steps:", 1)[0]
         self.assertEqual(
             re.findall(r"- os: ([^\s]+)\n\s+python-version: \"([^\"]+)\"", matrix),
-            [("ubuntu-latest", "3.8"), ("ubuntu-latest", "3.13"), ("macos-latest", "3.13")],
+            [("ubuntu-latest", "3.8"), ("ubuntu-latest", "3.13"), ("macos-latest", "3.13"), ("windows-latest", "3.13")],
         )
         self.assertIn("python-version: ${{ matrix.python-version }}", root_workflow)
         self.assertIn("${{ runner.temp }}/dravux-report.json", demo_workflow)

@@ -5,11 +5,12 @@ Mostly clicking, with two short commands. About ten minutes.
 ## Integrity gate — before upload or installation
 
 For a downloaded artifact, do not extract, upload, install, or run it until its SHA-256 digest matches
-the exact entry in the accompanying `SHA256SUMS.txt`. After a matching engineering-archive digest,
+the exact entry in the accompanying `SHA256SUMS.txt`. After a matching release-archive digest,
 extract it and run `sh verify-release.sh` before the plugin commands below. A same-channel checksum,
 the embedded manifest, and the internal release record detect corruption or inconsistency only; they
 do not authenticate the publisher. Dravux 1.0.2 has no cryptographic publisher signature.
 **Publisher authenticity was not independently verified.**
+Details: [SECURITY.md](../../SECURITY.md).
 
 For a source checkout, there is no installer ZIP to verify: run `sh verify-release.sh` on the checkout
 before adding it as a local plugin source. If the plugin-source ZIP will be submitted or shared,

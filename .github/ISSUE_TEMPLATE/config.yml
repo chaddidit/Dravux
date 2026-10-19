@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security and integrity
+    url: https://github.com/chaddidit/Dravux/blob/main/SECURITY.md
+    about: Integrity gate, residual risks, and how to report a vulnerability
+  - name: Start here
+    url: https://github.com/chaddidit/Dravux/blob/main/START_HERE.md
+    about: Pick an install route before filing an install bug

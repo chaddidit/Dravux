@@ -6,10 +6,11 @@ Everything needed to install Dravux, in one place. Pick the folder that matches 
 
 For a downloaded artifact, keep the archive unopened, calculate its digest with
 `shasum -a 256 <archive-name>`, and compare it with the exact matching line in the accompanying
-`SHA256SUMS.txt`. Do not extract, upload, install, or run it unless the digest matches. A same-channel
-checksum, the embedded manifest, and the internal release record detect corruption or inconsistency
-only; they do not authenticate the publisher. Dravux 1.0.2 has no cryptographic publisher signature.
+`SHA256SUMS.txt`. Do not extract, upload, install, or run it unless the digest matches. That
+fingerprint check catches corruption in transit; it does **not** prove who published the file.
+Dravux 1.0.2 has no cryptographic publisher signature.
 **Publisher authenticity was not independently verified.**
+Details: [SECURITY.md](../SECURITY.md).
 
 After the outer engineering archive matches, extract it and run `sh verify-release.sh` before using
 either embedded installer. A source checkout contains these guides but intentionally contains no
@@ -18,17 +19,18 @@ archive for an upload route.
 
 | Folder | Use it for | What is inside |
 |---|---|---|
-| `Claude-Chat-Cowork/` | Claude in a browser, or Cowork. No terminal needed. | Guide; a published engineering release also injects `dravux.zip` |
-| `Codex-ChatGPT/` | The Codex or ChatGPT desktop app. | Guide; a published engineering release also injects `Dravux-OpenAI-Plugin-Source.zip` |
+| `Claude-Chat-Cowork/` | Claude in a browser, or Cowork. No terminal needed. | Guide; a downloadable release also includes `dravux.zip` |
+| `Codex-ChatGPT/` | The Codex or ChatGPT desktop app. | Guide; a downloadable release also includes `Dravux-OpenAI-Plugin-Source.zip` |
 
 Using Claude Code or the Codex command line instead? You do not need this folder. Run
 `sh install.sh` from the top of this package — see [Path 3 in START_HERE.md](../START_HERE.md).
 
 ## What these files are
 
-In an extracted published engineering release, each folder holds one ready-made archive. They are
-exact copies of the archives published alongside the release, byte for byte, and the accompanying
-`SHA256SUMS.txt` records both. In a source checkout, each folder holds its guide only.
+In a downloadable release archive, each folder holds one ready-made installer zip. They are exact
+copies of the standalone downloads, byte for byte, and the accompanying `SHA256SUMS.txt` records
+both. In the GitHub source tree, each folder holds its guide only — get the zip from the release
+page when you need one.
 
 After completing the integrity gate, do not rebuild, unzip, or edit an embedded installer before
 use. Upload or install the verified archive as-is.

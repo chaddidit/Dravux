@@ -1,0 +1,38 @@
+name: Bug report
+description: Something in Dravux is wrong, unclear, or unsafe
+title: "Bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do **not** include secrets, private data, or sensitive vulnerability details.
+        For sensitive security issues, see [SECURITY.md](../SECURITY.md).
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what you expected, what you got.
+    validations:
+      required: true
+  - type: dropdown
+    id: route
+    attributes:
+      label: Route
+      options:
+        - Claude Chat / Cowork upload
+        - Claude Code
+        - Codex / ChatGPT desktop
+        - Codex CLI
+        - Offline CLI / validators only
+        - Docs / packaging
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      placeholder: "1.0.2"
+    validations:
+      required: true

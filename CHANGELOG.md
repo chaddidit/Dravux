@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+- Matched preflight website URL checks to acquisition policy and escaped terminal controls/bidi formatting in text receipts while preserving JSON values.
+- Required an OPEN manually evidenced normative finding for a manual override of automated PASS/ERROR.
+- Added source/staging special-file rejection and atomic no-replace installer finalization on Linux/macOS.
+- Rejected ZIP file/descendant conflicts, Windows-invalid characters, and superscript reserved device names.
+- Added a README download table, explicit source-snapshot distinction, and accurate platform limits.
+
+- Removed the unpublished project-website link from the README front door; GitHub remains the public home until a site is intentionally published.
+- Added root `SECURITY.md` as the canonical integrity, residual-risk, and vulnerability-reporting page; operator guides keep the short disclosure and link there.
+- Added `docs/portability.md` describing the OS-agnostic validator core, POSIX installer path, and Windows-via-CI testing model for maintainers without a Windows machine.
+- Scoped Windows CI to portable contract/preflight/run tests; full packaging and installer gates remain Linux/macOS. Safe output-directory creation refuses unsupported directory-descriptor platforms.
+- Added GitHub issue templates for bugs, docs, and features so public feedback has a clear path.
+
 ## 1.0.2 — 2026-07-28
 
 - Added the Dravux project website and a public GitHub Issues route for bugs, documentation problems, and feature requests, with a warning not to disclose private or sensitive information publicly.
