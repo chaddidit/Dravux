@@ -30,3 +30,6 @@ out/
 config/local-paths.json
 config/*.private.json
 .claude/settings.local.json
+dist-release/
+node_modules/
+*.tgz

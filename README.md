@@ -330,6 +330,23 @@ when instructed below.
 Choose exactly one. Do not install both a plain skill copy and a plugin copy for the same app;
 duplicate copies cause confusing discovery or shadowing.
 
+### Via npx (after v1.0.2 is published)
+
+Requires Node.js 18 or newer, macOS or Linux with `sh`, and Python 3.8 or newer.
+The GitHub route downloads the tagged package; no npm publication is required.
+Review the tagged source and the [integrity limits](SECURITY.md) before running it.
+
+```bash
+npx --yes github:chaddidit/Dravux#v1.0.2 --help
+npx --yes github:chaddidit/Dravux#v1.0.2 --codex --project-dir "$DRAVUX_TEST_PROJECT"
+npx --yes github:chaddidit/Dravux#v1.0.2 verify --codex --project-dir "$DRAVUX_TEST_PROJECT"
+```
+
+Use `--claude` for Claude, or replace `--project-dir` and its path with `--personal`
+to install under `HOME`. The project must already exist. Existing installs are never overwritten.
+After a separate npm publication, `npx --yes dravux@1.0.2` accepts the same arguments.
+The launcher uses the bundled shell installers and adds no runtime dependencies.
+
 ### Option A — project-only install (recommended for first testing)
 
 Claude Code/Desktop:

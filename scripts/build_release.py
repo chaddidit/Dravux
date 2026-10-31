@@ -19,7 +19,7 @@ SKILL = ROOT / "plugins" / "dravux" / "skills" / "dravux"
 # Operating-system metadata that Finder/Explorer create beside real files. Release
 # archives contain zero such entries, at any depth.
 OS_METADATA_NAMES = {".DS_Store", ".AppleDouble", "__MACOSX", "Thumbs.db", "desktop.ini"}
-EXCLUDED_PARTS = {".git", "__pycache__", "out", "build", "dist"} | OS_METADATA_NAMES
+EXCLUDED_PARTS = {".git", "__pycache__", "out", "build", "dist", "dist-release", "node_modules"} | OS_METADATA_NAMES
 SEMVER = re.compile(r"^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$")
 RUN_CONTRACT_PATTERN = re.compile(r'^RUN_CONTRACT_VERSION\s*=\s*"([^"]+)"', re.MULTILINE)
 INSTALLER_PROJECTIONS = (
@@ -58,6 +58,7 @@ SHIPPED_FILES = (
     "adapters/codex/README.md",
     "adapters/github-copilot/README.md",
     "adapters/github-copilot/copilot-instructions.md",
+    "bin/dravux.js",
     "config/local-paths.example.json",
     "demos/github/.github/copilot-instructions.md",
     "demos/github/.github/pull_request_template.md",
@@ -127,6 +128,7 @@ SHIPPED_FILES = (
     "fixtures/passing/false-positive-resistance.json",
     "fixtures/passing/known-pass.json",
     "install.sh",
+    "package.json",
     "plugins/dravux/.claude-plugin/plugin.json",
     "plugins/dravux/.codex-plugin/plugin.json",
     "plugins/dravux/LICENSE",
@@ -166,6 +168,7 @@ SHIPPED_FILES = (
     "tests/test_demos.py",
     "tests/test_distribution.py",
     "tests/test_live_site.py",
+    "tests/test_npx.py",
     "tests/test_operational.py",
     "tests/test_package.py",
     "tests/test_skill_portability.py",
@@ -214,7 +217,7 @@ def should_exclude(relative):
         return True
     if relative.name == ".env" or relative.name.startswith(".env."):
         return True
-    if relative.suffix in {".pyc", ".zip", ".log"}:
+    if relative.suffix in {".pyc", ".zip", ".tgz", ".log"}:
         return True
     return False
 

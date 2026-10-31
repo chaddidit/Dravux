@@ -16,6 +16,9 @@
 
 ## 1.0.2 — 2026-07-28
 
+- Added a dependency-free npx launcher for installation and verification with the existing Claude/Codex personal and project flags; bundled the hardened installer safety helper.
+- Kept local release output out of source inventories while retaining strict checks on extracted releases, and excluded Git internals and binary npm artifacts from package text checks.
+
 - Added the Dravux project website and a public GitHub Issues route for bugs, documentation problems, and feature requests, with a warning not to disclose private or sensitive information publicly.
 - Replaced private workspace taxonomy in the privacy regression fixture with generic synthetic markers and removed an internal development-only reference from the public README.
 - Refreshed active fixture tooling/provenance labels to Dravux 1.0.2 so current contract fixtures no longer present themselves as 1.0.1 output; historical 1.0.1 changelog entries remain unchanged.

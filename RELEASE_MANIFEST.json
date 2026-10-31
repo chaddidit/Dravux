@@ -52,14 +52,14 @@
     {
       "mode": "0644",
       "path": ".gitignore",
-      "sha256": "7078b12a6cfbaa91c91ad0e1d576bf92a77310cc8ca5b5f025011ad4d3a58fc3",
-      "size": 319
+      "sha256": "75967264a3353a49a7d164b519f61bfea08e9678e25b96e87b982dcfc9916c29",
+      "size": 353
     },
     {
       "mode": "0644",
       "path": "CHANGELOG.md",
-      "sha256": "d4e10e3b1f701f10a9677d8dcd043a27111b0bddfa3374e66e9476dbac118796",
-      "size": 12762
+      "sha256": "e23c52b98d6192a19ba9e1c08b92d385e3ada6f4a9545f4cf5c311dab03639c6",
+      "size": 13126
     },
     {
       "mode": "0644",
@@ -88,8 +88,8 @@
     {
       "mode": "0644",
       "path": "README.md",
-      "sha256": "45fa6179200d2d93841a54df75cbc5580527c39d0f054459075aed57689b6ad4",
-      "size": 27467
+      "sha256": "a6b739631723b21280a5eea902946da9eaa32d472807ff0ba0c162c0a9f836a2",
+      "size": 28345
     },
     {
       "mode": "0644",
@@ -144,6 +144,12 @@
       "path": "adapters/github-copilot/copilot-instructions.md",
       "sha256": "4b6b123743ddc2e7dc318fe7e07dfdabd2557694b07f61a9aa48d7d2c9a78956",
       "size": 916
+    },
+    {
+      "mode": "0755",
+      "path": "bin/dravux.js",
+      "sha256": "ac037868bf7f073d14362fb2f2af4ccb47a8750a02af2d8ae5073865da05fb0b",
+      "size": 1102
     },
     {
       "mode": "0644",
@@ -561,6 +567,12 @@
     },
     {
       "mode": "0644",
+      "path": "package.json",
+      "sha256": "de5c108bfaecc5dacde4352512aad43ce9219b99d975cc5848832abba2563f0f",
+      "size": 432
+    },
+    {
+      "mode": "0644",
       "path": "plugins/dravux/.claude-plugin/plugin.json",
       "sha256": "cff0515f9ed3601270cc7d2719c951a487f3bd388eacf07dc4b9c5da49c214b9",
       "size": 292
@@ -742,8 +754,8 @@
     {
       "mode": "0755",
       "path": "scripts/build_release.py",
-      "sha256": "fa68fc1ef17f6137d4cb0dfa0b6b94ebbb992e474d9c94afc11eaea6c52cd457",
-      "size": 17306
+      "sha256": "30cc8f4238e2b7bb638b84657e21cfa6ad99ed3919a7f060a8f78959ac3f70b7",
+      "size": 17412
     },
     {
       "mode": "0644",
@@ -766,8 +778,8 @@
     {
       "mode": "0755",
       "path": "scripts/verify_distribution.py",
-      "sha256": "20a4f1668aa9c9edd736e6e92b0cada0fede531b7afc7104490faec220b272d2",
-      "size": 33768
+      "sha256": "de89e9dd6ed07d5b025b6bf167072a11b17bc5d297f0ef33850155f93b16a813",
+      "size": 33872
     },
     {
       "mode": "0644",
@@ -784,14 +796,20 @@
     {
       "mode": "0644",
       "path": "tests/test_distribution.py",
-      "sha256": "dcb4defa6dbb701141629af7049d53d7559adf8dbd0a55ec34aa4a19aeeaa25d",
-      "size": 71243
+      "sha256": "289d0ad1d318f99d8bb8bce8fdbbbbdefd2a89b6b3ca593eafa8d66a68c19822",
+      "size": 72120
     },
     {
       "mode": "0644",
       "path": "tests/test_live_site.py",
       "sha256": "4aa2b032514dda580a7f918d6bacf8278e4642d1ecf01804b2d5af38ac15542b",
       "size": 1431
+    },
+    {
+      "mode": "0644",
+      "path": "tests/test_npx.py",
+      "sha256": "e1be928ffcc7af57157013732bfc05bba464da49e85d693af9a8f5862ff04107",
+      "size": 2793
     },
     {
       "mode": "0644",
@@ -802,8 +820,8 @@
     {
       "mode": "0644",
       "path": "tests/test_package.py",
-      "sha256": "f631820654d58600cdac6abe0020d763e5b1fc1285c1a60831d3ebb1004705be",
-      "size": 32082
+      "sha256": "75160f90acdb9bc5cb79d920df6aef2921beffd2d5644ceaae7286f4be1cd397",
+      "size": 32906
     },
     {
       "mode": "0644",
