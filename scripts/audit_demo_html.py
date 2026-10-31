@@ -13,6 +13,7 @@ from typing import Dict, List, Optional, Tuple
 
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
+PACKAGE_VERSION = (PACKAGE_ROOT / "VERSION").read_text(encoding="utf-8").strip()
 REPORT_SCHEMA = PACKAGE_ROOT / "schemas" / "dravux-report.schema.json"
 SKILL_SCRIPTS = PACKAGE_ROOT / "plugins" / "dravux" / "skills" / "dravux" / "scripts"
 sys.path.insert(0, str(SKILL_SCRIPTS))
@@ -297,7 +298,7 @@ def audit_html(source: Path, state: str) -> Dict[str, object]:
         "run": {
             "started_at": "1970-01-01T00:00:00Z",
             "completed_at": "1970-01-01T00:00:00Z",
-            "tooling": ["Dravux demo HTML audit 1.0.1", "Python standard library"],
+            "tooling": [f"Dravux demo HTML audit {PACKAGE_VERSION}", "Python standard library"],
             "environment": "Deterministic offline source fixture",
         },
     }

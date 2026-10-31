@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Preflight and validate a complete Dravux operational run."""
+"""Preflight a surface, validate a complete Dravux operational run, and place its output."""
 
 import argparse
 import json
@@ -8,18 +8,23 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
-from dravux_contract import (
+# Importing the sibling contract module would otherwise leave a __pycache__ directory inside an
+# installed skill tree, and that tree must stay exactly as the release manifest recorded it.
+sys.dont_write_bytecode = True
+
+from dravux_contract import (  # noqa: E402
     INPUT_TYPES,
     _is_absolute_url,
     _is_nonempty_string,
     _is_rfc3339_datetime,
+    load_json_path,
     validate_report,
 )
 
 
-PACKAGE_VERSION = "1.0.1"
+PACKAGE_VERSION = "1.0.2"
 PREFLIGHT_VERSION = "1.0.0"
-RUN_CONTRACT_VERSION = "1.0.0"
+RUN_CONTRACT_VERSION = "1.1.0"
 
 REQUEST_MODES = (
     "CONTRACT_ONLY",
@@ -52,6 +57,22 @@ ACQUISITION_METHODS = set(ACQUISITION_LEVELS)
 MODE_RANK = {name: index for index, name in enumerate(REQUEST_MODES)}
 SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 
+FAILURE_STAGES = (
+    "ACQUISITION",
+    "INTERACTION",
+    "AUDIT_EXECUTION",
+    "EVIDENCE_CAPTURE",
+    "REPORT_ASSEMBLY",
+    "TOOLING",
+)
+VERIFIED_PASS_STATUSES = {"VERIFIED PASS", "VERIFIED_PASS"}
+
+GUARD_MARKERS = ("SKILL.md", "RELEASE_MANIFEST.json")
+OUTPUT_DIR_NAME = "dravux-audits"
+AUDIT_ID_PATTERN = re.compile(r"^[a-z0-9-]{1,64}$")
+OUTPUT_DIR_INPUT_EXIT = 2
+OUTPUT_DIR_REFUSED_EXIT = 5
+
 PREFLIGHT_REQUIRED = {
     "preflight_version",
     "package_version",
@@ -75,8 +96,16 @@ CAPABILITY_KEYS = {
     "screenshots",
     "manual_evidence",
 }
-RUN_REQUIRED = {"run_contract_version", "package_version", "preflight", "acquisition", "report"}
+RUN_REQUIRED = {
+    "run_contract_version",
+    "package_version",
+    "preflight",
+    "acquisition",
+    "execution",
+    "report",
+}
 RUN_ALLOWED = RUN_REQUIRED | {"$schema"}
+EXECUTION_KEYS = {"completed", "failure_stage", "error"}
 ACQUISITION_KEYS = {
     "attempted",
     "succeeded",
@@ -342,6 +371,38 @@ def _validate_acquisition(value: Any, errors: List[str]) -> None:
         errors.append("failed acquisition requires acquisition.error")
 
 
+def _validate_execution(value: Any, errors: List[str]) -> None:
+    """Structural rules for the post-acquisition execution receipt.
+
+    Acquiring a target and completing an audit are two different events. The
+    execution block records the second one so that "the page was retrieved but
+    the audit itself broke" has one honest representation instead of being
+    forced into an acquisition failure or, worse, into a silent pass.
+    """
+    _require_object(value, EXECUTION_KEYS, EXECUTION_KEYS, "execution", errors)
+    if not isinstance(value, dict):
+        return
+    completed = value.get("completed")
+    stage = value.get("failure_stage")
+    detail = value.get("error")
+    if not isinstance(completed, bool):
+        errors.append("execution.completed must be boolean")
+    if stage is not None and stage not in FAILURE_STAGES:
+        errors.append("execution.failure_stage must be null or one of: " + ", ".join(FAILURE_STAGES))
+    if detail is not None and not _is_nonempty_string(detail):
+        errors.append("execution.error must be null or a non-empty string")
+    if completed is True:
+        if stage is not None:
+            errors.append("completed execution requires execution.failure_stage to be null")
+        if detail is not None:
+            errors.append("completed execution requires execution.error to be null")
+    if completed is False:
+        if stage is None:
+            errors.append("incomplete execution requires execution.failure_stage")
+        if not _is_nonempty_string(detail):
+            errors.append("incomplete execution requires execution.error")
+
+
 def validate_run(envelope: Any) -> List[str]:
     errors: List[str] = []
     _require_object(envelope, RUN_REQUIRED, RUN_ALLOWED, "run", errors)
@@ -361,10 +422,17 @@ def validate_run(envelope: Any) -> List[str]:
 
     acquisition = envelope.get("acquisition")
     _validate_acquisition(acquisition, errors)
+    execution = envelope.get("execution")
+    _validate_execution(execution, errors)
     report = envelope.get("report")
     report_violations = validate_report(report)
     errors.extend(f"report: {violation}" for violation in report_violations)
-    if not isinstance(profile, dict) or not isinstance(acquisition, dict) or not isinstance(report, dict):
+    if (
+        not isinstance(profile, dict)
+        or not isinstance(acquisition, dict)
+        or not isinstance(execution, dict)
+        or not isinstance(report, dict)
+    ):
         return errors
 
     target = profile.get("target") if isinstance(profile.get("target"), dict) else {}
@@ -423,20 +491,47 @@ def validate_run(envelope: Any) -> List[str]:
             "report cannot contain MANUAL_OBSERVATION evidence when preflight.capabilities.manual_evidence is false"
         )
 
+    completed = execution.get("completed")
+    failure_stage = execution.get("failure_stage")
+    automated = report.get("automated_result")
+    final = report.get("final_status")
+    error_codes = {
+        item.get("code")
+        for item in report.get("errors", [])
+        if isinstance(item, dict) and isinstance(item.get("code"), str)
+    }
+
+    if completed is False:
+        # An audit that never finished cannot have discovered that anything passed.
+        if automated == "PASS":
+            errors.append("an execution that did not complete cannot report an automated PASS")
+        if final in VERIFIED_PASS_STATUSES:
+            errors.append("an execution that did not complete cannot end VERIFIED PASS")
+
     if selected == "CONTRACT_ONLY":
         if acquisition.get("attempted") is not False or acquisition.get("succeeded") is not False:
             errors.append("CONTRACT_ONLY runs must not claim target acquisition")
+        if completed is not True:
+            errors.append("CONTRACT_ONLY runs must record execution.completed true")
     elif acquisition.get("succeeded") is True:
-        if report.get("automated_result") == "ERROR":
-            errors.append("successful selected-mode acquisition cannot end automated ERROR")
+        if completed is True:
+            if automated == "ERROR":
+                errors.append("successful acquisition with completed execution cannot end automated ERROR")
+        elif completed is False:
+            # Acquisition worked and the audit then failed: legal, but only in this exact shape.
+            if failure_stage == "ACQUISITION":
+                errors.append("acquired target cannot record execution.failure_stage ACQUISITION")
+            if automated != "ERROR" or final != "INCOMPLETE":
+                errors.append("post-acquisition execution failure requires report ERROR | INCOMPLETE")
+            if "EXECUTION_FAILED" not in error_codes:
+                errors.append("post-acquisition execution failure requires structured EXECUTION_FAILED error")
     else:
-        if report.get("automated_result") != "ERROR" or report.get("final_status") != "INCOMPLETE":
+        if completed is not False:
+            errors.append("failed acquisition requires execution.completed false")
+        elif failure_stage != "ACQUISITION":
+            errors.append("failed acquisition requires execution.failure_stage ACQUISITION")
+        if automated != "ERROR" or final != "INCOMPLETE":
             errors.append("failed acquisition requires report ERROR | INCOMPLETE")
-        error_codes = {
-            item.get("code")
-            for item in report.get("errors", [])
-            if isinstance(item, dict) and isinstance(item.get("code"), str)
-        }
         if "ACQUISITION_FAILED" not in error_codes:
             errors.append("failed acquisition requires structured ACQUISITION_FAILED error")
 
@@ -468,6 +563,7 @@ def validate_run(envelope: Any) -> List[str]:
 
 def build_receipt(envelope: Dict[str, Any]) -> Dict[str, Any]:
     profile = envelope["preflight"]
+    execution = envelope["execution"]
     report = envelope["report"]
     scope = report["scope"]
     required = set(scope["required_manual_checks"])
@@ -475,11 +571,22 @@ def build_receipt(envelope: Dict[str, Any]) -> Dict[str, Any]:
     pending = sorted(required - completed)
     surface = profile["surface"]
     final_status = report["final_status"]
-    meaning = (
-        "The declared run is valid, but accessibility remains incomplete."
-        if final_status == "INCOMPLETE"
-        else "The declared run and its report passed the operational contract."
-    )
+    execution_completed = execution["completed"]
+    failure_stage = execution["failure_stage"]
+    if not execution_completed and failure_stage == "ACQUISITION":
+        meaning = (
+            "The target was never acquired, so the audit did not run. "
+            "No accessibility conclusion is established."
+        )
+    elif not execution_completed:
+        meaning = (
+            "The page was acquired, but the audit itself failed before completion. "
+            "No accessibility conclusion is established."
+        )
+    elif final_status == "INCOMPLETE":
+        meaning = "The declared run is valid, but accessibility remains incomplete."
+    else:
+        meaning = "The declared run and its report passed the operational contract."
     return {
         "package_version": PACKAGE_VERSION,
         "run_contract_version": RUN_CONTRACT_VERSION,
@@ -488,6 +595,8 @@ def build_receipt(envelope: Dict[str, Any]) -> Dict[str, Any]:
         "evidence_mode": profile["selected_mode"],
         "limitation_acknowledged": profile["limitation_acknowledged"],
         "validator": "PASS (exit 0)",
+        "execution_completed": execution_completed,
+        "execution_failure_stage": failure_stage,
         "automated_result": report["automated_result"],
         "final_status": final_status,
         "manual_checks_remaining": pending,
@@ -496,15 +605,146 @@ def build_receipt(envelope: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def guarded_roots(base: Path) -> List[Path]:
+    """Every directory from base upward that carries a Dravux tree marker.
+
+    An installed skill, a source checkout, and an extracted release all carry at
+    least one of SKILL.md or RELEASE_MANIFEST.json. Audit output written inside
+    such a tree contaminates the very files a manifest verification checks, so
+    those directories are off limits. The list runs innermost first.
+    """
+    roots: List[Path] = []
+    for candidate in (base,) + tuple(base.parents):
+        if any((candidate / marker).is_file() for marker in GUARD_MARKERS):
+            roots.append(candidate)
+    return roots
+
+
+def resolve_output_dir(
+    base: Any = None,
+    audit_id: Any = None,
+    strict: bool = False,
+) -> Dict[str, Any]:
+    """Decide where this run's audit output belongs, and create that directory."""
+    result: Dict[str, Any] = {
+        "command": "output-dir",
+        "status": "CREATED",
+        "exit_code": 0,
+        "base": None,
+        "guarded": False,
+        "guarded_root": None,
+        "output_dir": None,
+        "created": False,
+        "message": "",
+    }
+    if audit_id is not None and (
+        not isinstance(audit_id, str) or not AUDIT_ID_PATTERN.fullmatch(audit_id)
+    ):
+        result.update(
+            status="INVALID",
+            exit_code=OUTPUT_DIR_INPUT_EXIT,
+            message=(
+                "The audit name may use only lowercase letters, numbers and hyphens, "
+                "and must be 1 to 64 characters long. Nothing was created."
+            ),
+        )
+        return result
+
+    try:
+        resolved = Path(base if base is not None else Path.cwd()).expanduser().resolve()
+    except (OSError, RuntimeError, ValueError) as exc:
+        result.update(
+            status="INVALID",
+            exit_code=OUTPUT_DIR_INPUT_EXIT,
+            message=f"That starting folder could not be read: {exc}. Nothing was created.",
+        )
+        return result
+
+    result["base"] = str(resolved)
+    roots = guarded_roots(resolved)
+    outermost = roots[-1] if roots else None
+    result["guarded"] = bool(roots)
+    result["guarded_root"] = str(outermost) if outermost is not None else None
+
+    if outermost is not None:
+        parent = outermost.parent
+        suggestion = Path.home() / OUTPUT_DIR_NAME
+        if strict:
+            result.update(
+                status="REFUSED",
+                exit_code=OUTPUT_DIR_REFUSED_EXIT,
+                message=(
+                    f"Refusing to create an audit folder inside the Dravux files at {outermost}. "
+                    f"Nothing was created. Choose a folder outside it, for example {suggestion}."
+                ),
+            )
+            return result
+        if parent == outermost:
+            result.update(
+                status="REFUSED",
+                exit_code=OUTPUT_DIR_REFUSED_EXIT,
+                message=(
+                    f"The Dravux files at {outermost} have no folder above them to write beside. "
+                    f"Nothing was created. Re-run with --base {suggestion}."
+                ),
+            )
+            return result
+    else:
+        parent = resolved
+
+    target = parent / OUTPUT_DIR_NAME
+    if audit_id:
+        target = target / audit_id
+    if outermost is not None and (target == outermost or outermost in target.parents):
+        result.update(
+            status="REFUSED",
+            exit_code=OUTPUT_DIR_REFUSED_EXIT,
+            message=(
+                f"The requested audit folder would sit inside the Dravux files at {outermost}. "
+                "Nothing was created."
+            ),
+        )
+        return result
+
+    try:
+        target.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        result.update(
+            status="INVALID",
+            exit_code=OUTPUT_DIR_INPUT_EXIT,
+            output_dir=str(target),
+            message=f"The audit folder could not be created: {exc}.",
+        )
+        return result
+
+    result["output_dir"] = str(target)
+    result["created"] = True
+    if outermost is not None:
+        result.update(
+            status="REDIRECTED",
+            message=(
+                f"{resolved} is inside the Dravux files at {outermost}, which must stay exactly as "
+                "installed, so this audit folder was created next to them instead."
+            ),
+        )
+    else:
+        result["message"] = "This run's audit folder is ready."
+    return result
+
+
+def _print_output_dir(result: Dict[str, Any], json_output: bool) -> None:
+    if json_output:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return
+    if result["output_dir"] is None or not result["created"]:
+        print(result["message"], file=sys.stderr)
+        return
+    print(result["message"])
+    print(result["output_dir"])
+
+
 def _load_json(path: Path) -> Any:
-    loader = lambda handle: json.load(
-        handle,
-        parse_constant=lambda value: (_ for _ in ()).throw(ValueError(f"invalid JSON constant: {value}")),
-    )
-    if str(path) == "-":
-        return loader(sys.stdin)
-    with path.open("r", encoding="utf-8") as handle:
-        return loader(handle)
+    return load_json_path(path)
 
 
 def _print_preflight(result: Dict[str, Any], json_output: bool) -> None:
@@ -546,22 +786,57 @@ def _print_run(result: Dict[str, Any], json_output: bool) -> None:
         if key == "evidence_mode":
             acknowledgement = "accepted" if receipt["limitation_acknowledged"] else "not required"
             print(f"Limitation acknowledgement: {acknowledgement}")
+        if key == "validator":
+            state = (
+                "completed"
+                if receipt["execution_completed"]
+                else f"did not complete (failure stage: {receipt['execution_failure_stage']})"
+            )
+            print(f"Execution: {state}")
     remaining = ", ".join(receipt["manual_checks_remaining"]) or "none"
     print(f"Manual checks remaining: {remaining}")
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Preflight or validate a Dravux operational run.")
+    parser = argparse.ArgumentParser(
+        description="Preflight a surface, validate a Dravux operational run, or place its output."
+    )
     subparsers = parser.add_subparsers(dest="command", required=True)
     for command in ("preflight", "validate"):
         child = subparsers.add_parser(command)
         child.add_argument("input", type=Path, help="Path to JSON, or - for stdin")
         child.add_argument("--json", action="store_true", dest="json_output")
+    placement = subparsers.add_parser(
+        "output-dir",
+        help="Create the folder this run's audit files belong in, never inside the Dravux files",
+    )
+    placement.add_argument(
+        "--base",
+        type=Path,
+        default=None,
+        help="Folder the audit output should sit under (default: the current folder)",
+    )
+    placement.add_argument(
+        "--audit-id",
+        dest="audit_id",
+        default=None,
+        help="Optional audit name: lowercase letters, numbers and hyphens, 1 to 64 characters",
+    )
+    placement.add_argument(
+        "--strict",
+        action="store_true",
+        help="Refuse instead of redirecting when the chosen folder is inside the Dravux files",
+    )
+    placement.add_argument("--json", action="store_true", dest="json_output")
     return parser
 
 
 def main(argv: List[str] = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.command == "output-dir":
+        result = resolve_output_dir(args.base, args.audit_id, args.strict)
+        _print_output_dir(result, args.json_output)
+        return result["exit_code"]
     try:
         payload = _load_json(args.input)
     except (OSError, ValueError, RecursionError) as exc:

@@ -54,6 +54,8 @@ python3 -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 8) else 1)
 script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P) \
   || fail 3 'Could not resolve the release directory.'
 source_dir=$script_dir/plugins/dravux/skills/dravux
+version=$(cat "$script_dir/VERSION") \
+  || fail 3 'The bundled VERSION file is missing.'
 
 [ -d "$source_dir" ] && [ ! -L "$source_dir" ] \
   || fail 3 'The bundled Dravux skill is missing or is a symlink.'
@@ -123,7 +125,7 @@ mv "$staging" "$destination" || fail 5 'Could not finalize the installation.'
 staging=
 trap - EXIT HUP INT TERM
 
-printf 'INSTALLED: Dravux 1.0.1\n'
+printf 'INSTALLED: Dravux %s\n' "$version"
 printf 'Platform: %s\n' "$platform"
 printf 'Scope: %s\n' "$scope"
 printf 'Destination: %s\n' "$destination"

@@ -23,6 +23,10 @@ Do not add Codex-specific verdict rules. The shared skill, bundled schemas, and 
 
 Codex must resolve paths from the installed skill's `SKILL.md`, not the repository working directory. For an audit, validate the report and complete operational run before presenting a Dravux result. A missing saved file is not permission to skip validation; both validators accept complete JSON through stdin.
 
+Installing the skill grants no network access, browser, rendered page, DOM, screenshots, repository metadata, or credentials. Sandbox network access is off by default, so a live-site request usually stops at `LIMITATION_ACK_REQUIRED` until the user enables it or moves the audit to a surface with a browser capability; that stop is a correct capability result, not a failed audit. `docs/capabilities.md` holds the per-surface matrix, and the skill carries `references/capability-matrix.md` and `references/github-evidence.md`.
+
+Write audit artifacts outside the skill folder, the repository, and any extracted release tree. Obtain the destination from `python3 <skill-root>/scripts/dravux_run.py output-dir`.
+
 Official references:
 
 - <https://learn.chatgpt.com/docs/build-skills>

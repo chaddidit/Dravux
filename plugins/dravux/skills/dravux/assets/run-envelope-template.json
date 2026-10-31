@@ -1,10 +1,10 @@
 {
   "$schema": "../schemas/dravux-run.schema.json",
-  "run_contract_version": "1.0.0",
-  "package_version": "1.0.1",
+  "run_contract_version": "1.1.0",
+  "package_version": "1.0.2",
   "preflight": {
     "preflight_version": "1.0.0",
-    "package_version": "1.0.1",
+    "package_version": "1.0.2",
     "surface": {
       "provider": "Example provider",
       "product": "Example chat surface",
@@ -45,6 +45,11 @@
     "acquired_at": "2026-07-20T21:00:00Z",
     "tool": "Example converted-text retrieval",
     "content_sha256": "8c9ddc0ea2005e09dd8a37e46da22f6ac6dd93c2c79f957cc380f8ed1ddf02c5",
+    "error": null
+  },
+  "execution": {
+    "completed": true,
+    "failure_stage": null,
     "error": null
   },
   "report": {

@@ -16,4 +16,4 @@ python3 -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 8) else 1)
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_*.py' -v
 python3 -B scripts/verify_distribution.py
 
-printf 'VERIFIED: Dravux 1.0.1 release tree passed all offline checks\n'
+printf 'VERIFIED: Dravux %s release tree passed all offline checks\n' "$(cat "$script_dir/VERSION")"

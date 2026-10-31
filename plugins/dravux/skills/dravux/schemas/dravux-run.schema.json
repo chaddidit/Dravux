@@ -1,14 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Dravux operational run envelope",
-  "$comment": "Cross-document evidence-mode and verdict invariants are enforced by scripts/dravux_run.py.",
+  "$comment": "Cross-document evidence-mode, execution, and verdict invariants are enforced by scripts/dravux_run.py.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["run_contract_version", "package_version", "preflight", "acquisition", "report"],
+  "required": ["run_contract_version", "package_version", "preflight", "acquisition", "execution", "report"],
   "properties": {
     "$schema": {"type": "string", "minLength": 1},
-    "run_contract_version": {"const": "1.0.0"},
-    "package_version": {"const": "1.0.1"},
+    "run_contract_version": {"const": "1.1.0"},
+    "package_version": {"const": "1.0.2"},
     "preflight": {"$ref": "dravux-preflight.schema.json"},
     "acquisition": {
       "type": "object",
@@ -26,6 +26,17 @@
         "tool": {"type": ["string", "null"]},
         "content_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
         "error": {"type": ["string", "null"]}
+      }
+    },
+    "execution": {
+      "$comment": "Acquiring the target and completing the audit are separate events; this records the second one.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["completed", "failure_stage", "error"],
+      "properties": {
+        "completed": {"type": "boolean"},
+        "failure_stage": {"enum": ["ACQUISITION", "INTERACTION", "AUDIT_EXECUTION", "EVIDENCE_CAPTURE", "REPORT_ASSEMBLY", "TOOLING", null]},
+        "error": {"type": ["string", "null"], "minLength": 1}
       }
     },
     "report": {"$ref": "dravux-report.schema.json"}
@@ -50,6 +61,56 @@
               "scope": {
                 "properties": {"manual_checks_completed": {"maxItems": 0}}
               }
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "A completed execution carries no failure.",
+      "if": {
+        "required": ["execution"],
+        "properties": {
+          "execution": {
+            "required": ["completed"],
+            "properties": {"completed": {"const": true}}
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "execution": {
+            "properties": {
+              "failure_stage": {"const": null},
+              "error": {"const": null}
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "An execution that did not complete must name its stage and its error, and can never carry a pass.",
+      "if": {
+        "required": ["execution"],
+        "properties": {
+          "execution": {
+            "required": ["completed"],
+            "properties": {"completed": {"const": false}}
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "execution": {
+            "properties": {
+              "failure_stage": {"type": "string", "minLength": 1},
+              "error": {"type": "string", "minLength": 1}
+            }
+          },
+          "report": {
+            "properties": {
+              "automated_result": {"not": {"const": "PASS"}},
+              "final_status": {"not": {"enum": ["VERIFIED PASS", "VERIFIED_PASS"]}}
             }
           }
         }

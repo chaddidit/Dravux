@@ -9,6 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILL = ROOT / "plugins" / "dravux" / "skills" / "dravux"
+VERSION = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
 sys.path.insert(0, str(SKILL / "scripts"))
 
 from dravux_contract import INPUT_TYPES, validate_report  # noqa: E402
@@ -41,7 +42,7 @@ class PackageTests(unittest.TestCase):
     def test_package_contains_no_legacy_product_identity(self):
         forbidden = ("gate" + "breaker", "GB" + "-")
         for path in ROOT.rglob("*"):
-            if not path.is_file() or "__pycache__" in path.parts or path.suffix.lower() in {".pyc", ".png", ".jpg", ".jpeg", ".webp"}:
+            if not path.is_file() or "__pycache__" in path.parts or path.suffix.lower() in {".pyc", ".png", ".jpg", ".jpeg", ".webp", ".zip"}:
                 continue
             relative = str(path.relative_to(ROOT))
             text = path.read_text(encoding="utf-8", errors="ignore")
@@ -81,13 +82,24 @@ class PackageTests(unittest.TestCase):
         )
 
     def test_package_version_and_contract_versions_are_explicit(self):
-        self.assertEqual((ROOT / "VERSION").read_text(encoding="utf-8").strip(), "1.0.1")
+        self.assertRegex(VERSION, r"^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$")
         preflight = json.loads((ROOT / "schemas" / "dravux-preflight.schema.json").read_text(encoding="utf-8"))
         run = json.loads((ROOT / "schemas" / "dravux-run.schema.json").read_text(encoding="utf-8"))
-        self.assertEqual(preflight["properties"]["package_version"]["const"], "1.0.1")
+        self.assertEqual(preflight["properties"]["package_version"]["const"], VERSION)
         self.assertEqual(preflight["properties"]["preflight_version"]["const"], "1.0.0")
-        self.assertEqual(run["properties"]["package_version"]["const"], "1.0.1")
-        self.assertEqual(run["properties"]["run_contract_version"]["const"], "1.0.0")
+        self.assertEqual(run["properties"]["package_version"]["const"], VERSION)
+        declared = re.search(
+            r'^RUN_CONTRACT_VERSION\s*=\s*"([^"]+)"',
+            (SKILL / "scripts" / "dravux_run.py").read_text(encoding="utf-8"),
+            re.MULTILINE,
+        )
+        self.assertIsNotNone(declared, "dravux_run.py must declare RUN_CONTRACT_VERSION")
+        self.assertRegex(declared.group(1), r"^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$")
+        self.assertEqual(run["properties"]["run_contract_version"]["const"], declared.group(1))
+        expected_tooling = f"Dravux demo HTML audit {VERSION}"
+        for name in ("broken-report.json", "repaired-report.json"):
+            demo = json.loads((ROOT / "demos" / "github" / "expected" / name).read_text(encoding="utf-8"))
+            self.assertIn(expected_tooling, demo["run"]["tooling"], name)
         for item in json.loads((ROOT / "fixtures" / "manifest.json").read_text(encoding="utf-8"))["fixtures"]:
             report = json.loads((ROOT / "fixtures" / item["path"]).read_text(encoding="utf-8"))
             if item["path"] == "hostile/invalid-semver.invalid.json":
@@ -96,6 +108,90 @@ class PackageTests(unittest.TestCase):
                 self.assertEqual(report["contract_version"], "2.0.0")
             elif "contract_version" in report:
                 self.assertEqual(report["contract_version"], "0.1.0")
+
+    def test_beginner_entry_point_names_all_four_routes_before_architecture(self):
+        start = (ROOT / "START_HERE.md").read_text(encoding="utf-8")
+        self.assertIn(f"VERIFIED: Dravux {VERSION} release tree passed all offline checks", start)
+        for route in (
+            "Claude Chat or Cowork (no terminal)",
+            "Codex or ChatGPT desktop app",
+            "Claude Code or Codex command line",
+            "Maintainer or developer",
+        ):
+            self.assertIn(route, start, route)
+        for promise in ("What to open", "What success looks like", "Where reports go"):
+            self.assertIn(promise, start, promise)
+        self.assertIn("dravux-audits", start)
+        self.assertIn("It does not give Claude a web", start)
+
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertLess(
+            readme.index("## Choose your path"),
+            readme.index("# Installation and reference"),
+            "the beginner path must come before installation and architecture",
+        )
+        self.assertLess(readme.index("## Choose your path"), readme.index("## Requirements"))
+        self.assertLess(readme.index("## The 60-second self-test"), readme.index("## Troubleshooting"))
+        self.assertLess(readme.index("## Troubleshooting"), readme.index("## Reference and architecture"))
+        self.assertIn("docs/capabilities.md", readme)
+        self.assertIn("START_HERE.md", readme)
+
+    def test_troubleshooting_is_symptom_led_and_explains_the_correct_stop(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        for symptom in (
+            "### Claude stopped before the audit and said `LIMITATION_ACK_REQUIRED`",
+            "### I only got source text, not the real page",
+            "### Where did my report go?",
+            "### The ZIP will not install",
+            "### I need evidence from GitHub",
+        ):
+            self.assertIn(symptom, readme, symptom)
+        self.assertIn("**This is Dravux working correctly.** It is not an error", readme)
+        self.assertIn("Your next action:", readme)
+        self.assertIn("scripts/dravux_run.py output-dir", readme)
+        self.assertIn("dravux-audits", readme)
+        self.assertIn("single folder named `dravux` containing `SKILL.md`", readme)
+        self.assertIn("Installing Dravux never grants network access", readme)
+
+    def test_installer_projection_guides_are_tracked_sources(self):
+        guides = {
+            "INSTALLERS/README.md": ("Claude-Chat-Cowork/", "Codex-ChatGPT/"),
+            "INSTALLERS/Claude-Chat-Cowork/README.md": ("dravux.zip", "Customize > Skills"),
+            "INSTALLERS/Codex-ChatGPT/README.md": ("Dravux-OpenAI-Plugin-Source.zip", "$dravux"),
+        }
+        for name, expected in guides.items():
+            path = ROOT / name
+            with self.subTest(guide=name):
+                self.assertTrue(path.is_file())
+                text = path.read_text(encoding="utf-8")
+                for token in expected:
+                    self.assertIn(token, text)
+                self.assertIn("does not", text.lower(), "each installer guide must state its limits")
+        # In a source checkout there are no archives here at all; in an extracted release the only
+        # archives present are the two injected at build time.
+        allowed = {
+            "INSTALLERS/Claude-Chat-Cowork/dravux.zip",
+            "INSTALLERS/Codex-ChatGPT/Dravux-OpenAI-Plugin-Source.zip",
+        }
+        present = {
+            path.relative_to(ROOT).as_posix()
+            for path in (ROOT / "INSTALLERS").rglob("*")
+            if path.suffix == ".zip"
+        }
+        self.assertTrue(present <= allowed, f"unexpected archive under INSTALLERS/: {present - allowed}")
+
+    def test_tester_docs_state_the_self_test_and_truthful_claims(self):
+        expected_line = f"VERIFIED: Dravux {VERSION} release tree passed all offline checks"
+        quickstart = (ROOT / "docs" / "quickstart.md").read_text(encoding="utf-8")
+        checklist = (ROOT / "docs" / "release-checklist.md").read_text(encoding="utf-8")
+        self.assertIn("dravux_run.py output-dir", quickstart)
+        self.assertIn("START_HERE.md", quickstart)
+        for name, text in (("quickstart.md", quickstart), ("release-checklist.md", checklist)):
+            self.assertIn("sh verify-release.sh", text, name)
+            self.assertIn(expected_line, text, name)
+        self.assertIn("Unicode line/paragraph separators", checklist)
+        self.assertIn("Universal string-length bounds are NOT a shipped guarantee", checklist)
+        self.assertIn("git status", checklist)
 
     def test_every_relative_json_schema_reference_resolves(self):
         for path in ROOT.rglob("*.json"):
@@ -196,8 +292,8 @@ class PackageTests(unittest.TestCase):
         skill = (SKILL / "SKILL.md").read_text(encoding="utf-8")
         surfaces = (SKILL / "references" / "surface-modes.md").read_text(encoding="utf-8")
         claude = (ROOT / "adapters" / "claude" / "README.md").read_text(encoding="utf-8")
-        self.assertIn("set `requested_mode` to `RENDERED_DOM`", skill)
-        self.assertIn("Do not silently replace it", skill)
+        self.assertIn("audit a website is at least `RENDERED_DOM`", skill)
+        self.assertIn("do not silently replace it", skill.lower())
         self.assertIn("Installing a skill answers only the first question", surfaces)
         self.assertIn("Upload the dedicated custom-skill ZIP", surfaces)
         self.assertIn("The pre-publication plugin-source ZIP is not a one-click web installer", surfaces)
@@ -206,7 +302,7 @@ class PackageTests(unittest.TestCase):
     def test_active_package_never_uses_literal_1_01(self):
         forbidden = "1" + "." + "01"
         for path in ROOT.rglob("*"):
-            if not path.is_file() or path.suffix.lower() in {".pyc", ".png", ".jpg", ".jpeg", ".webp"}:
+            if not path.is_file() or path.suffix.lower() in {".pyc", ".png", ".jpg", ".jpeg", ".webp", ".zip"}:
                 continue
             self.assertNotIn(forbidden, path.read_text(encoding="utf-8", errors="ignore"), str(path))
 
@@ -238,7 +334,7 @@ class PackageTests(unittest.TestCase):
             if (
                 not path.is_file()
                 or "__pycache__" in path.parts
-                or path.suffix.lower() in {".pyc", ".png", ".jpg", ".jpeg", ".webp"}
+                or path.suffix.lower() in {".pyc", ".png", ".jpg", ".jpeg", ".webp", ".zip"}
             ):
                 continue
             text = path.read_text(encoding="utf-8", errors="ignore")
@@ -253,14 +349,15 @@ class PackageTests(unittest.TestCase):
             re.compile(r"BEGIN [A-Z ]*PRIVATE KEY"),
         ]
         for path in ROOT.rglob("*"):
-            if not path.is_file() or "__pycache__" in path.parts or path.suffix.lower() == ".pyc":
+            if not path.is_file() or "__pycache__" in path.parts or path.suffix.lower() in {".pyc", ".zip"}:
                 continue
             text = path.read_text(encoding="utf-8", errors="ignore")
             for pattern in patterns:
                 self.assertIsNone(pattern.search(text), f"secret-like value in {path.relative_to(ROOT)}")
 
     def test_no_nested_git_or_symlinks(self):
-        self.assertFalse(any(path.name == ".git" for path in ROOT.rglob(".git")))
+        nested = [str(path.relative_to(ROOT)) for path in ROOT.rglob(".git") if path.parent != ROOT]
+        self.assertEqual(nested, [], f"nested git repositories present: {nested}")
         self.assertFalse(any(path.is_symlink() for path in ROOT.rglob("*")))
 
     def test_package_has_no_removed_design_tool_references(self):
@@ -269,7 +366,8 @@ class PackageTests(unittest.TestCase):
         binary_extension = re.compile(r"\." + "fig" + r"\b", re.IGNORECASE)
         removed_tools = [
             re.compile(r"\b" + "st" + "ark" + r"\b", re.IGNORECASE),
-            re.compile(r"\b" + "Ab" + "le" + r"\b", re.IGNORECASE),
+            # Product name only: case-sensitive so ordinary English ("usually able to") is not a hit.
+            re.compile(r"\b" + "Ab" + "le" + r"\b"),
             re.compile(r"\b" + "a11y " + "focus " + "orderer" + r"\b", re.IGNORECASE),
             re.compile(r"\b" + "axe for " + "designers" + r"\b", re.IGNORECASE),
         ]
@@ -278,7 +376,7 @@ class PackageTests(unittest.TestCase):
             if (
                 not path.is_file()
                 or "__pycache__" in path.parts
-                or path.suffix.lower() in {".pyc", ".png", ".jpg", ".jpeg", ".webp"}
+                or path.suffix.lower() in {".pyc", ".png", ".jpg", ".jpeg", ".webp", ".zip"}
             ):
                 continue
             relative = str(path.relative_to(ROOT))

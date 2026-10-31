@@ -41,6 +41,13 @@ EVIDENCE_TYPES = {
     "DOCUMENT_STRUCTURE",
 }
 
+# references/manual-checks.md names manual-check categories in prose only; it defines
+# no machine-readable baseline token set. The two shipped VERIFIED PASS fixtures declare
+# disjoint tokens ({"keyboard", "screen-reader"} for source code, {"content-purpose"} for
+# markdown), so no non-empty token baseline holds for both. The baseline is therefore a
+# minimum count of declared manual checks: automation alone can never earn VERIFIED PASS.
+MINIMUM_BASELINE_MANUAL_CHECKS = 1
+
 REPORT_REQUIRED = {
     "contract_version",
     "audit_id",
@@ -205,8 +212,15 @@ def _reject_duplicates(value: Any, label: str, errors: List[str]) -> None:
         errors.append(f"{label} contains duplicate entries: {', '.join(duplicates)}")
 
 
+# Codepoints outside the C0 range that still break a rendered receipt into
+# extra lines under str.splitlines(): DEL, NEL, LINE SEPARATOR, PARAGRAPH SEPARATOR.
+_FORBIDDEN_CODEPOINTS = frozenset({0x7F, 0x85, 0x2028, 0x2029})
+
+
 def _is_nonempty_string(value: Any) -> bool:
-    return isinstance(value, str) and bool(value.strip())
+    if not isinstance(value, str) or not value.strip():
+        return False
+    return not any(ord(ch) < 0x20 or ord(ch) in _FORBIDDEN_CODEPOINTS for ch in value)
 
 
 def _is_string_member(value: Any, allowed: Collection[str]) -> bool:
@@ -486,6 +500,12 @@ def validate_report(report: Any) -> List[str]:
             pending = sorted(required - completed)
             if pending:
                 errors.append(f"VERIFIED PASS requires completed manual checks: {', '.join(pending)}")
+            if len(required) < MINIMUM_BASELINE_MANUAL_CHECKS:
+                errors.append(
+                    "VERIFIED PASS requires at least "
+                    f"{MINIMUM_BASELINE_MANUAL_CHECKS} declared manual check(s) in "
+                    "scope.required_manual_checks; automation alone cannot verify a pass"
+                )
     if final == "NOT APPLICABLE":
         reason = scope.get("applicability_reason") if isinstance(scope, dict) else None
         if not _is_nonempty_string(reason):
@@ -499,17 +519,44 @@ def validate_report(report: Any) -> List[str]:
     return errors
 
 
-def load_report(path: Path) -> Dict[str, Any]:
+def _reject_duplicate_keys(pairs: List[Any]) -> Dict[str, Any]:
+    """Build an object from JSON key/value pairs, rejecting any repeated key.
+
+    Repeated keys let a report display one verdict to a human reader while the last
+    occurrence silently decides the parsed value.
+    """
+    result: Dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON key: {key}")
+        result[key] = value
+    return result
+
+
+def strict_json_load(handle: Any) -> Any:
+    """Parse JSON from an open handle under the single strict ingress policy.
+
+    Rejects duplicate object keys and the non-standard NaN/Infinity constants.
+    Every external JSON ingress point must route through this function so one
+    entry point cannot be more permissive than another.
+    """
+    return json.load(
+        handle,
+        object_pairs_hook=_reject_duplicate_keys,
+        parse_constant=lambda value: (_ for _ in ()).throw(ValueError(f"invalid JSON constant: {value}")),
+    )
+
+
+def load_json_path(path: Path) -> Any:
+    """Strictly load JSON from a filesystem path, or from stdin when path is '-'."""
     if str(path) == "-":
-        return json.load(
-            sys.stdin,
-            parse_constant=lambda value: (_ for _ in ()).throw(ValueError(f"invalid JSON constant: {value}")),
-        )
+        return strict_json_load(sys.stdin)
     with path.open("r", encoding="utf-8") as handle:
-        return json.load(
-            handle,
-            parse_constant=lambda value: (_ for _ in ()).throw(ValueError(f"invalid JSON constant: {value}")),
-        )
+        return strict_json_load(handle)
+
+
+def load_report(path: Path) -> Dict[str, Any]:
+    return load_json_path(path)
 
 
 def build_parser() -> argparse.ArgumentParser:
