@@ -262,6 +262,26 @@ printf 'Test project: %s\n' "$DRAVUX_TEST_PROJECT"
 Keep this Terminal window open while installing. Open the printed project path in the desktop app
 when instructed below.
 
+## Optional npx installer
+
+Requires Node.js 18 or newer, a POSIX shell, and Python 3.8 or newer. The launcher runs
+the same refuse-overwrite installer and read-only installed-copy verifier.
+After the GitHub release tag is published:
+
+```bash
+npx --yes github:chaddidit/Dravux#v1.0.2 --help
+npx --yes github:chaddidit/Dravux#v1.0.2 --codex --project-dir /absolute/path/to/project
+npx --yes github:chaddidit/Dravux#v1.0.2 verify --codex --project-dir /absolute/path/to/project
+```
+
+The project directory must already exist. Use `--claude` for Claude or `--personal`
+for the current user's skill directory. GitHub delivery needs no npm publisher account;
+fetching the package through npx needs network access. The bundled validators stay offline.
+After a separate npm publication, use `npx --yes dravux@1.0.2` with the same arguments
+(`npx dravux` selects npm's latest release).
+The npm tarball contains the installer, verifier, licenses, and standalone skill; use the
+full GitHub ZIP for demos, tests, upload archives, and contributor documentation.
+
 ## Installation options
 
 Choose exactly one. Do not install both a plain skill copy and a plugin copy for the same app;

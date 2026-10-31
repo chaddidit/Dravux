@@ -18,7 +18,10 @@ SKILL = ROOT / "plugins" / "dravux" / "skills" / "dravux"
 # Operating-system metadata that Finder/Explorer create beside real files. Release
 # archives contain zero such entries, at any depth.
 OS_METADATA_NAMES = {".DS_Store", ".AppleDouble", "__MACOSX", "Thumbs.db", "desktop.ini"}
-EXCLUDED_PARTS = {".git", "__pycache__", "out", "build", "dist"} | OS_METADATA_NAMES
+EXCLUDED_PARTS = {
+    ".git", "__pycache__", "out", "build", "dist", "dist-release", "node_modules", ".venv", "venv",
+    ".pytest_cache", ".mypy_cache", ".ruff_cache", ".idea", ".vscode",
+} | OS_METADATA_NAMES
 SEMVER = re.compile(r"^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$")
 RUN_CONTRACT_PATTERN = re.compile(r'^RUN_CONTRACT_VERSION\s*=\s*"([^"]+)"', re.MULTILINE)
 INSTALLER_PROJECTIONS = (
@@ -71,7 +74,9 @@ def should_exclude(relative):
         return True
     if relative.name == ".env" or relative.name.startswith(".env."):
         return True
-    if relative.suffix in {".pyc", ".zip", ".log"}:
+    if relative.name.endswith("~"):
+        return True
+    if relative.suffix in {".pyc", ".zip", ".tgz", ".log", ".tmp", ".bak", ".swp", ".swo"}:
         return True
     return False
 

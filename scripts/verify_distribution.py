@@ -70,6 +70,8 @@ def release_paths():
     for path in ROOT.rglob("*"):
         if path == GIT_DIR or GIT_DIR in path.parents:
             continue
+        if path.relative_to(ROOT).parts[0] == "dist-release" and GIT_DIR.exists():
+            continue
         yield path
 
 

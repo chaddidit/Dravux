@@ -1,6 +1,8 @@
 # Changelog
 
-## 1.0.2 — 2026-07-28
+## 1.0.2 — 2026-10-30
+
+- Added an optional dependency-free npx launcher for the existing installer and installed-copy verifier.
 
 - Added an operational run-contract revision (`1.1.0`) with a required `execution` object recording whether the audit itself completed, which stage failed, and why. A page that was acquired successfully but whose audit then failed now has a legal, explicit envelope shape instead of no representation at all; it must report an automated `ERROR`, a final `INCOMPLETE`, and a structured `EXECUTION_FAILED` error. No incomplete execution can coexist with an automated `PASS` or a final `VERIFIED PASS`.
 - Added a `dravux_run.py output-dir` subcommand that resolves where audit artifacts belong. Audit output is always written to a `dravux-audits` directory outside the installed skill, the source checkout, and any extracted release, so a verified tree stays verified. `--strict` refuses instead of redirecting; `--audit-id` separates runs.

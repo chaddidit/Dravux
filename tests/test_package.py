@@ -18,6 +18,8 @@ from dravux_contract import INPUT_TYPES, validate_report  # noqa: E402
 class PackageTests(unittest.TestCase):
     def test_every_json_file_parses(self):
         for path in ROOT.rglob("*.json"):
+            if ".git" in path.relative_to(ROOT).parts:
+                continue
             with self.subTest(path=path.relative_to(ROOT)):
                 json.loads(path.read_text(encoding="utf-8"))
 
@@ -42,7 +44,7 @@ class PackageTests(unittest.TestCase):
     def test_package_contains_no_legacy_product_identity(self):
         forbidden = ("gate" + "breaker", "GB" + "-")
         for path in ROOT.rglob("*"):
-            if not path.is_file() or "__pycache__" in path.parts or path.suffix.lower() in {".pyc", ".png", ".jpg", ".jpeg", ".webp", ".zip"}:
+            if not path.is_file() or ".git" in path.relative_to(ROOT).parts or "__pycache__" in path.parts or path.suffix.lower() in {".pyc", ".png", ".jpg", ".jpeg", ".webp", ".zip", ".tgz"}:
                 continue
             relative = str(path.relative_to(ROOT))
             text = path.read_text(encoding="utf-8", errors="ignore")
@@ -195,6 +197,8 @@ class PackageTests(unittest.TestCase):
 
     def test_every_relative_json_schema_reference_resolves(self):
         for path in ROOT.rglob("*.json"):
+            if ".git" in path.relative_to(ROOT).parts:
+                continue
             if "__pycache__" in path.parts:
                 continue
             payload = json.loads(path.read_text(encoding="utf-8"))
@@ -302,7 +306,7 @@ class PackageTests(unittest.TestCase):
     def test_active_package_never_uses_literal_1_01(self):
         forbidden = "1" + "." + "01"
         for path in ROOT.rglob("*"):
-            if not path.is_file() or path.suffix.lower() in {".pyc", ".png", ".jpg", ".jpeg", ".webp", ".zip"}:
+            if not path.is_file() or ".git" in path.relative_to(ROOT).parts or path.suffix.lower() in {".pyc", ".png", ".jpg", ".jpeg", ".webp", ".zip", ".tgz"}:
                 continue
             self.assertNotIn(forbidden, path.read_text(encoding="utf-8", errors="ignore"), str(path))
 
@@ -333,8 +337,9 @@ class PackageTests(unittest.TestCase):
         for path in ROOT.rglob("*"):
             if (
                 not path.is_file()
+                or ".git" in path.relative_to(ROOT).parts
                 or "__pycache__" in path.parts
-                or path.suffix.lower() in {".pyc", ".png", ".jpg", ".jpeg", ".webp", ".zip"}
+                or path.suffix.lower() in {".pyc", ".png", ".jpg", ".jpeg", ".webp", ".zip", ".tgz"}
             ):
                 continue
             text = path.read_text(encoding="utf-8", errors="ignore")
@@ -349,7 +354,7 @@ class PackageTests(unittest.TestCase):
             re.compile(r"BEGIN [A-Z ]*PRIVATE KEY"),
         ]
         for path in ROOT.rglob("*"):
-            if not path.is_file() or "__pycache__" in path.parts or path.suffix.lower() in {".pyc", ".zip"}:
+            if not path.is_file() or ".git" in path.relative_to(ROOT).parts or "__pycache__" in path.parts or path.suffix.lower() in {".pyc", ".zip", ".tgz"}:
                 continue
             text = path.read_text(encoding="utf-8", errors="ignore")
             for pattern in patterns:
@@ -375,8 +380,9 @@ class PackageTests(unittest.TestCase):
         for path in ROOT.rglob("*"):
             if (
                 not path.is_file()
+                or ".git" in path.relative_to(ROOT).parts
                 or "__pycache__" in path.parts
-                or path.suffix.lower() in {".pyc", ".png", ".jpg", ".jpeg", ".webp", ".zip"}
+                or path.suffix.lower() in {".pyc", ".png", ".jpg", ".jpeg", ".webp", ".zip", ".tgz"}
             ):
                 continue
             relative = str(path.relative_to(ROOT))

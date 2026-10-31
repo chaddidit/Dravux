@@ -1,0 +1,20 @@
+{
+  "name": "dravux",
+  "version": "1.0.2",
+  "description": "Install and verify the portable Dravux accessibility-audit skill.",
+  "license": "MIT",
+  "bin": {
+    "dravux": "bin/dravux.js"
+  },
+  "files": [
+    "bin/dravux.js",
+    "install.sh",
+    "verify-install.sh",
+    "VERSION",
+    "THIRD_PARTY_NOTICES.md",
+    "plugins/dravux/skills/dravux/"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}
