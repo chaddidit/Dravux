@@ -1104,7 +1104,7 @@ class OutputDirectoryContractTests(unittest.TestCase):
     def test_guarded_tree_redirects_beside_the_installation(self):
         with tempfile.TemporaryDirectory() as tmp:
             workspace = Path(tmp).resolve()
-            installed = workspace / "dravux-1.0.2"
+            installed = workspace / "dravux-1.0.3"
             nested = installed / "plugins" / "dravux" / "skills" / "dravux"
             nested.mkdir(parents=True)
             (installed / "RELEASE_MANIFEST.json").write_text("{}", encoding="utf-8")
@@ -1262,7 +1262,8 @@ class OutputDirectoryContractTests(unittest.TestCase):
             self.assertEqual(result["status"], "REFUSED")
             self.assertEqual(result["exit_code"], OUTPUT_DIR_REFUSED_EXIT)
             self.assertTrue(result["message"].endswith("Nothing was created."))
-            self.assertEqual(sorted((guarded / "base" / "dravux-audits").iterdir()), [])
+            # 1.0.3: the dravux-audits root this run created is removed again on refusal.
+            self.assertFalse((guarded / "base" / "dravux-audits").exists())
 
     def test_base_with_ordinary_unicode_spaces_is_accepted(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -35,7 +35,7 @@
   "run": {
     "started_at": "2026-07-16T14:02:00Z",
     "completed_at": "2026-07-16T14:02:01Z",
-    "tooling": ["Dravux fixture harness 1.0.2"],
+    "tooling": ["Dravux fixture harness 1.0.3"],
     "environment": "Synthetic offline fixture"
   }
 }

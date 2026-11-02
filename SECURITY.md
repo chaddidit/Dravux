@@ -35,7 +35,7 @@ A same-channel `SHA256SUMS.txt`, the embedded `RELEASE_MANIFEST.json`, and the i
 record detect corruption or internal inconsistency only. They do **not** authenticate the
 publisher.
 
-Dravux 1.0.2 has no cryptographic publisher signature.
+Dravux 1.0.3 has no cryptographic publisher signature.
 **Publisher authenticity was not independently verified.**
 
 Do not describe `verify-release.sh`, the manifest, or the checksum file as proof that a download

@@ -8,7 +8,7 @@ For a downloaded artifact, keep the archive unopened, calculate its digest with
 `shasum -a 256 <archive-name>`, and compare it with the exact matching line in the accompanying
 `SHA256SUMS.txt`. Do not extract, upload, install, or run it unless the digest matches. That
 fingerprint check catches corruption in transit; it does **not** prove who published the file.
-Dravux 1.0.2 has no cryptographic publisher signature.
+Dravux 1.0.3 has no cryptographic publisher signature.
 **Publisher authenticity was not independently verified.**
 Details: [SECURITY.md](../SECURITY.md).
 

@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 # Every test module and method counts towards this number; a deleted test must change it, never vanish.
-EXPECTED_TEST_COUNT = 218
+EXPECTED_TEST_COUNT = 257
 SKILL = ROOT / "plugins" / "dravux" / "skills" / "dravux"
 VERSION = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
 sys.path.insert(0, str(SKILL / "scripts"))
@@ -110,7 +110,7 @@ class PackageTests(unittest.TestCase):
                 self.assertNotRegex(
                     tool,
                     r"\bDravux\b.*\b1\.0\.1\b",
-                    f"{item['path']} claims legacy tooling in the active 1.0.2 fixture set",
+                    f"{item['path']} claims legacy tooling in the active 1.0.3 fixture set",
                 )
             if item["path"] == "hostile/invalid-semver.invalid.json":
                 continue

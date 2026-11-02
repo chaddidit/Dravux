@@ -77,6 +77,7 @@ python3 -B -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 8) else
 script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P) \
   || fail 3 'Could not resolve the release directory.'
 source_dir=$script_dir/plugins/dravux/skills/dravux
+safety_helper=$script_dir/scripts/install_safety.py
 
 if [ "$scope" = personal ]; then
   case ${HOME-} in
@@ -84,23 +85,12 @@ if [ "$scope" = personal ]; then
     *) fail 3 'HOME must be set to an absolute path.' ;;
   esac
   [ "$HOME" != / ] || fail 3 'Refusing to use / as HOME.'
-  base_dir=$(CDPATH= cd -- "$HOME" && pwd -P) \
+  base_dir=$(python3 -B "$safety_helper" home "$HOME") \
     || fail 3 'Could not resolve HOME to a physical directory.'
   [ "$base_dir" != / ] || fail 3 'Refusing to use / as the physical HOME directory.'
 else
-  # [ -L "link/" ] and [ -L "link/." ] are false, so test the bare name.
-  project_check=$project_dir
-  while :; do
-    case $project_check in
-      ?*/.) project_check=${project_check%/.} ;;
-      ?*/) project_check=${project_check%/} ;;
-      *) break ;;
-    esac
-  done
-  [ -d "$project_check" ] && [ ! -L "$project_check" ] \
-    || fail 3 'The project directory must exist and must not be a symlink.'
-  base_dir=$(CDPATH= cd -- "$project_dir" && pwd -P) \
-    || fail 3 'Could not resolve the project directory.'
+  base_dir=$(python3 -B "$safety_helper" project "$project_dir") \
+    || fail 3 'Could not safely enter the project directory.'
 fi
 
 case "$platform" in

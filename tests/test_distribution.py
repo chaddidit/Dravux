@@ -101,7 +101,7 @@ class DistributionTests(unittest.TestCase):
             Path("out/generated.json"),
             Path("session.log"),
             Path("dist-release/SHA256SUMS.txt"),
-            Path("dravux-1.0.2.tgz"),
+            Path("dravux-1.0.3.tgz"),
             Path("node_modules/example/package.json"),
         )
         for path in excluded:

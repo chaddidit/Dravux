@@ -236,6 +236,7 @@ def _reject_duplicates(value: Any, label: str, errors: List[str]) -> None:
 # Codepoints outside the C0 range that still break a rendered receipt into
 # extra lines under str.splitlines(): DEL, NEL, LINE SEPARATOR, PARAGRAPH SEPARATOR.
 _FORBIDDEN_CODEPOINTS = frozenset({0x7F, 0x85, 0x2028, 0x2029})
+_SURROGATE_PATTERN = re.compile(r"[\ud800-\udfff]")
 
 
 # Code points that render as nothing yet are not classed as spaces or format characters.
@@ -244,14 +245,16 @@ _BLANK_CODEPOINTS = frozenset({0x115F, 0x1160, 0x2800, 0x3164, 0xFFA0})
 
 def _is_visible(ch: str) -> bool:
     category = unicodedata.category(ch)
-    return category[0] != "Z" and category not in ("Cc", "Cf") and ord(ch) not in _BLANK_CODEPOINTS
+    return category[0] not in "ZCM" and ord(ch) not in _BLANK_CODEPOINTS
 
 
 def _is_nonempty_string(value: Any) -> bool:
     # str.strip() keeps U+200B, U+FEFF and U+2800, so an invisible-only string would count as text.
     if not isinstance(value, str) or not any(_is_visible(ch) for ch in value):
         return False
-    return not any(ord(ch) < 0x20 or ord(ch) in _FORBIDDEN_CODEPOINTS for ch in value)
+    return not _SURROGATE_PATTERN.search(value) and not any(
+        ord(ch) < 0x20 or ord(ch) in _FORBIDDEN_CODEPOINTS for ch in value
+    )
 
 
 def _is_string_member(value: Any, allowed: Collection[str]) -> bool:
@@ -677,6 +680,8 @@ def _enforce_json_value_limits(value: Any) -> None:
                     "JSON string exceeds the "
                     f"{MAX_JSON_STRING_CHARACTERS}-character limit"
                 )
+            if _SURROGATE_PATTERN.search(current):
+                raise ValueError("JSON string contains a lone surrogate")
             continue
         if isinstance(current, dict):
             size = len(current)
@@ -696,6 +701,8 @@ def _enforce_json_value_limits(value: Any) -> None:
                         "JSON object key exceeds the "
                         f"{MAX_JSON_STRING_CHARACTERS}-character limit"
                     )
+                if _SURROGATE_PATTERN.search(key):
+                    raise ValueError("JSON object key contains a lone surrogate")
                 stack.append((item, depth + 1))
             continue
         if isinstance(current, list):

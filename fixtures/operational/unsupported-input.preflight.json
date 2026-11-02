@@ -1,7 +1,7 @@
 {
   "$schema": "../../schemas/dravux-preflight.schema.json",
   "preflight_version": "1.0.0",
-  "package_version": "1.0.2",
+  "package_version": "1.0.3",
   "surface": {
     "provider": "Example provider",
     "product": "Example local agent",

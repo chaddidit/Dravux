@@ -29,7 +29,7 @@ from dravux_contract import (  # noqa: E402
 )
 
 
-PACKAGE_VERSION = "1.0.2"
+PACKAGE_VERSION = "1.0.3"
 PREFLIGHT_VERSION = "1.0.0"
 RUN_CONTRACT_VERSION = "1.2.0"
 
@@ -857,29 +857,39 @@ def guarded_roots(base: Path) -> List[Path]:
     return roots
 
 
-def _open_stable_directory(path: Path) -> Tuple[Any, os.stat_result]:
+def _open_stable_directory(path: Path, dir_fd: Any = None) -> Tuple[Any, os.stat_result]:
     """Open a directory without following its final component and confirm path identity."""
-    flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0)
-    descriptor = os.open(str(path), flags)
-    opened = os.fstat(descriptor)
-    current = os.lstat(str(path))
-    if not stat.S_ISDIR(opened.st_mode) or stat.S_ISLNK(current.st_mode):
-        os.close(descriptor)
-        raise OSError("output root is not a physical directory")
-    if (opened.st_dev, opened.st_ino) != (current.st_dev, current.st_ino):
-        os.close(descriptor)
-        raise OSError("output root changed while it was being opened")
-    return descriptor, opened
-
-
-def _remove_created_child(descriptor: Any, audit_id: str, problem: str) -> str:
-    """Undo this run's own empty audit folder so a refusal really leaves nothing behind."""
+    flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+    descriptor = os.open(str(path), flags, dir_fd=dir_fd)
     try:
-        os.rmdir(audit_id, dir_fd=descriptor)
+        opened = os.fstat(descriptor)
+        current = os.stat(str(path), dir_fd=dir_fd, follow_symlinks=False)
+        if not stat.S_ISDIR(opened.st_mode) or stat.S_ISLNK(current.st_mode):
+            raise OSError("output folder is not a physical directory")
+        if (opened.st_dev, opened.st_ino) != (current.st_dev, current.st_ino):
+            raise OSError("output folder changed while it was being opened")
+        return descriptor, opened
+    except BaseException:
+        os.close(descriptor)
+        raise
+
+
+def _remove_created_directory(
+    descriptor: Any, name: str, created: os.stat_result, problem: str
+) -> str:
+    """Remove only this run's empty directory, never a replacement at the same name."""
+    try:
+        current = os.stat(name, dir_fd=descriptor, follow_symlinks=False)
+        if not stat.S_ISDIR(current.st_mode) or (
+            current.st_dev, current.st_ino
+        ) != (created.st_dev, created.st_ino):
+            raise OSError("the folder name no longer identifies the created directory")
+        os.rmdir(name, dir_fd=descriptor)
     except OSError:
-        return problem.replace(
-            "Nothing was created.",
-            f"An audit folder named {audit_id} was created and could not be removed. Nothing was written into it.",
+        return (
+            problem.replace("Nothing was created.", "").rstrip()
+            + f" A folder named {_quoted(name)} was created and could not be safely removed. "
+            "Nothing was written into it."
         )
     return problem
 
@@ -889,8 +899,10 @@ def _descriptor_path(descriptor: Any) -> Any:
     try:
         import fcntl
 
-        if hasattr(fcntl, "F_GETPATH"):
-            raw = fcntl.fcntl(descriptor, fcntl.F_GETPATH, b"\0" * 1024)
+        # Python 3.8 omits F_GETPATH, but macOS provides it as command 50.
+        getpath = getattr(fcntl, "F_GETPATH", 50 if sys.platform == "darwin" else None)
+        if getpath is not None:
+            raw = fcntl.fcntl(descriptor, getpath, b"\0" * 1024)
             return Path(os.fsdecode(raw.split(b"\0", 1)[0]))
     except (ImportError, OSError):
         pass
@@ -901,53 +913,64 @@ def _descriptor_path(descriptor: Any) -> Any:
 
 
 def _check_output_target(
-    output_root: Path, descriptor: Any, opened: os.stat_result, audit_id: Any, created: List[bool]
+    output_root: Path, descriptor: Any, opened: os.stat_result, audit_id: Any, created: List[os.stat_result]
 ) -> Tuple[Any, str]:
     physical_root = output_root.resolve(strict=True)
     if guarded_roots(physical_root):
         return None, "The dravux-audits path resolves inside guarded Dravux files. Nothing was created."
-    if audit_id is None:
-        target_status = opened
-        physical_target = physical_root
-    else:
-        try:
-            target_status = os.stat(audit_id, dir_fd=descriptor, follow_symlinks=False)
-        except FileNotFoundError:
+    child_descriptor = None
+    try:
+        if audit_id is None:
+            physical_target = physical_root
+        else:
             try:
-                os.mkdir(audit_id, mode=0o755, dir_fd=descriptor)
-            except FileExistsError:
-                return None, "The audit path appeared during creation. Nothing was created."
-            created.append(True)
-            target_status = os.stat(audit_id, dir_fd=descriptor, follow_symlinks=False)
-        if stat.S_ISLNK(target_status.st_mode) or not stat.S_ISDIR(target_status.st_mode):
-            return None, "The audit path is not a physical directory. Nothing was created."
-        physical_target = (physical_root / audit_id).resolve(strict=True)
-        current = physical_target.stat()
-        if (target_status.st_dev, target_status.st_ino) != (current.st_dev, current.st_ino):
-            return None, "The audit path changed during creation. Nothing was created."
-    # The held descriptor must still be the directory that passed the guard check above:
-    # a rename of dravux-audits between that check and mkdir would otherwise go unnoticed.
-    for path in (output_root, physical_root):
-        current_root = os.stat(str(path), follow_symlinks=False)
-        if (opened.st_dev, opened.st_ino) != (current_root.st_dev, current_root.st_ino):
-            return None, "The dravux-audits path changed during creation. Nothing was created."
-    # Path checks above can all agree while an ancestor was renamed into a guarded tree and
-    # replaced by a symlink, so check where the held directory itself now lives.
-    held = _descriptor_path(descriptor)
-    if held is None:
-        held = output_root.resolve(strict=True)
-    if guarded_roots(held) or guarded_roots(physical_target):
-        return None, "The audit path resolves inside guarded Dravux files. Nothing was created."
-    return physical_target, ""
+                target_status = os.stat(audit_id, dir_fd=descriptor, follow_symlinks=False)
+            except FileNotFoundError:
+                try:
+                    os.mkdir(audit_id, mode=0o755, dir_fd=descriptor)
+                except FileExistsError:
+                    return None, "The audit path appeared during creation. Nothing was created."
+                target_status = os.stat(audit_id, dir_fd=descriptor, follow_symlinks=False)
+                created.append(target_status)
+            if stat.S_ISLNK(target_status.st_mode) or not stat.S_ISDIR(target_status.st_mode):
+                return None, "The audit path is not a physical directory. Nothing was created."
+            child_descriptor, child_opened = _open_stable_directory(Path(audit_id), descriptor)
+            if (target_status.st_dev, target_status.st_ino) != (child_opened.st_dev, child_opened.st_ino):
+                return None, "The audit path changed during creation. Nothing was created."
+            physical_target = (physical_root / audit_id).resolve(strict=True)
+            current = physical_target.stat()
+            if (target_status.st_dev, target_status.st_ino) != (current.st_dev, current.st_ino):
+                return None, "The audit path changed during creation. Nothing was created."
+        # A rename of the root after the guard check must not redirect the returned path.
+        for path in (output_root, physical_root):
+            current_root = os.stat(str(path), follow_symlinks=False)
+            if (opened.st_dev, opened.st_ino) != (current_root.st_dev, current_root.st_ino):
+                return None, "The dravux-audits path changed during creation. Nothing was created."
+        # Matching names can hide a moved ancestor; ask the kernel about both held directories.
+        held = _descriptor_path(descriptor)
+        held_child = _descriptor_path(child_descriptor) if child_descriptor is not None else held
+        if held is None or held_child is None:
+            return None, "The kernel could not report the held audit folder's location. Nothing was created."
+        if guarded_roots(held) or guarded_roots(held_child) or guarded_roots(physical_target):
+            return None, "The audit path resolves inside guarded Dravux files. Nothing was created."
+        return physical_target, ""
+    finally:
+        if child_descriptor is not None:
+            os.close(child_descriptor)
 
 
 def _prepare_output_target(parent: Path, audit_id: Any) -> Tuple[Any, str]:
     """Create through a held directory descriptor so a raced symlink cannot redirect writes."""
-    if os.name != "posix" or not all(
-        function in os.supports_dir_fd for function in (os.stat, os.mkdir, os.rmdir)
+    if os.name != "posix" or not all(getattr(os, flag, 0) for flag in ("O_DIRECTORY", "O_NOFOLLOW")) or not all(
+        function in os.supports_dir_fd for function in (os.open, os.stat, os.mkdir, os.rmdir)
     ):
         return None, "Safe output directory creation requires POSIX directory-descriptor support. Nothing was created."
     output_root = parent / OUTPUT_DIR_NAME
+    created_root = None
+    descriptor = None
+    created: List[os.stat_result] = []
+    physical_target = None
+    problem = ""
     try:
         existed = output_root.exists() or output_root.is_symlink()
         if existed:
@@ -959,24 +982,37 @@ def _prepare_output_target(parent: Path, audit_id: Any) -> Tuple[Any, str]:
                 output_root.mkdir(mode=0o755)
             except FileExistsError:
                 return None, "The dravux-audits path appeared during creation. Nothing was created."
+            created_root = output_root.lstat()
 
         descriptor, opened = _open_stable_directory(output_root)
-        created: List[bool] = []
-        try:
-            try:
-                physical_target, problem = _check_output_target(
-                    output_root, descriptor, opened, audit_id, created
-                )
-            except (OSError, RuntimeError, ValueError, NotImplementedError) as exc:
-                physical_target = None
-                problem = f"The audit folder could not be created safely: {_quoted(exc)}. Nothing was created."
-            if problem and created:
-                problem = _remove_created_child(descriptor, audit_id, problem)
-            return physical_target, problem
-        finally:
-            os.close(descriptor)
+        if created_root is not None and (
+            opened.st_dev, opened.st_ino
+        ) != (created_root.st_dev, created_root.st_ino):
+            raise OSError("the dravux-audits path changed during creation")
+        physical_target, problem = _check_output_target(output_root, descriptor, opened, audit_id, created)
     except (OSError, RuntimeError, ValueError, NotImplementedError) as exc:
-        return None, f"The audit folder could not be created safely: {_quoted(exc)}. Nothing was created."
+        problem = f"The audit folder could not be created safely: {_quoted(exc)}. Nothing was created."
+    finally:
+        if problem and created:
+            problem = _remove_created_directory(descriptor, audit_id, created[0], problem)
+        if problem and created_root is not None:
+            problem = _remove_created_directory(None, str(output_root), created_root, problem)
+        if descriptor is not None:
+            os.close(descriptor)
+    return physical_target, problem
+
+
+def _validate_output_path_text(value: str) -> None:
+    try:
+        value.encode("utf-8")
+    except UnicodeEncodeError:
+        raise ValueError("The folder name is not valid UTF-8") from None
+    # Text mode prints the path on its own line; controls can misrepresent the destination.
+    if any(unicodedata.category(character) in ("Cc", "Cf", "Cs", "Zl", "Zp") for character in value):
+        raise ValueError(
+            "The folder path contains a line break, tab, or invisible control or text-direction character. "
+            "Choose a folder with a plain name"
+        )
 
 
 def resolve_output_dir(
@@ -1010,28 +1046,15 @@ def resolve_output_dir(
         return result
 
     try:
-        resolved = Path(base if base is not None else Path.cwd()).expanduser().resolve()
+        raw_base = str(base if base is not None else Path.cwd())
+        _validate_output_path_text(raw_base)
+        resolved = Path(raw_base).expanduser().resolve()
+        _validate_output_path_text(str(resolved))
     except (OSError, RuntimeError, ValueError) as exc:
         result.update(
             status="INVALID",
             exit_code=OUTPUT_DIR_INPUT_EXIT,
-            message=f"That starting folder could not be read: {exc}. Nothing was created.",
-        )
-        return result
-
-    # Text mode prints the folder as its own last line, so a line break, control or
-    # bidi character in the path could make that line name a different folder.
-    if any(
-        unicodedata.category(character) in ("Cc", "Cf", "Cs", "Zl", "Zp")
-        for character in str(resolved)
-    ):
-        result.update(
-            status="INVALID",
-            exit_code=OUTPUT_DIR_INPUT_EXIT,
-            message=(
-                "That starting folder's path contains a line break, tab, or invisible control "
-                "or text-direction character. Choose a folder with a plain name. Nothing was created."
-            ),
+            message=f"That starting folder could not be read: {_quoted(exc)}. Nothing was created.",
         )
         return result
 
@@ -1200,7 +1223,6 @@ def build_parser() -> argparse.ArgumentParser:
     )
     placement.add_argument(
         "--base",
-        type=Path,
         default=None,
         help="Folder the audit output should sit under (default: the current folder)",
     )

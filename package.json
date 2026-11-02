@@ -1,8 +1,12 @@
 {
   "name": "dravux",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Install and verify the portable Dravux accessibility-audit skill.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chaddidit/Dravux.git"
+  },
   "bin": {
     "dravux": "bin/dravux.js"
   },
@@ -13,6 +17,7 @@
     "scripts/install_safety.py",
     "VERSION",
     "THIRD_PARTY_NOTICES.md",
+    "SECURITY.md",
     "plugins/dravux/skills/dravux/"
   ],
   "engines": {
