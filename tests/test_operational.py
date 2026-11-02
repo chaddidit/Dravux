@@ -1169,18 +1169,29 @@ class OutputDirectoryContractTests(unittest.TestCase):
             workspace = Path(tmp).resolve()
             redirected = workspace / "redirected"
             redirected.mkdir()
-            original_mkdir = Path.mkdir
+            original_mkdir = os.mkdir
+            race_calls = 0
 
             def race(path, *args, **kwargs):
-                path.symlink_to(redirected, target_is_directory=True)
-                raise FileExistsError(str(path))
+                nonlocal race_calls
+                dir_fd = kwargs.get("dir_fd")
+                if path == "dravux-audits" and dir_fd is not None:
+                    race_calls += 1
+                    os.symlink(redirected, path, dir_fd=dir_fd, target_is_directory=True)
+                    raise FileExistsError(str(path))
+                return original_mkdir(path, *args, **kwargs)
 
-            with mock.patch("pathlib.Path.mkdir", autospec=True, side_effect=race):
-                result = resolve_output_dir(workspace, "run-001", False)
+            with mock.patch("os.mkdir", side_effect=race) as patched:
+                with mock.patch("os.supports_dir_fd", set(os.supports_dir_fd) | {patched}):
+                    result = resolve_output_dir(workspace, "run-001", False)
             self.assertEqual(result["status"], "REFUSED")
             self.assertEqual(result["exit_code"], OUTPUT_DIR_REFUSED_EXIT)
             self.assertEqual(sorted(redirected.iterdir()), [])
-            self.assertIsNotNone(original_mkdir)
+            self.assertEqual(
+                result["message"],
+                "The dravux-audits path appeared during creation. Nothing was created.",
+            )
+            self.assertEqual(race_calls, 1)
 
     def test_audit_child_alias_into_guarded_tree_is_refused(self):
         with tempfile.TemporaryDirectory() as tmp:

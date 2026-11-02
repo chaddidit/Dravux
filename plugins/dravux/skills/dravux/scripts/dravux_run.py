@@ -969,24 +969,26 @@ def _prepare_output_target(parent: Path, audit_id: Any) -> Tuple[Any, str]:
         return None, "Safe output directory creation requires POSIX directory-descriptor support. Nothing was created."
     output_root = parent / OUTPUT_DIR_NAME
     created_root = None
+    parent_descriptor = None
     descriptor = None
     created: List[os.stat_result] = []
     physical_target = None
     problem = ""
     try:
-        existed = output_root.exists() or output_root.is_symlink()
-        if existed:
-            root_status = output_root.lstat()
-            if stat.S_ISLNK(root_status.st_mode) or not stat.S_ISDIR(root_status.st_mode):
-                return None, "The dravux-audits path is not a physical directory. Nothing was created."
-        else:
+        parent_descriptor, _ = _open_stable_directory(parent)
+        try:
+            root_status = os.stat(OUTPUT_DIR_NAME, dir_fd=parent_descriptor, follow_symlinks=False)
+        except FileNotFoundError:
             try:
-                output_root.mkdir(mode=0o755)
+                os.mkdir(OUTPUT_DIR_NAME, mode=0o755, dir_fd=parent_descriptor)
             except FileExistsError:
                 return None, "The dravux-audits path appeared during creation. Nothing was created."
-            created_root = output_root.lstat()
+            root_status = os.stat(OUTPUT_DIR_NAME, dir_fd=parent_descriptor, follow_symlinks=False)
+            created_root = root_status
+        if stat.S_ISLNK(root_status.st_mode) or not stat.S_ISDIR(root_status.st_mode):
+            return None, "The dravux-audits path is not a physical directory. Nothing was created."
 
-        descriptor, opened = _open_stable_directory(output_root)
+        descriptor, opened = _open_stable_directory(Path(OUTPUT_DIR_NAME), parent_descriptor)
         if created_root is not None and (
             opened.st_dev, opened.st_ino
         ) != (created_root.st_dev, created_root.st_ino):
@@ -998,9 +1000,11 @@ def _prepare_output_target(parent: Path, audit_id: Any) -> Tuple[Any, str]:
         if problem and created:
             problem = _remove_created_directory(descriptor, audit_id, created[0], problem)
         if problem and created_root is not None:
-            problem = _remove_created_directory(None, str(output_root), created_root, problem)
+            problem = _remove_created_directory(parent_descriptor, OUTPUT_DIR_NAME, created_root, problem)
         if descriptor is not None:
             os.close(descriptor)
+        if parent_descriptor is not None:
+            os.close(parent_descriptor)
     return physical_target, problem
 
 
@@ -1074,8 +1078,8 @@ def resolve_output_dir(
                 status="REFUSED",
                 exit_code=OUTPUT_DIR_REFUSED_EXIT,
                 message=(
-                    f"Refusing to create an audit folder inside the Dravux files at {outermost}. "
-                    f"Nothing was created. Choose a folder outside it, for example {suggestion}."
+                    f"Refusing to create an audit folder inside the Dravux files at {_quoted(outermost)}. "
+                    f"Nothing was created. Choose a folder outside it, for example {_quoted(suggestion)}."
                 ),
             )
             return result
@@ -1084,8 +1088,8 @@ def resolve_output_dir(
                 status="REFUSED",
                 exit_code=OUTPUT_DIR_REFUSED_EXIT,
                 message=(
-                    f"The Dravux files at {outermost} have no folder above them to write beside. "
-                    f"Nothing was created. Re-run with --base {suggestion}."
+                    f"The Dravux files at {_quoted(outermost)} have no folder above them to write beside. "
+                    f"Nothing was created. Re-run with --base {_quoted(suggestion)}."
                 ),
             )
             return result
@@ -1100,7 +1104,7 @@ def resolve_output_dir(
             status="REFUSED",
             exit_code=OUTPUT_DIR_REFUSED_EXIT,
             message=(
-                f"The requested audit folder would sit inside the Dravux files at {outermost}. "
+                f"The requested audit folder would sit inside the Dravux files at {_quoted(outermost)}. "
                 "Nothing was created."
             ),
         )
@@ -1123,7 +1127,7 @@ def resolve_output_dir(
         result.update(
             status="REDIRECTED",
             message=(
-                f"{resolved} is inside the Dravux files at {outermost}, which must stay exactly as "
+                f"{_quoted(resolved)} is inside the Dravux files at {_quoted(outermost)}, which must stay exactly as "
                 "installed, so this audit folder was created next to them instead."
             ),
         )

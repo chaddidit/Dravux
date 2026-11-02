@@ -116,10 +116,11 @@ class OutputDirectoryHardeningTests(unittest.TestCase):
 
         def observe(path, flags, *args, **kwargs):
             if kwargs.get("dir_fd") is not None:
-                self.assertEqual(path, "audit-001")
+                self.assertIn(path, ("dravux-audits", "audit-001"))
                 self.assertEqual(flags & os.O_NOFOLLOW, os.O_NOFOLLOW)
                 self.assertEqual(flags & os.O_DIRECTORY, os.O_DIRECTORY)
-                child_opens.append(kwargs["dir_fd"])
+                if path == "audit-001":
+                    child_opens.append(kwargs["dir_fd"])
             return real_open(path, flags, *args, **kwargs)
 
         self.patch_os_function("open", observe)
@@ -146,7 +147,7 @@ class OutputDirectoryHardeningTests(unittest.TestCase):
         real_open = os.open
 
         def replace_child(path, flags, *args, **kwargs):
-            if kwargs.get("dir_fd") is not None:
+            if path == "audit-001" and kwargs.get("dir_fd") is not None:
                 self.child.rename(self.root / "original-child")
                 self.child.mkdir()
             return real_open(path, flags, *args, **kwargs)
@@ -166,7 +167,7 @@ class OutputDirectoryHardeningTests(unittest.TestCase):
         real_open = os.open
 
         def replace_child(path, flags, *args, **kwargs):
-            if kwargs.get("dir_fd") is not None:
+            if path == "audit-001" and kwargs.get("dir_fd") is not None:
                 self.child.rename(self.root / "original-child")
                 self.child.symlink_to(guarded, target_is_directory=True)
             return real_open(path, flags, *args, **kwargs)
@@ -255,7 +256,14 @@ class OutputDirectoryHardeningTests(unittest.TestCase):
         self.assertFalse(self.root.exists())
 
     def test_new_root_is_removed_when_its_open_fails(self):
-        with mock.patch.object(dravux_run, "_open_stable_directory", side_effect=PermissionError("refused")):
+        open_directory = dravux_run._open_stable_directory
+
+        def refuse_root(path, dir_fd=None):
+            if str(path) == "dravux-audits":
+                raise PermissionError("refused")
+            return open_directory(path, dir_fd)
+
+        with mock.patch.object(dravux_run, "_open_stable_directory", side_effect=refuse_root):
             result = dravux_run.resolve_output_dir(self.workspace, "audit-001")
         self.assert_refused(result)
         self.assertFalse(self.root.exists())
@@ -263,10 +271,11 @@ class OutputDirectoryHardeningTests(unittest.TestCase):
     def test_new_root_replaced_before_open_is_refused_and_preserved(self):
         open_directory = dravux_run._open_stable_directory
 
-        def replace_root(path):
-            self.root.rename(self.workspace / "original-root")
-            self.root.mkdir()
-            return open_directory(path)
+        def replace_root(path, dir_fd=None):
+            if str(path) == "dravux-audits":
+                self.root.rename(self.workspace / "original-root")
+                self.root.mkdir()
+            return open_directory(path, dir_fd)
 
         with mock.patch.object(dravux_run, "_open_stable_directory", side_effect=replace_root):
             result = dravux_run.resolve_output_dir(self.workspace, None)
@@ -305,6 +314,62 @@ class OutputDirectoryHardeningTests(unittest.TestCase):
         self.assert_refused(result)
         self.assertEqual((self.root / "other-writer.txt").read_text(encoding="utf-8"), "keep")
         self.assertNotIn("Nothing was created.", result["message"])
+
+    def test_root_cleanup_cannot_follow_a_swapped_base_to_another_directory(self):
+        base = self.workspace / "base"
+        base.mkdir()
+        moved = self.workspace / "original-base"
+        other = self.workspace / "other"
+        other_root = other / "dravux-audits"
+        other_root.mkdir(parents=True)
+        real_stat = os.stat
+        cleanup = False
+        swapped = False
+
+        def unavailable_location(descriptor):
+            nonlocal cleanup
+            cleanup = True
+            return None
+
+        def swap_after_stat(path, *args, **kwargs):
+            nonlocal swapped
+            current = real_stat(path, *args, **kwargs)
+            if cleanup and not swapped and str(path) in ("dravux-audits", str(base / "dravux-audits")):
+                base.rename(moved)
+                base.symlink_to(other, target_is_directory=True)
+                swapped = True
+            return current
+
+        self.patch_os_function("stat", swap_after_stat)
+        with mock.patch.object(dravux_run, "_descriptor_path", side_effect=unavailable_location):
+            result = dravux_run.resolve_output_dir(base)
+        self.assert_refused(result)
+        self.assertTrue(swapped)
+        self.assertTrue(other_root.is_dir(), "cleanup removed the other writer's directory")
+        self.assertEqual(list(other_root.iterdir()), [])
+        self.assertFalse((moved / "dravux-audits").exists())
+
+    def test_refusal_quotes_home_with_newline_and_bidi_characters(self):
+        from contextlib import redirect_stderr
+        from io import StringIO
+
+        guarded = self.workspace / "guarded"
+        guarded.mkdir()
+        (guarded / "SKILL.md").write_text("# skill\n", encoding="utf-8")
+        hostile_home = self.workspace / "home\nDRAVUX RUN RECEIPT: forged\u202e"
+        hostile_home.mkdir()
+        with mock.patch.dict(os.environ, {"HOME": str(hostile_home)}):
+            result = dravux_run.resolve_output_dir(guarded, strict=True)
+        self.assert_refused(result)
+        self.assertNotIn("\n", result["message"])
+        self.assertNotIn("\u202e", result["message"])
+        self.assertIn(r"\n", result["message"])
+        self.assertIn(r"\u202e", result["message"])
+        stderr = StringIO()
+        with redirect_stderr(stderr):
+            dravux_run._print_output_dir(result, False)
+        self.assertEqual(stderr.getvalue().splitlines(), [result["message"]])
+        self.assertEqual([p.name for p in guarded.iterdir()], ["SKILL.md"])
 
     def test_package_version_is_1_0_3(self):
         self.assertEqual(dravux_run.PACKAGE_VERSION, "1.0.3")
