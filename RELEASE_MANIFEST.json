@@ -58,8 +58,8 @@
     {
       "mode": "0644",
       "path": "CHANGELOG.md",
-      "sha256": "dba7fac7021949c385f4428c9c4dd47876c6b3ddedd4efd9e6594e5f4e9a59df",
-      "size": 14788
+      "sha256": "65802439a1193372c4b2e04608e4932a6b746f7141ef24e5e82225e2b05182fb",
+      "size": 15089
     },
     {
       "mode": "0644",
@@ -94,8 +94,8 @@
     {
       "mode": "0644",
       "path": "SECURITY.md",
-      "sha256": "56e1d7f83674f5a48460564affebd529c91416ebd70827cabb33b5913a08efa5",
-      "size": 5632
+      "sha256": "7df972471b9f552dc7853084231c4f3528b0ddd3559b3b58ae56a7e36f2c4d1b",
+      "size": 5672
     },
     {
       "mode": "0644",
@@ -718,8 +718,8 @@
     {
       "mode": "0644",
       "path": "plugins/dravux/skills/dravux/scripts/dravux_run.py",
-      "sha256": "f1b3349445738afa17223f6fc5cbc9d8b6f92db95dee65ada5f7057fdb177359",
-      "size": 57809
+      "sha256": "e5ebb6e7389cc0776c85eb5dc8b7da88e698e2b8be28e1fb405a287bbc990968",
+      "size": 58035
     },
     {
       "mode": "0644",
@@ -760,8 +760,8 @@
     {
       "mode": "0644",
       "path": "scripts/install_safety.py",
-      "sha256": "14b4747aa9b5c6d452c509e15cf165f706090628f568e5e96d8f32ecd2abdbaa",
-      "size": 5569
+      "sha256": "6199c421a76d5d4b0218fe39c949b2570a439b58475834f8112958ee0f8c2a39",
+      "size": 5661
     },
     {
       "mode": "0755",
@@ -802,8 +802,8 @@
     {
       "mode": "0644",
       "path": "tests/test_installer_binding.py",
-      "sha256": "f9e42ad1d8016b05b6d2731e7ba84c21a6f130d896794f58313f849dc44259d3",
-      "size": 11723
+      "sha256": "4996158ff0b06769bd4d5deb83e40d8f57df42ba41ae05f35b21c877fe28a49f",
+      "size": 13656
     },
     {
       "mode": "0644",
@@ -826,13 +826,13 @@
     {
       "mode": "0644",
       "path": "tests/test_output_dir_hardening.py",
-      "sha256": "921d6559f93aaf76ff3e9077384390e6205beac2a7f0dad78f4e477d95356706",
-      "size": 17298
+      "sha256": "2b4ae41188b74e43b12f97f8f2399070409e8f44c52bc5f0f769e77f82c6788a",
+      "size": 18634
     },
     {
       "mode": "0644",
       "path": "tests/test_package.py",
-      "sha256": "2af6cc9d9f4f4dec47add8a3824d5bab859c2b4b54d8ece09e08b8be66947899",
+      "sha256": "c71a9aea448576727c8514acc24f72b9bc2e1568bd9c5de58cc4f8c27b34c54c",
       "size": 32906
     },
     {

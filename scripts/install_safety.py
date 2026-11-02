@@ -12,9 +12,16 @@ import unicodedata
 from contextlib import contextmanager
 
 
+def _validate_path_text(path):
+    for character in path:
+        if unicodedata.category(character) in {"Cc", "Cs", "Zl", "Zp"} or character in (
+            "\u061c\u200e\u200f\u202a\u202b\u202c\u202d\u202e\u2066\u2067\u2068\u2069\ufeff"
+        ):
+            raise ValueError("install base path contains U+{:04X}".format(ord(character)))
+
+
 def resolve_base(path, project):
-    if path.endswith("\n"):
-        raise ValueError("install base path must not end in a newline")
+    _validate_path_text(path)
     if project:
         # Strip trailing slash/dot spellings without resolving a symlink first.
         named = path
@@ -31,8 +38,7 @@ def resolve_base(path, project):
         if not stat.S_ISDIR(status.st_mode) or (entered.st_dev, entered.st_ino) != (status.st_dev, status.st_ino):
             raise ValueError("project directory changed while entering it")
     physical = os.getcwd()
-    if any(unicodedata.category(character) in {"Cc", "Cf", "Cs", "Zl", "Zp"} for character in physical):
-        raise ValueError("physical install base path contains a forbidden text character (including newline)")
+    _validate_path_text(physical)
     print(physical)
 
 

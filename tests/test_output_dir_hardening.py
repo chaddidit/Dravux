@@ -68,6 +68,27 @@ class OutputDirectoryHardeningTests(unittest.TestCase):
         self.assertEqual(result["status"], "INVALID")
         self.assertEqual(list(destination.iterdir()), [])
 
+    def test_path_format_characters_allow_joiners_and_name_first_refused_codepoint(self):
+        for character in ("\u200d", "\u200c", "\u00ad"):
+            with self.subTest(allowed=repr(character)):
+                base = self.workspace / ("allowed" + character)
+                base.mkdir()
+                result = dravux_run.resolve_output_dir(base, "audit-001")
+                self.assertEqual(result["status"], "CREATED", result)
+                self.assertEqual(result["exit_code"], 0)
+                self.assertEqual(result["output_dir"], str(base / "dravux-audits" / "audit-001"))
+                self.assertTrue(Path(result["output_dir"]).is_dir())
+        for characters in ("\n", "\u202e", "\ufeff", "\n\u202e\ud800", "\u202e\n"):
+            with self.subTest(refused=repr(characters)):
+                base = self.workspace / ("refused" + characters)
+                result = dravux_run.resolve_output_dir(base, "audit-001")
+                self.assertEqual(result["status"], "INVALID", result)
+                self.assertEqual(result["exit_code"], 2)
+                self.assertIn(f"contains U+{ord(characters[0]):04X}", result["message"])
+                self.assertEqual(result["message"].count("U+"), 1)
+                self.assertIsNone(result["output_dir"])
+                self.assertFalse(result["created"])
+
     def test_ancestor_renamed_to_forge_receipt_is_refused_and_cleaned_up(self):
         base = self.workspace / "base"
         base.mkdir()

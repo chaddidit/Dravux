@@ -15,10 +15,38 @@ PYTHON = sys.executable
 
 
 class InstallerBindingTests(unittest.TestCase):
+    def test_linguistic_format_characters_install_and_verify(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp).resolve()
+            for character in ("\u200d", "\u200c", "\u00ad"):
+                for personal in (False, True):
+                    project = base / ("proj" + character + str(personal))
+                    project.mkdir()
+                    for script in ("install.sh", "verify-install.sh"):
+                        with self.subTest(character=repr(character), personal=personal, script=script):
+                            result = self.run_script(
+                                script, project, env=dict(os.environ, HOME=str(project)), personal=personal,
+                            )
+                            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            for character in "\n\u061c\u200e\u200f\u202a\u202b\u202c\u202d\u202e\u2066\u2067\u2068\u2069\ufeff":
+                project = base / ("refused" + character)
+                project.mkdir()
+                for script in ("install.sh", "verify-install.sh"):
+                    with self.subTest(refused=repr(character), script=script):
+                        result = self.run_script(script, project)
+                        self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+                        self.assertIn("contains U+{:04X}".format(ord(character)), result.stderr)
+                        self.assertEqual(list(project.iterdir()), [])
+            project = base / "first\u202eoffense\n"
+            project.mkdir()
+            result = self.run_script("install.sh", project)
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+            self.assertIn("contains U+202E", result.stderr)
+
     def test_physical_base_text_cannot_forge_an_installed_receipt(self):
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp).resolve()
-            for character in ("\n", "\t", "\u202e", "\u2028", "\u2029"):
+            for character in ("\n", "\t", "\u0085", "\u202e", "\u2028", "\u2029"):
                 project = base / ("proj" + character + "INSTALLED: Dravux 9.9.9 (forged)")
                 project.mkdir()
                 for script in ("install.sh", "verify-install.sh"):
@@ -30,20 +58,21 @@ class InstallerBindingTests(unittest.TestCase):
                             self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
                             self.assertFalse(any(line.startswith("INSTALLED:") for line in result.stdout.splitlines()))
                             self.assertEqual(list(project.iterdir()), [])
-            # A lone surrogate cannot be created as a macOS filename; inject its kernel path text.
-            result = subprocess.run(
-                [PYTHON, "-B", "-c", """
+            # NUL and lone surrogates cannot be macOS filenames; inject their kernel path text.
+            for codepoint in (0, 0xD800):
+                result = subprocess.run(
+                    [PYTHON, "-B", "-c", """
 import sys
 from unittest.mock import patch
 sys.path.insert(0, sys.argv[1])
 import install_safety
-with patch.object(install_safety.os, 'getcwd', return_value='/proj\\ud800'):
+with patch.object(install_safety.os, 'getcwd', return_value='/proj' + chr(int(sys.argv[2]))):
     install_safety.resolve_base('/', False)
-""", str(ROOT / "scripts")], capture_output=True, text=True, timeout=30,
-            )
-            self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
-            self.assertIn("forbidden text character", result.stderr)
-            self.assertEqual(result.stdout, "")
+""", str(ROOT / "scripts"), str(codepoint)], capture_output=True, text=True, timeout=30,
+                )
+                self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertIn("contains U+{:04X}".format(codepoint), result.stderr)
+                self.assertEqual(result.stdout, "")
 
     def test_root_dot_spellings_resolve_like_root(self):
         def resolve(path):
@@ -143,7 +172,7 @@ if len(sys.argv) > 3 and sys.argv[3] == 'project':
                         env = dict(os.environ, HOME=argument)
                         result = self.run_script(script, argument, env=env, personal=personal)
                         self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
-                        self.assertIn("newline", result.stderr)
+                        self.assertIn("contains U+000A", result.stderr)
                         self.assertEqual(list(trimmed.iterdir()), [])
                         self.assertEqual(list(selected.iterdir()), [])
 
@@ -184,7 +213,7 @@ if len(sys.argv) > 3 and sys.argv[3] == 'record':
             for script in ("install.sh", "verify-install.sh"):
                 result = self.run_script(script, home, env=dict(os.environ, HOME=str(alias)), personal=True)
                 self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
-                self.assertIn("newline", result.stderr)
+                self.assertIn("contains U+000A", result.stderr)
                 self.assertEqual(list(home.iterdir()), [])
 
     def test_failed_record_does_not_remove_a_substituted_staging_directory(self):

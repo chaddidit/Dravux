@@ -73,10 +73,11 @@ to ship.
 - **Skill-in-assistant architecture.** Hostile page or fixture text is inert data to the validators.
   An assistant that ignores the skill policy could still follow embedded instructions. That is a
   host/model risk, not something the offline validator can eliminate.
-- **Folder creation is not atomic with its identity check.** `output-dir` records a new audit
-  folder's identity right after `mkdir`. A process that can already write to the parent folder
-  could swap in an empty folder in that instant; a refusal then removes only that empty folder,
-  never a folder with contents. POSIX offers no way to close this window.
+- **Folder creation is not atomic with its identity check.** `output-dir` records the identity of
+  a new `dravux-audits` folder and a new audit folder right after `mkdir`. A process that can
+  already write to the parent folder could swap in an empty folder in that instant; a refusal then
+  removes only that empty folder, never a folder with contents. POSIX offers no way to close this
+  window.
 - **"Filled in" follows the running Python's Unicode tables.** A text field made only of
   characters newer than that Python's Unicode version (for example a new emoji on Python 3.8)
   is treated as unassigned and refused; newer Pythons accept it.

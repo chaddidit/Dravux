@@ -1009,16 +1009,20 @@ def _prepare_output_target(parent: Path, audit_id: Any) -> Tuple[Any, str]:
 
 
 def _validate_output_path_text(value: str) -> None:
-    try:
-        value.encode("utf-8")
-    except UnicodeEncodeError:
-        raise ValueError("The folder name is not valid UTF-8") from None
     # Text mode prints the path on its own line; controls can misrepresent the destination.
-    if any(unicodedata.category(character) in ("Cc", "Cf", "Cs", "Zl", "Zp") for character in value):
-        raise ValueError(
-            "The folder path contains a line break, tab, or invisible control or text-direction character. "
-            "Choose a folder with a plain name"
-        )
+    for character in value:
+        category = unicodedata.category(character)
+        if category in ("Cc", "Cs", "Zl", "Zp") or character in (
+            "\u061c\u200e\u200f\u202a\u202b\u202c\u202d\u202e"
+            "\u2066\u2067\u2068\u2069\ufeff"
+        ):
+            codepoint = f"U+{ord(character):04X}"
+            if category == "Cs":
+                raise ValueError(f"The folder name is not valid UTF-8: contains {codepoint}")
+            raise ValueError(
+                f"The folder path contains {codepoint}, a line break, tab, or invisible control "
+                "or text-direction character. Choose a folder with a plain name"
+            )
 
 
 def resolve_output_dir(
