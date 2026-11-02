@@ -21,10 +21,10 @@
 
 ### Security hardening
 
-- `output-dir` refuses a `--base` whose text contains line breaks, control, surrogate or text-direction characters, checked before and after the path is resolved, so the printed folder line cannot be spoofed.
+- `output-dir` refuses a `--base`, and any folder path it is about to report, that contains line breaks, control or format characters (including text-direction marks) or surrogates. The text is checked before and after the path is resolved and again just before the folder is reported, so the printed folder line cannot be spoofed.
 - `output-dir` holds the `dravux-audits` folder and the new audit folder open and asks the kernel where each one is. If a rename moved either into Dravux's own files, the run refuses and removes only the folders it created, and only while they are still the same empty folders. When the system cannot report a folder's location, the run refuses instead of guessing.
 - `output-dir` says so plainly when a folder name is not valid UTF-8.
-- `install.sh` and `verify-install.sh` refuse a symlinked `--project-dir`, also when it is written with a trailing slash, and confirm after entering it that the folder entered is the folder that was checked. A project or HOME path ending in a newline is refused.
+- `install.sh` and `verify-install.sh` refuse a symlinked `--project-dir`, also when it is written with a trailing slash, and confirm after entering it that the folder entered is the folder that was checked. A project or HOME path that ends in a newline, or whose physical location contains line breaks, control or format characters or surrogates, is refused, so installer receipt lines cannot be forged.
 - The installer removes its staging folder if binding it to the install directories fails, and exits after cleanup when interrupted.
 - The run validator requires a content hash for every successful acquisition and a 2xx or 3xx status for websites.
 - Text fields no longer count as filled in when they hold only spaces or invisible, format, combining-mark, private-use or unassigned characters. Text containing a lone surrogate is refused.

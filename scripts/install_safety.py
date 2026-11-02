@@ -8,6 +8,7 @@ import shutil
 import stat
 import sys
 import tempfile
+import unicodedata
 from contextlib import contextmanager
 
 
@@ -18,7 +19,7 @@ def resolve_base(path, project):
         # Strip trailing slash/dot spellings without resolving a symlink first.
         named = path
         while named not in {"", "/"} and named.endswith(("/", "/.")):
-            named = named[:-2] if named.endswith("/.") else named[:-1]
+            named = (named[:-2] if named.endswith("/.") else named[:-1]) or "/"
         named = os.path.join(os.getcwd(), named)
         status = os.lstat(named)
         if not stat.S_ISDIR(status.st_mode):
@@ -30,8 +31,8 @@ def resolve_base(path, project):
         if not stat.S_ISDIR(status.st_mode) or (entered.st_dev, entered.st_ino) != (status.st_dev, status.st_ino):
             raise ValueError("project directory changed while entering it")
     physical = os.getcwd()
-    if physical.endswith("\n"):
-        raise ValueError("physical install base path must not end in a newline")
+    if any(unicodedata.category(character) in {"Cc", "Cf", "Cs", "Zl", "Zp"} for character in physical):
+        raise ValueError("physical install base path contains a forbidden text character (including newline)")
     print(physical)
 
 

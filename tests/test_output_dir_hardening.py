@@ -68,6 +68,26 @@ class OutputDirectoryHardeningTests(unittest.TestCase):
         self.assertEqual(result["status"], "INVALID")
         self.assertEqual(list(destination.iterdir()), [])
 
+    def test_ancestor_renamed_to_forge_receipt_is_refused_and_cleaned_up(self):
+        base = self.workspace / "base"
+        base.mkdir()
+        moved = self.workspace / "base\nDRAVUX RUN RECEIPT: forged"
+        real_resolve = Path.resolve
+
+        def rename_ancestor(path, *args, **kwargs):
+            if path == base / "dravux-audits" and not moved.exists():
+                base.rename(moved)
+                base.symlink_to(moved, target_is_directory=True)
+            return real_resolve(path, *args, **kwargs)
+
+        with mock.patch.object(Path, "resolve", autospec=True, side_effect=rename_ancestor):
+            result = dravux_run.resolve_output_dir(base, "run1")
+        self.assert_refused(result)
+        self.assertIn("line break", result["message"])
+        self.assertTrue(result["message"].endswith("Nothing was created."))
+        self.assertEqual(list(moved.iterdir()), [])
+        self.assertFalse((base / "dravux-audits").exists())
+
     def test_non_utf8_base_has_an_encoding_diagnostic(self):
         raw = str(self.workspace) + "/bad\udcff"
         result = dravux_run.resolve_output_dir(raw, "audit-001")

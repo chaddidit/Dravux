@@ -15,6 +15,50 @@ PYTHON = sys.executable
 
 
 class InstallerBindingTests(unittest.TestCase):
+    def test_physical_base_text_cannot_forge_an_installed_receipt(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp).resolve()
+            for character in ("\n", "\t", "\u202e", "\u2028", "\u2029"):
+                project = base / ("proj" + character + "INSTALLED: Dravux 9.9.9 (forged)")
+                project.mkdir()
+                for script in ("install.sh", "verify-install.sh"):
+                    for personal in (False, True):
+                        with self.subTest(character=repr(character), script=script, personal=personal):
+                            result = self.run_script(
+                                script, project, env=dict(os.environ, HOME=str(project)), personal=personal,
+                            )
+                            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+                            self.assertFalse(any(line.startswith("INSTALLED:") for line in result.stdout.splitlines()))
+                            self.assertEqual(list(project.iterdir()), [])
+            # A lone surrogate cannot be created as a macOS filename; inject its kernel path text.
+            result = subprocess.run(
+                [PYTHON, "-B", "-c", """
+import sys
+from unittest.mock import patch
+sys.path.insert(0, sys.argv[1])
+import install_safety
+with patch.object(install_safety.os, 'getcwd', return_value='/proj\\ud800'):
+    install_safety.resolve_base('/', False)
+""", str(ROOT / "scripts")], capture_output=True, text=True, timeout=30,
+            )
+            self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertIn("forbidden text character", result.stderr)
+            self.assertEqual(result.stdout, "")
+
+    def test_root_dot_spellings_resolve_like_root(self):
+        def resolve(path):
+            result = subprocess.run(
+                [PYTHON, "-B", str(ROOT / "scripts/install_safety.py"), "project", path],
+                capture_output=True, text=True, timeout=30,
+            )
+            return result.returncode, result.stdout, result.stderr
+
+        expected = resolve("/")
+        self.assertEqual(expected, (0, "/\n", ""))
+        for spelling in ("/.", "/./", "//"):
+            with self.subTest(spelling=spelling):
+                self.assertEqual(resolve(spelling), expected)
+
     def run_script(self, script, project, env=None, personal=False):
         return subprocess.run(
             ["sh", str(ROOT / script), "--codex"]

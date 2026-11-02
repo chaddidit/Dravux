@@ -953,6 +953,8 @@ def _check_output_target(
             return None, "The kernel could not report the held audit folder's location. Nothing was created."
         if guarded_roots(held) or guarded_roots(held_child) or guarded_roots(physical_target):
             return None, "The audit path resolves inside guarded Dravux files. Nothing was created."
+        for path in (physical_target, held, held_child):
+            _validate_output_path_text(str(path))
         return physical_target, ""
     finally:
         if child_descriptor is not None:
