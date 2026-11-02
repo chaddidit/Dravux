@@ -58,8 +58,8 @@
     {
       "mode": "0644",
       "path": "CHANGELOG.md",
-      "sha256": "e23c52b98d6192a19ba9e1c08b92d385e3ada6f4a9545f4cf5c311dab03639c6",
-      "size": 13126
+      "sha256": "723e3b7064f99e09e263dc82c8ec81a1e1338d078cf8d3f8659a4b429a71862b",
+      "size": 13717
     },
     {
       "mode": "0644",
@@ -562,8 +562,8 @@
     {
       "mode": "0755",
       "path": "install.sh",
-      "sha256": "dc692deb79329998e159bfc05da31b347919baaec0c7fd70325a416f819b498b",
-      "size": 7213
+      "sha256": "5b5ad532c3b85df54dd4b79bf1ea1012e5abe60f8f756df718d1c0cf0eb5ca91",
+      "size": 7490
     },
     {
       "mode": "0644",
@@ -712,14 +712,14 @@
     {
       "mode": "0644",
       "path": "plugins/dravux/skills/dravux/scripts/dravux_contract.py",
-      "sha256": "3d5bba7ba23c03c46428ae025c11d7c3508100d77fdb59d7c77a066b001990a6",
-      "size": 34698
+      "sha256": "d98849ec7748d733efccf75efebbd3dc5203e81d4d483ef810ea6cade07d7c12",
+      "size": 35183
     },
     {
       "mode": "0644",
       "path": "plugins/dravux/skills/dravux/scripts/dravux_run.py",
-      "sha256": "e4eb73931e657438f372bf74d7924f19b0a954b197b519c5e92006bd2840e512",
-      "size": 52621
+      "sha256": "97a99a5776dd153204515580864643d1902818157958508e9c46f5e6aad6dbb1",
+      "size": 55796
     },
     {
       "mode": "0644",
@@ -814,13 +814,13 @@
     {
       "mode": "0644",
       "path": "tests/test_operational.py",
-      "sha256": "2f9b30f3b9fb2f6de257e999f10af3a8423c2d16e2a13534e6d845acdf0c8947",
-      "size": 62882
+      "sha256": "5ba4dfed77aa9384dc7d8fb52f930c5b08d37a74727682165a3262b892f70401",
+      "size": 69568
     },
     {
       "mode": "0644",
       "path": "tests/test_package.py",
-      "sha256": "75160f90acdb9bc5cb79d920df6aef2921beffd2d5644ceaae7286f4be1cd397",
+      "sha256": "faf91c2dcf0060d2c7be2c2f9826540840a819a3fa9d939a83df9203990c2485",
       "size": 32906
     },
     {
@@ -832,8 +832,8 @@
     {
       "mode": "0755",
       "path": "verify-install.sh",
-      "sha256": "1bdad66a340cb08dd1596d59e3a70c95b8870d4e22d386d93f585503d364b3f6",
-      "size": 4784
+      "sha256": "4de86abc3eb90180064383442f99a486c907ac44adcd1b4e39a77d23848cefd0",
+      "size": 5061
     },
     {
       "mode": "0755",

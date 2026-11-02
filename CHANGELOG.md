@@ -62,6 +62,13 @@
 - Printed the requested mode in the run receipt and reported the limitation acknowledgement as "not required" when the requested mode was available, instead of echoing an idle flag as "accepted".
 - Turned two `skipTest` guards into hard assertions, asserted the published execution invariants structurally, and declared the expected test count so a deleted test module or method can no longer pass silently; fixtures are now judged through the strict loader, and nested duplicate keys are tested.
 
+### Security hardening
+
+- output-dir refuses a --base whose path contains line breaks, control or text-direction characters, so the printed folder line cannot be spoofed.
+- output-dir checks the kernel's location of the folder it created and removes it again if a rename moved it into Dravux's own files.
+- install.sh and verify-install.sh refuse a symlinked --project-dir also when it is written with a trailing slash.
+- The run validator requires a content hash for every successful acquisition and a 2xx or 3xx status for websites, and no longer counts invisible-only text as filled in.
+
 ## 1.0.1 — 2026-07-20
 
 - Added a deterministic capability preflight and operational run contract without changing report contract 0.1.0.

@@ -772,6 +772,32 @@ class OperationalContractTests(unittest.TestCase):
         envelope["acquisition"]["final_location"] = "https://example.org/final"
         self.assertEqual(validate_run(envelope), [])
 
+    def test_successful_website_acquisition_requires_success_status_and_content_hash(self):
+        self.assertEqual(validate_run(self.run), [])
+        for status in (503, 404, 100, None, True, "200"):
+            with self.subTest(response_status=status):
+                envelope = copy.deepcopy(self.run)
+                envelope["acquisition"]["response_status"] = status
+                errors = "\n".join(validate_run(envelope))
+                self.assertIn("successful website acquisition requires a 2xx or 3xx", errors)
+        envelope = copy.deepcopy(self.run)
+        envelope["acquisition"]["content_sha256"] = None
+        self.assertIn(
+            "successful acquisition requires acquisition.content_sha256", "\n".join(validate_run(envelope))
+        )
+
+    def test_invisible_only_strings_and_trailing_newline_dates_are_rejected(self):
+        from dravux_contract import _is_nonempty_string, _parse_rfc3339_datetime
+
+        for blank in ("\u200b", "\ufeff", "\u2800", " \u3000", "\u3164", "\u00a0\u202f"):
+            with self.subTest(blank=ascii(blank)):
+                self.assertFalse(_is_nonempty_string(blank))
+        for text in ("x", "a\u200b", "Screenshot\u202fPM"):
+            with self.subTest(text=ascii(text)):
+                self.assertTrue(_is_nonempty_string(text))
+        self.assertIsNone(_parse_rfc3339_datetime("2026-11-02T00:00:00Z\n"))
+        self.assertIsNotNone(_parse_rfc3339_datetime("2026-11-02T00:00:00Z"))
+
     def test_redirect_chain_must_end_at_final_location(self):
         envelope = copy.deepcopy(self.run)
         envelope["acquisition"]["redirect_chain"] = ["https://example.net/not-final"]
@@ -1170,6 +1196,82 @@ class OutputDirectoryContractTests(unittest.TestCase):
             self.assertEqual(result["exit_code"], OUTPUT_DIR_REFUSED_EXIT)
             self.assertEqual(sorted(path.name for path in guarded.iterdir()), ["SKILL.md"])
 
+    def test_base_with_line_break_or_control_character_is_refused(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            workspace = Path(tmp).resolve()
+            guarded = workspace / "skill"
+            guarded.mkdir()
+            (guarded / "SKILL.md").write_text("# skill\n", encoding="utf-8")
+            for name in (f"prefix\n{guarded}", "tab\there", "bidi\u202eevil", "sep\u2028line"):
+                with self.subTest(name=name):
+                    base = workspace / name
+                    base.mkdir(parents=True)
+                    result = resolve_output_dir(base, None, False)
+                    self.assertEqual(result["status"], "INVALID")
+                    self.assertEqual(result["exit_code"], 2)
+                    self.assertIsNone(result["output_dir"])
+                    self.assertEqual(sorted(path.name for path in base.iterdir()), [])
+            proc = self.output_dir_cli(["--base", str(workspace / f"prefix\n{guarded}")])
+            self.assertEqual(proc.returncode, 2)
+            self.assertEqual(proc.stdout, "")
+            self.assertEqual(sorted(path.name for path in guarded.iterdir()), ["SKILL.md"])
+
+    def test_output_root_renamed_into_guarded_tree_during_child_creation_is_undone(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            workspace = Path(tmp).resolve()
+            guarded = workspace / "guarded"
+            guarded.mkdir()
+            (guarded / "SKILL.md").write_text("# skill\n", encoding="utf-8")
+            (workspace / "dravux-audits").mkdir()
+            real_mkdir = os.mkdir
+
+            def race(path, *args, **kwargs):
+                real_mkdir(path, *args, **kwargs)
+                if kwargs.get("dir_fd") is not None:
+                    os.rename(workspace / "dravux-audits", guarded / "moved")
+                    real_mkdir(workspace / "dravux-audits")
+
+            with mock.patch("os.mkdir", side_effect=race) as patched:
+                with mock.patch("os.supports_dir_fd", set(os.supports_dir_fd) | {patched}):
+                    result = resolve_output_dir(workspace, "run-001", False)
+            self.assertEqual(result["status"], "REFUSED")
+            self.assertEqual(result["exit_code"], OUTPUT_DIR_REFUSED_EXIT)
+            self.assertTrue(result["message"].endswith("Nothing was created."))
+            self.assertEqual(sorted((guarded / "moved").iterdir()), [])
+            self.assertEqual(sorted((workspace / "dravux-audits").iterdir()), [])
+
+    def test_ancestor_swapped_for_symlink_into_guarded_tree_during_creation_is_undone(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            workspace = Path(tmp).resolve()
+            guarded = workspace / "guarded"
+            guarded.mkdir()
+            (guarded / "SKILL.md").write_text("# skill\n", encoding="utf-8")
+            base = workspace / "base"
+            base.mkdir()
+            real_mkdir = os.mkdir
+
+            def race(path, *args, **kwargs):
+                real_mkdir(path, *args, **kwargs)
+                if kwargs.get("dir_fd") is not None:
+                    os.rename(base, guarded / "base")
+                    os.symlink(guarded / "base", base, target_is_directory=True)
+
+            with mock.patch("os.mkdir", side_effect=race) as patched:
+                with mock.patch("os.supports_dir_fd", set(os.supports_dir_fd) | {patched}):
+                    result = resolve_output_dir(base, "run-001", False)
+            self.assertEqual(result["status"], "REFUSED")
+            self.assertEqual(result["exit_code"], OUTPUT_DIR_REFUSED_EXIT)
+            self.assertTrue(result["message"].endswith("Nothing was created."))
+            self.assertEqual(sorted((guarded / "base" / "dravux-audits").iterdir()), [])
+
+    def test_base_with_ordinary_unicode_spaces_is_accepted(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp).resolve() / "Screenshot 10.00.00\u202fPM\u00a0copy"
+            base.mkdir()
+            result = resolve_output_dir(base, "run-001", False)
+            self.assertEqual(result["status"], "CREATED")
+            self.assertEqual(result["output_dir"], str(base / "dravux-audits" / "run-001"))
+
     def test_audit_id_is_a_closed_slug(self):
         with tempfile.TemporaryDirectory() as tmp:
             workspace = Path(tmp).resolve()
@@ -1228,6 +1330,26 @@ class OutputDirectoryContractTests(unittest.TestCase):
             for path in sorted(root.rglob("*"))
             if path.is_file()
         }
+
+
+class InstallerProjectDirectoryTests(unittest.TestCase):
+    def test_symlinked_project_dir_is_refused_with_any_trailing_slash_spelling(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            workspace = Path(tmp).resolve()
+            real = workspace / "real"
+            real.mkdir()
+            link = workspace / "link"
+            link.symlink_to(real, target_is_directory=True)
+            env = dict(os.environ, HOME=str(workspace / "home"))
+            for script in ("install.sh", "verify-install.sh"):
+                for spelling in ("", "/", "/.", "//./"):
+                    with self.subTest(script=script, spelling=spelling):
+                        proc = subprocess.run(
+                            ["sh", str(ROOT / script), "--claude", "--project-dir", str(link) + spelling],
+                            capture_output=True, text=True, env=env, timeout=60,
+                        )
+                        self.assertEqual(proc.returncode, 3, proc.stderr)
+            self.assertEqual(sorted(real.iterdir()), [])
 
 
 if __name__ == "__main__":

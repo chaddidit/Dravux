@@ -8,6 +8,7 @@ import json
 import math
 import re
 import sys
+import unicodedata
 import urllib.parse
 from pathlib import Path
 from typing import Any, Collection, Dict, List
@@ -152,7 +153,7 @@ def _reject_unknown(obj: Any, allowed: set, label: str, errors: List[str]) -> No
 def _parse_rfc3339_datetime(value: Any):
     if not isinstance(value, str):
         return None
-    match = DATE_TIME_PATTERN.match(value)
+    match = DATE_TIME_PATTERN.fullmatch(value)
     if not match:
         return None
     fraction = match.group("fraction")
@@ -237,8 +238,18 @@ def _reject_duplicates(value: Any, label: str, errors: List[str]) -> None:
 _FORBIDDEN_CODEPOINTS = frozenset({0x7F, 0x85, 0x2028, 0x2029})
 
 
+# Code points that render as nothing yet are not classed as spaces or format characters.
+_BLANK_CODEPOINTS = frozenset({0x115F, 0x1160, 0x2800, 0x3164, 0xFFA0})
+
+
+def _is_visible(ch: str) -> bool:
+    category = unicodedata.category(ch)
+    return category[0] != "Z" and category not in ("Cc", "Cf") and ord(ch) not in _BLANK_CODEPOINTS
+
+
 def _is_nonempty_string(value: Any) -> bool:
-    if not isinstance(value, str) or not value.strip():
+    # str.strip() keeps U+200B, U+FEFF and U+2800, so an invisible-only string would count as text.
+    if not isinstance(value, str) or not any(_is_visible(ch) for ch in value):
         return False
     return not any(ord(ch) < 0x20 or ord(ch) in _FORBIDDEN_CODEPOINTS for ch in value)
 

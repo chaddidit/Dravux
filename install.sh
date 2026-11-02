@@ -107,7 +107,16 @@ if [ "$scope" = personal ]; then
     || fail 3 'Could not resolve HOME to a physical directory; nothing was installed.'
   [ "$base_dir" != / ] || fail 3 'Refusing to use / as the physical HOME directory.'
 else
-  [ -d "$project_dir" ] && [ ! -L "$project_dir" ] \
+  # [ -L "link/" ] and [ -L "link/." ] are false, so test the bare name.
+  project_check=$project_dir
+  while :; do
+    case $project_check in
+      ?*/.) project_check=${project_check%/.} ;;
+      ?*/) project_check=${project_check%/} ;;
+      *) break ;;
+    esac
+  done
+  [ -d "$project_check" ] && [ ! -L "$project_check" ] \
     || fail 3 'The project directory must already exist and must not be a symlink.'
   base_dir=$(CDPATH= cd -- "$project_dir" && pwd -P) \
     || fail 3 'Could not resolve the project directory.'
