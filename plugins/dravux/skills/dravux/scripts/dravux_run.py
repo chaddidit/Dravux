@@ -29,7 +29,7 @@ from dravux_contract import (  # noqa: E402
 )
 
 
-PACKAGE_VERSION = "1.0.2"
+PACKAGE_VERSION = "1.0.3"
 PREFLIGHT_VERSION = "1.0.0"
 RUN_CONTRACT_VERSION = "1.2.0"
 
@@ -474,6 +474,11 @@ def _validate_acquisition(value: Any, errors: List[str], website: bool = False) 
                 errors.append(f"successful acquisition requires acquisition.{key}")
         if value.get("error") is not None:
             errors.append("successful acquisition requires acquisition.error to be null")
+        if not isinstance(value.get("content_sha256"), str):
+            errors.append("successful acquisition requires acquisition.content_sha256")
+        status = value.get("response_status")
+        if website and (isinstance(status, bool) or not isinstance(status, int) or not 200 <= status <= 399):
+            errors.append("successful website acquisition requires a 2xx or 3xx acquisition.response_status")
     if attempted is True and succeeded is False and not _is_nonempty_string(value.get("error")):
         errors.append("failed acquisition requires acquisition.error")
     if succeeded is not True:
@@ -852,73 +857,172 @@ def guarded_roots(base: Path) -> List[Path]:
     return roots
 
 
-def _open_stable_directory(path: Path) -> Tuple[Any, os.stat_result]:
+def _open_stable_directory(path: Path, dir_fd: Any = None) -> Tuple[Any, os.stat_result]:
     """Open a directory without following its final component and confirm path identity."""
-    flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0)
-    descriptor = os.open(str(path), flags)
-    opened = os.fstat(descriptor)
-    current = os.lstat(str(path))
-    if not stat.S_ISDIR(opened.st_mode) or stat.S_ISLNK(current.st_mode):
+    flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+    descriptor = os.open(str(path), flags, dir_fd=dir_fd)
+    try:
+        opened = os.fstat(descriptor)
+        current = os.stat(str(path), dir_fd=dir_fd, follow_symlinks=False)
+        if not stat.S_ISDIR(opened.st_mode) or stat.S_ISLNK(current.st_mode):
+            raise OSError("output folder is not a physical directory")
+        if (opened.st_dev, opened.st_ino) != (current.st_dev, current.st_ino):
+            raise OSError("output folder changed while it was being opened")
+        return descriptor, opened
+    except BaseException:
         os.close(descriptor)
-        raise OSError("output root is not a physical directory")
-    if (opened.st_dev, opened.st_ino) != (current.st_dev, current.st_ino):
-        os.close(descriptor)
-        raise OSError("output root changed while it was being opened")
-    return descriptor, opened
+        raise
+
+
+def _remove_created_directory(
+    descriptor: Any, name: str, created: os.stat_result, problem: str
+) -> str:
+    """Remove only this run's empty directory, never a replacement at the same name."""
+    try:
+        current = os.stat(name, dir_fd=descriptor, follow_symlinks=False)
+        if not stat.S_ISDIR(current.st_mode) or (
+            current.st_dev, current.st_ino
+        ) != (created.st_dev, created.st_ino):
+            raise OSError("the folder name no longer identifies the created directory")
+        os.rmdir(name, dir_fd=descriptor)
+    except OSError:
+        return (
+            problem.replace("Nothing was created.", "").rstrip()
+            + f" A folder named {_quoted(name)} was created and could not be safely removed. "
+            "Nothing was written into it."
+        )
+    return problem
+
+
+def _descriptor_path(descriptor: Any) -> Any:
+    """Where the held directory is now, asked of the kernel instead of walking a path."""
+    try:
+        import fcntl
+
+        # Python 3.8 omits F_GETPATH, but macOS provides it as command 50.
+        getpath = getattr(fcntl, "F_GETPATH", 50 if sys.platform == "darwin" else None)
+        if getpath is not None:
+            raw = fcntl.fcntl(descriptor, getpath, b"\0" * 1024)
+            return Path(os.fsdecode(raw.split(b"\0", 1)[0]))
+    except (ImportError, OSError):
+        pass
+    try:
+        return Path(os.readlink(f"/proc/self/fd/{descriptor}"))
+    except OSError:
+        return None
+
+
+def _check_output_target(
+    output_root: Path, descriptor: Any, opened: os.stat_result, audit_id: Any, created: List[os.stat_result]
+) -> Tuple[Any, str]:
+    physical_root = output_root.resolve(strict=True)
+    if guarded_roots(physical_root):
+        return None, "The dravux-audits path resolves inside guarded Dravux files. Nothing was created."
+    child_descriptor = None
+    try:
+        if audit_id is None:
+            physical_target = physical_root
+        else:
+            try:
+                target_status = os.stat(audit_id, dir_fd=descriptor, follow_symlinks=False)
+            except FileNotFoundError:
+                try:
+                    os.mkdir(audit_id, mode=0o755, dir_fd=descriptor)
+                except FileExistsError:
+                    return None, "The audit path appeared during creation. Nothing was created."
+                target_status = os.stat(audit_id, dir_fd=descriptor, follow_symlinks=False)
+                created.append(target_status)
+            if stat.S_ISLNK(target_status.st_mode) or not stat.S_ISDIR(target_status.st_mode):
+                return None, "The audit path is not a physical directory. Nothing was created."
+            child_descriptor, child_opened = _open_stable_directory(Path(audit_id), descriptor)
+            if (target_status.st_dev, target_status.st_ino) != (child_opened.st_dev, child_opened.st_ino):
+                return None, "The audit path changed during creation. Nothing was created."
+            physical_target = (physical_root / audit_id).resolve(strict=True)
+            current = physical_target.stat()
+            if (target_status.st_dev, target_status.st_ino) != (current.st_dev, current.st_ino):
+                return None, "The audit path changed during creation. Nothing was created."
+        # A rename of the root after the guard check must not redirect the returned path.
+        for path in (output_root, physical_root):
+            current_root = os.stat(str(path), follow_symlinks=False)
+            if (opened.st_dev, opened.st_ino) != (current_root.st_dev, current_root.st_ino):
+                return None, "The dravux-audits path changed during creation. Nothing was created."
+        # Matching names can hide a moved ancestor; ask the kernel about both held directories.
+        held = _descriptor_path(descriptor)
+        held_child = _descriptor_path(child_descriptor) if child_descriptor is not None else held
+        if held is None or held_child is None:
+            return None, "The kernel could not report the held audit folder's location. Nothing was created."
+        if guarded_roots(held) or guarded_roots(held_child) or guarded_roots(physical_target):
+            return None, "The audit path resolves inside guarded Dravux files. Nothing was created."
+        for path in (physical_target, held, held_child):
+            _validate_output_path_text(str(path))
+        return physical_target, ""
+    finally:
+        if child_descriptor is not None:
+            os.close(child_descriptor)
 
 
 def _prepare_output_target(parent: Path, audit_id: Any) -> Tuple[Any, str]:
     """Create through a held directory descriptor so a raced symlink cannot redirect writes."""
-    if os.name != "posix" or not all(
-        function in os.supports_dir_fd for function in (os.stat, os.mkdir)
+    if os.name != "posix" or not all(getattr(os, flag, 0) for flag in ("O_DIRECTORY", "O_NOFOLLOW")) or not all(
+        function in os.supports_dir_fd for function in (os.open, os.stat, os.mkdir, os.rmdir)
     ):
         return None, "Safe output directory creation requires POSIX directory-descriptor support. Nothing was created."
     output_root = parent / OUTPUT_DIR_NAME
+    created_root = None
+    parent_descriptor = None
+    descriptor = None
+    created: List[os.stat_result] = []
+    physical_target = None
+    problem = ""
     try:
-        existed = output_root.exists() or output_root.is_symlink()
-        if existed:
-            root_status = output_root.lstat()
-            if stat.S_ISLNK(root_status.st_mode) or not stat.S_ISDIR(root_status.st_mode):
-                return None, "The dravux-audits path is not a physical directory. Nothing was created."
-        else:
+        parent_descriptor, _ = _open_stable_directory(parent)
+        try:
+            root_status = os.stat(OUTPUT_DIR_NAME, dir_fd=parent_descriptor, follow_symlinks=False)
+        except FileNotFoundError:
             try:
-                output_root.mkdir(mode=0o755)
+                os.mkdir(OUTPUT_DIR_NAME, mode=0o755, dir_fd=parent_descriptor)
             except FileExistsError:
                 return None, "The dravux-audits path appeared during creation. Nothing was created."
+            root_status = os.stat(OUTPUT_DIR_NAME, dir_fd=parent_descriptor, follow_symlinks=False)
+            created_root = root_status
+        if stat.S_ISLNK(root_status.st_mode) or not stat.S_ISDIR(root_status.st_mode):
+            return None, "The dravux-audits path is not a physical directory. Nothing was created."
 
-        descriptor, opened = _open_stable_directory(output_root)
-        try:
-            physical_root = output_root.resolve(strict=True)
-            if guarded_roots(physical_root):
-                return None, "The dravux-audits path resolves inside guarded Dravux files. Nothing was created."
-            if audit_id is None:
-                target_status = opened
-                physical_target = physical_root
-            else:
-                try:
-                    target_status = os.stat(audit_id, dir_fd=descriptor, follow_symlinks=False)
-                except FileNotFoundError:
-                    try:
-                        os.mkdir(audit_id, mode=0o755, dir_fd=descriptor)
-                    except FileExistsError:
-                        return None, "The audit path appeared during creation. Nothing was created."
-                    target_status = os.stat(audit_id, dir_fd=descriptor, follow_symlinks=False)
-                if stat.S_ISLNK(target_status.st_mode) or not stat.S_ISDIR(target_status.st_mode):
-                    return None, "The audit path is not a physical directory. Nothing was created."
-                physical_target = (physical_root / audit_id).resolve(strict=True)
-                current = physical_target.stat()
-                if (target_status.st_dev, target_status.st_ino) != (current.st_dev, current.st_ino):
-                    return None, "The audit path changed during creation. Nothing was created."
-            current_root = os.lstat(str(output_root))
-            if (opened.st_dev, opened.st_ino) != (current_root.st_dev, current_root.st_ino):
-                return None, "The dravux-audits path changed during creation. Nothing was created."
-            if guarded_roots(physical_target):
-                return None, "The audit path resolves inside guarded Dravux files. Nothing was created."
-            return physical_target, ""
-        finally:
-            os.close(descriptor)
+        descriptor, opened = _open_stable_directory(Path(OUTPUT_DIR_NAME), parent_descriptor)
+        if created_root is not None and (
+            opened.st_dev, opened.st_ino
+        ) != (created_root.st_dev, created_root.st_ino):
+            raise OSError("the dravux-audits path changed during creation")
+        physical_target, problem = _check_output_target(output_root, descriptor, opened, audit_id, created)
     except (OSError, RuntimeError, ValueError, NotImplementedError) as exc:
-        return None, f"The audit folder could not be created safely: {_quoted(exc)}. Nothing was created."
+        problem = f"The audit folder could not be created safely: {_quoted(exc)}. Nothing was created."
+    finally:
+        if problem and created:
+            problem = _remove_created_directory(descriptor, audit_id, created[0], problem)
+        if problem and created_root is not None:
+            problem = _remove_created_directory(parent_descriptor, OUTPUT_DIR_NAME, created_root, problem)
+        if descriptor is not None:
+            os.close(descriptor)
+        if parent_descriptor is not None:
+            os.close(parent_descriptor)
+    return physical_target, problem
+
+
+def _validate_output_path_text(value: str) -> None:
+    # Text mode prints the path on its own line; controls can misrepresent the destination.
+    for character in value:
+        category = unicodedata.category(character)
+        if category in ("Cc", "Cs", "Zl", "Zp") or character in (
+            "\u061c\u200e\u200f\u202a\u202b\u202c\u202d\u202e"
+            "\u2066\u2067\u2068\u2069\ufeff"
+        ):
+            codepoint = f"U+{ord(character):04X}"
+            if category == "Cs":
+                raise ValueError(f"The folder name is not valid UTF-8: contains {codepoint}")
+            raise ValueError(
+                f"The folder path contains {codepoint}, a line break, tab, or invisible control "
+                "or text-direction character. Choose a folder with a plain name"
+            )
 
 
 def resolve_output_dir(
@@ -952,12 +1056,15 @@ def resolve_output_dir(
         return result
 
     try:
-        resolved = Path(base if base is not None else Path.cwd()).expanduser().resolve()
+        raw_base = str(base if base is not None else Path.cwd())
+        _validate_output_path_text(raw_base)
+        resolved = Path(raw_base).expanduser().resolve()
+        _validate_output_path_text(str(resolved))
     except (OSError, RuntimeError, ValueError) as exc:
         result.update(
             status="INVALID",
             exit_code=OUTPUT_DIR_INPUT_EXIT,
-            message=f"That starting folder could not be read: {exc}. Nothing was created.",
+            message=f"That starting folder could not be read: {_quoted(exc)}. Nothing was created.",
         )
         return result
 
@@ -975,8 +1082,8 @@ def resolve_output_dir(
                 status="REFUSED",
                 exit_code=OUTPUT_DIR_REFUSED_EXIT,
                 message=(
-                    f"Refusing to create an audit folder inside the Dravux files at {outermost}. "
-                    f"Nothing was created. Choose a folder outside it, for example {suggestion}."
+                    f"Refusing to create an audit folder inside the Dravux files at {_quoted(outermost)}. "
+                    f"Nothing was created. Choose a folder outside it, for example {_quoted(suggestion)}."
                 ),
             )
             return result
@@ -985,8 +1092,8 @@ def resolve_output_dir(
                 status="REFUSED",
                 exit_code=OUTPUT_DIR_REFUSED_EXIT,
                 message=(
-                    f"The Dravux files at {outermost} have no folder above them to write beside. "
-                    f"Nothing was created. Re-run with --base {suggestion}."
+                    f"The Dravux files at {_quoted(outermost)} have no folder above them to write beside. "
+                    f"Nothing was created. Re-run with --base {_quoted(suggestion)}."
                 ),
             )
             return result
@@ -1001,7 +1108,7 @@ def resolve_output_dir(
             status="REFUSED",
             exit_code=OUTPUT_DIR_REFUSED_EXIT,
             message=(
-                f"The requested audit folder would sit inside the Dravux files at {outermost}. "
+                f"The requested audit folder would sit inside the Dravux files at {_quoted(outermost)}. "
                 "Nothing was created."
             ),
         )
@@ -1024,7 +1131,7 @@ def resolve_output_dir(
         result.update(
             status="REDIRECTED",
             message=(
-                f"{resolved} is inside the Dravux files at {outermost}, which must stay exactly as "
+                f"{_quoted(resolved)} is inside the Dravux files at {_quoted(outermost)}, which must stay exactly as "
                 "installed, so this audit folder was created next to them instead."
             ),
         )
@@ -1126,7 +1233,6 @@ def build_parser() -> argparse.ArgumentParser:
     )
     placement.add_argument(
         "--base",
-        type=Path,
         default=None,
         help="Folder the audit output should sit under (default: the current folder)",
     )

@@ -57,7 +57,7 @@
   "run": {
     "started_at": "2026-07-16T14:07:00Z",
     "completed_at": "2026-07-16T14:07:01Z",
-    "tooling": ["Dravux static evidence review 1.0.2"],
+    "tooling": ["Dravux static evidence review 1.0.3"],
     "environment": "Synthetic static-screenshot fixture"
   }
 }

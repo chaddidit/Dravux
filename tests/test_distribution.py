@@ -100,6 +100,9 @@ class DistributionTests(unittest.TestCase):
             Path(".agents/skills/dravux/SKILL.md"),
             Path("out/generated.json"),
             Path("session.log"),
+            Path("dist-release/SHA256SUMS.txt"),
+            Path("dravux-1.0.3.tgz"),
+            Path("node_modules/example/package.json"),
         )
         for path in excluded:
             with self.subTest(path=path):
@@ -558,6 +561,19 @@ os.execv(PYTHON, [PYTHON] + sys.argv[1:])
             rejected = self.run_distribution_verifier(tree)
             self.assertNotEqual(rejected.returncode, 0)
             self.assertIn('excluded path present: "docs/.git"', rejected.stdout + rejected.stderr)
+
+    def test_build_output_is_ignored_only_in_a_source_checkout(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tree = self.build_verifiable_tree(Path(tmp))
+            output = tree / "dist-release"
+            output.mkdir()
+            (output / "stray.txt").write_text("local build output\n", encoding="utf-8")
+            rejected = self.run_distribution_verifier(tree)
+            self.assertNotEqual(rejected.returncode, 0)
+            self.assertIn("release manifest path set differs", rejected.stdout + rejected.stderr)
+            (tree / ".git").mkdir()
+            accepted = self.run_distribution_verifier(tree)
+            self.assertEqual(accepted.returncode, 0, accepted.stdout + accepted.stderr)
 
     def test_builder_creates_deterministic_engineering_and_surface_archives(self):
         with tempfile.TemporaryDirectory() as tmp:

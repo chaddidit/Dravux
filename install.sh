@@ -80,6 +80,7 @@ python3 -B -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 8) else
 script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P) \
   || fail 3 'Could not resolve the release directory.'
 source_dir=$script_dir/plugins/dravux/skills/dravux
+safety_helper=$script_dir/scripts/install_safety.py
 version=$(cat "$script_dir/VERSION") \
   || fail 3 'The bundled VERSION file is missing.'
 
@@ -103,14 +104,12 @@ if [ "$scope" = personal ]; then
     *) fail 3 'HOME must be set to an absolute path for a personal install.' ;;
   esac
   [ "$HOME" != / ] || fail 3 'Refusing to use / as HOME.'
-  base_dir=$(CDPATH= cd -- "$HOME" && pwd -P) \
+  base_dir=$(python3 -B "$safety_helper" home "$HOME") \
     || fail 3 'Could not resolve HOME to a physical directory; nothing was installed.'
   [ "$base_dir" != / ] || fail 3 'Refusing to use / as the physical HOME directory.'
 else
-  [ -d "$project_dir" ] && [ ! -L "$project_dir" ] \
-    || fail 3 'The project directory must already exist and must not be a symlink.'
-  base_dir=$(CDPATH= cd -- "$project_dir" && pwd -P) \
-    || fail 3 'Could not resolve the project directory.'
+  base_dir=$(python3 -B "$safety_helper" project "$project_dir") \
+    || fail 3 'Could not safely enter the project directory.'
 fi
 
 case "$platform" in
@@ -149,14 +148,8 @@ verify_safe_parent_chain "$base_dir" "$platform_dir" "$skills_dir" \
 
 parent_dir=$skills_dir
 
-staging=$(mktemp -d "$parent_dir/.dravux-install.XXXXXX") \
-  || fail 5 'Could not create a private staging directory.'
-
-safety_helper=$script_dir/scripts/install_safety.py
 platform_name=${platform_dir##*/}
-staging_name=${staging##*/}
-staging_identity=$(python3 -B "$safety_helper" record "$base_dir" "$platform_name" "$staging_name") \
-  || fail 5 'Could not bind staging to safe install directories; installation stopped.'
+staging=
 
 cleanup() {
   if [ -n "${staging-}" ]; then
@@ -164,7 +157,16 @@ cleanup() {
       || printf '%s\n' 'WARNING: staging moved or changed; cleanup refused to touch the replacement.' >&2
   fi
 }
-trap cleanup EXIT HUP INT TERM
+trap cleanup EXIT
+trap 'exit 129' HUP
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+staging_record=$(python3 -B "$safety_helper" record "$base_dir" "$platform_name") \
+  || fail 5 'Could not create and bind staging to safe install directories; installation stopped.'
+staging_name=${staging_record%% *}
+staging_identity=${staging_record#* }
+staging=$parent_dir/$staging_name
 
 cp -R "$source_dir"/. "$staging"/ \
   || fail 5 'Copy failed; installation stopped.'

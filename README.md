@@ -41,13 +41,13 @@ assets, a packaged release is not yet available.
 |---|---|
 | `dravux.zip` | Claude Chat/Cowork custom-skill upload, where enabled |
 | `Dravux-OpenAI-Plugin-Source.zip` | Codex/ChatGPT local plugin source, where the host supports local plugins |
-| `Dravux-1.0.2.zip` | Full engineering release, local installers, offline tests, and both embedded installer ZIPs |
+| `Dravux-1.0.3.zip` | Full engineering release, local installers, offline tests, and both embedded installer ZIPs |
 | `SHA256SUMS.txt` | Compare the matching archive digest before extraction, upload, or execution |
 
 GitHub's automatically generated **Source code** archives are source snapshots, not the packaged
 release. They do not contain the built installer ZIPs. Download `SHA256SUMS.txt` alongside your
 chosen asset and follow the integrity steps below. Checksums detect corruption and inconsistency;
-1.0.2 has no publisher signature and does not independently authenticate its publisher.
+1.0.3 has no publisher signature and does not independently authenticate its publisher.
 
 ## Choose your path
 
@@ -67,13 +67,13 @@ Keep the archive unopened, calculate its SHA-256 digest, and compare it with the
 the accompanying `SHA256SUMS.txt`:
 
 ```bash
-shasum -a 256 Dravux-1.0.2.zip
+shasum -a 256 Dravux-1.0.3.zip
 shasum -a 256 dravux.zip
 shasum -a 256 Dravux-OpenAI-Plugin-Source.zip
 ```
 
 Check only the archive you actually received. That fingerprint check catches corruption in transit; it
-does **not** prove who published the file. Dravux 1.0.2 has no cryptographic publisher signature.
+does **not** prove who published the file. Dravux 1.0.3 has no cryptographic publisher signature.
 **Publisher authenticity was not independently verified.**
 Full detail: [SECURITY.md](SECURITY.md).
 
@@ -123,7 +123,7 @@ sh verify-release.sh
 Expected last line:
 
 ```text
-VERIFIED: Dravux 1.0.2 release tree passed all offline checks
+VERIFIED: Dravux 1.0.3 release tree passed all offline checks
 ```
 
 Any other ending means the package did not verify. Stop; do not install it.
@@ -233,7 +233,7 @@ Only one of the archives is a Claude skill upload, and it is not the big one.
 
 - `dravux.zip` (in `INSTALLERS/Claude-Chat-Cowork/`) is the Claude upload. Unzipping it gives a
   single folder named `dravux` containing `SKILL.md`. That shape is what the upload requires.
-- `Dravux-1.0.2.zip` is the complete package for people installing from Terminal. It will be
+- `Dravux-1.0.3.zip` is the complete package for people installing from Terminal. It will be
   rejected as a skill upload.
 - `Dravux-OpenAI-Plugin-Source.zip` (in `INSTALLERS/Codex-ChatGPT/`) is plugin source for
   submission or workspace sharing, not a one-click installer.
@@ -297,7 +297,7 @@ Everything above is the beginner path. Everything below is the full detail.
 
 1. For a downloaded archive, complete the pre-extraction digest check above.
 2. Only after it matches, unzip the release.
-3. Open Terminal and change into the `Dravux-1.0.2` folder.
+3. Open Terminal and change into the `Dravux-1.0.3` folder.
 4. Run the internal consistency verifier before installing or running anything:
 
 ```bash
@@ -307,12 +307,12 @@ sh verify-release.sh
 Expected last line:
 
 ```text
-VERIFIED: Dravux 1.0.2 release tree passed all offline checks
+VERIFIED: Dravux 1.0.3 release tree passed all offline checks
 ```
 
 ## Create a disposable acceptance project
 
-Run this from the extracted `Dravux-1.0.2` folder. It creates a uniquely named Desktop project and
+Run this from the extracted `Dravux-1.0.3` folder. It creates a uniquely named Desktop project and
 copies the acceptance fixtures into it:
 
 ```bash
@@ -329,6 +329,23 @@ when instructed below.
 
 Choose exactly one. Do not install both a plain skill copy and a plugin copy for the same app;
 duplicate copies cause confusing discovery or shadowing.
+
+### Via npx (after v1.0.3 is published)
+
+Requires Node.js 18 or newer, macOS or Linux with `sh`, and Python 3.8 or newer.
+The GitHub route downloads the tagged package; no npm publication is required.
+Review the tagged source and the [integrity limits](SECURITY.md) before running it.
+
+```bash
+npx --yes github:chaddidit/Dravux#v1.0.3 --help
+npx --yes github:chaddidit/Dravux#v1.0.3 --codex --project-dir "$DRAVUX_TEST_PROJECT"
+npx --yes github:chaddidit/Dravux#v1.0.3 verify --codex --project-dir "$DRAVUX_TEST_PROJECT"
+```
+
+Use `--claude` for Claude, or replace `--project-dir` and its path with `--personal`
+to install under `HOME`. The project must already exist. Existing installs are never overwritten.
+After a separate npm publication, `npx --yes dravux@1.0.3` accepts the same arguments.
+The launcher uses the bundled shell installers and adds no runtime dependencies.
 
 ### Option A — project-only install (recommended for first testing)
 
@@ -526,7 +543,7 @@ Start a new app session after any install, update, or removal.
 
 ## Reference and architecture
 
-- Package version: `1.0.2`
+- Package version: `1.0.3`
 - Report-contract version: `0.2.0`
 - Preflight-contract version: `1.0.0`
 - Operational-run-contract version: recorded as `operational_contract_version` in
@@ -536,7 +553,7 @@ Start a new app session after any install, update, or removal.
 ### Package map
 
 ```text
-Dravux-1.0.2/
+Dravux-1.0.3/
 ├── START_HERE.md                   Plain-language entry point
 ├── SECURITY.md                     Integrity gate, residual risks, vulnerability reporting
 ├── INSTALLERS/                     Guides; built release includes ready-made archives

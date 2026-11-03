@@ -14,6 +14,21 @@
 - Scoped Windows CI to portable contract/preflight/run tests; full packaging and installer gates remain Linux/macOS. Safe output-directory creation refuses unsupported directory-descriptor platforms.
 - Added GitHub issue templates for bugs, docs, and features so public feedback has a clear path.
 
+## 1.0.3 — 2026-11-02
+
+- Added a dependency-free npx launcher for installation and verification with the existing Claude/Codex personal and project flags; bundled the hardened installer safety helper.
+- Kept local release output out of source inventories while retaining strict checks on extracted releases, and excluded Git internals and binary npm artifacts from package text checks.
+
+### Security hardening
+
+- `output-dir` refuses a `--base`, and any folder path it is about to report, that contains line breaks, control characters, text-direction controls, a byte-order mark or surrogates; the refusal names the character (for example U+202E). Zero-width joiners, non-joiners and soft hyphens stay allowed, so emoji, Persian and Urdu folder names work. The text is checked before and after the path is resolved and again just before the folder is reported, so the printed folder line cannot be spoofed.
+- `output-dir` holds the `dravux-audits` folder and the new audit folder open and asks the kernel where each one is. If a rename moved either into Dravux's own files, the run refuses and removes only the folders it created, and only while they are still the same empty folders; the `dravux-audits` folder is created, checked and removed through a parent folder the run holds open. When the system cannot report a folder's location, the run refuses instead of guessing.
+- `output-dir` says so plainly when a folder name is not valid UTF-8.
+- `install.sh` and `verify-install.sh` refuse a symlinked `--project-dir`, also when it is written with a trailing slash, and confirm after entering it that the folder entered is the folder that was checked. A project or HOME path that ends in a newline, or whose physical location contains line breaks, control characters, text-direction controls, a byte-order mark or surrogates, is refused, so installer receipt lines cannot be forged.
+- The installer removes its staging folder if binding it to the install directories fails, and exits after cleanup when interrupted.
+- The run validator requires a content hash for every successful acquisition and a 2xx or 3xx status for websites.
+- Text fields no longer count as filled in when they hold only spaces or invisible, format, combining-mark, private-use or unassigned characters. Text containing a lone surrogate is refused.
+
 ## 1.0.2 — 2026-07-28
 
 - Added the Dravux project website and a public GitHub Issues route for bugs, documentation problems, and feature requests, with a warning not to disclose private or sensitive information publicly.

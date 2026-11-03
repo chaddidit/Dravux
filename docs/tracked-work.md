@@ -24,6 +24,11 @@ Opened issues:
    and unsupported output-directory platforms. These changes still require exact-commit CI and
    release-owner manual checks; this page does not mark a GitHub issue closed.
 
+## Deferred to 1.0.4
+
+- Installer: check setuid bits and ownership; support 0775 `~/.claude`; address the glibc 2.28 requirement for `renameat2`.
+- Validator: make preflight errors in validate more informative; decide how to handle DNS names resolving to internal IPs, which requires network resolution.
+
 ## Next
 
 4. **Front-language pass** — Keep honesty; shorten integrity essays on the front door (done for
@@ -32,7 +37,7 @@ Opened issues:
 5. **CLI reference** — One page for `dravux_run.py` / `dravux_contract.py` commands and exit codes.
 6. **Windows-native operator path** — Optional `cmd`/PowerShell wrappers that call the same Python
    entry points; land only with Windows CI coverage (`docs/portability.md`).
-7. **GitHub Release artifacts** — Publish 1.0.2 (or next) with zips + `SHA256SUMS.txt` and short
+7. **GitHub Release artifacts** — Publish 1.0.3 with zips + `SHA256SUMS.txt` and short
    user-facing notes so download docs match reality.
 
 ## Not doing (for now)

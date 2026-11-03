@@ -9,7 +9,7 @@ Canonical policy: [SECURITY.md](../SECURITY.md). Release gates below must stay c
 
 - [ ] Before extracting, uploading, installing, or running any downloaded archive, calculate its SHA-256 digest and compare it with the exact matching entry in the accompanying `SHA256SUMS.txt`; stop on mismatch
 - [ ] Confirm the same-channel checksum, embedded manifest, and internal release record are described only as corruption/internal-consistency checks, never publisher authentication
-- [ ] Record that Dravux 1.0.2 has no cryptographic publisher signature
+- [ ] Record that Dravux 1.0.3 has no cryptographic publisher signature
 - [ ] Record this disclosure for every route without an independently trusted digest, signature, or provenance: Publisher authenticity was not independently verified.
 - [ ] Only after the outer archive digest matches, extract it and run `sh verify-release.sh` before any embedded installer is uploaded, installed, or run
 - [ ] Confirm the source checkout contains guides but no installer ZIPs; only a built engineering release injects them
@@ -52,7 +52,7 @@ sh verify-release.sh
 Fully offline; no credentials, network access, or package installs are required. Exit code `0` is success, and the expected final line is:
 
 ```
-VERIFIED: Dravux 1.0.2 release tree passed all offline checks
+VERIFIED: Dravux 1.0.3 release tree passed all offline checks
 ```
 
 ## Truthful release claims
