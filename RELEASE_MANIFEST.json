@@ -46,8 +46,8 @@
     {
       "mode": "0644",
       "path": ".github/workflows/ci.yml",
-      "sha256": "e067fc65bc4283d04b394d79f2d2aef0bdc7a31ee6ccaadabb94423658c718b9",
-      "size": 1725
+      "sha256": "82b81649d0c4fd54d30c508a7b93b8720852d00a33cc321f5ef53eb51bff3a17",
+      "size": 1724
     },
     {
       "mode": "0644",
@@ -790,8 +790,8 @@
     {
       "mode": "0644",
       "path": "tests/test_demos.py",
-      "sha256": "1df2a16f20a3439efe436bd0dbf196a2603261ffd1544ad88f9a8f9e019627c5",
-      "size": 6938
+      "sha256": "c9dbfc73a9492b687af0655ebd3499e391368d080eeb2faa56018007628a05de",
+      "size": 6937
     },
     {
       "mode": "0644",
