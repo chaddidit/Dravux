@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 # Every test module and method counts towards this number; a deleted test must change it, never vanish.
-EXPECTED_TEST_COUNT = 264
+EXPECTED_TEST_COUNT = 293
 SKILL = ROOT / "plugins" / "dravux" / "skills" / "dravux"
 VERSION = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
 sys.path.insert(0, str(SKILL / "scripts"))
@@ -110,7 +110,7 @@ class PackageTests(unittest.TestCase):
                 self.assertNotRegex(
                     tool,
                     r"\bDravux\b.*\b1\.0\.1\b",
-                    f"{item['path']} claims legacy tooling in the active 1.0.3 fixture set",
+                    f"{item['path']} claims legacy tooling in the active 1.0.4 fixture set",
                 )
             if item["path"] == "hostile/invalid-semver.invalid.json":
                 continue
@@ -135,19 +135,52 @@ class PackageTests(unittest.TestCase):
         self.assertIn("It does not give Claude a web", start)
 
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
-        self.assertLess(
-            readme.index("## Choose your path"),
-            readme.index("# Installation and reference"),
-            "the beginner path must come before installation and architecture",
-        )
-        self.assertLess(readme.index("## Choose your path"), readme.index("## Requirements"))
-        self.assertLess(readme.index("## The 60-second self-test"), readme.index("## Troubleshooting"))
-        self.assertLess(readme.index("## Troubleshooting"), readme.index("## Reference and architecture"))
-        self.assertIn("docs/capabilities.md", readme)
-        self.assertIn("START_HERE.md", readme)
+        self.assertLessEqual(len(readme.splitlines()), 150)
+        self.assertLess(readme.index("## Install"), readme.index("## Docs map"))
+        self.assertLess(readme.index("npx --yes dravux@"), readme.index("npx --yes github:"))
+        for name in ("docs/install.md", "docs/troubleshooting.md", "docs/cli-reference.md",
+                     "docs/capabilities.md", "START_HERE.md"):
+            self.assertIn(name, readme)
+        install = (ROOT / "docs" / "install.md").read_text(encoding="utf-8")
+        for section in ("## Requirements", "## Installation options", "## Confirm discovery",
+                        "## End-to-end acceptance test", "## Update or remove",
+                        "## Reference and architecture", "### Package map",
+                        "### Contracts and schemas", "### For contributors"):
+            self.assertIn(section, install)
+        self.assertLess(install.index("## Choose your path"), install.index("# Installation and reference"))
+        self.assertLess(install.index("## Choose your path"), install.index("## Requirements"))
+        self.assertLess(install.index("## The 60-second self-test"), install.index("## Reference and architecture"))
+        for command in ('cp -R fixtures "$DRAVUX_TEST_PROJECT/fixtures"',
+                        "/dravux:dravux", "$dravux:dravux",
+                        "claude plugin uninstall dravux@dravux", "codex plugin remove dravux@dravux"):
+            self.assertIn(command, install)
+        self.assertIn(f"npx --yes dravux@{VERSION}", readme)
+        self.assertIn("1.0.3 are also published to npm", readme)
+        self.assertIn("engineering ZIP", readme)
+
+        # npm includes only these explicit paths, directories, and automatic metadata files.
+        package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
+        bundled = package["files"] + ["README.md", "LICENSE", "package.json"]
+        prefix = f"https://github.com/chaddidit/Dravux/blob/v{VERSION}/"
+        tree_prefix = f"https://github.com/chaddidit/Dravux/tree/v{VERSION}/"
+        for name in ("README.md", "SECURITY.md"):
+            text = (ROOT / name).read_text(encoding="utf-8")
+            for target in re.findall(r"\]\(([^)]+)\)", text):
+                with self.subTest(source=name, link=target):
+                    if target.startswith((prefix, tree_prefix)):
+                        relative = target.split(f"/v{VERSION}/", 1)[1].split("#", 1)[0]
+                        self.assertTrue((ROOT / relative).exists(), target)
+                    elif not target.startswith(("https://", "http://", "#")):
+                        relative = target.split("#", 1)[0]
+                        self.assertTrue(any(relative == item or
+                                            (item.endswith("/") and relative.startswith(item))
+                                            for item in bundled), target)
+                        self.assertTrue((ROOT / relative).exists(), target)
+                    elif "github.com/chaddidit/Dravux/blob/" in target or "github.com/chaddidit/Dravux/tree/" in target:
+                        self.fail(f"unversioned npm documentation link: {target}")
 
     def test_troubleshooting_is_symptom_led_and_explains_the_correct_stop(self):
-        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        readme = (ROOT / "docs" / "troubleshooting.md").read_text(encoding="utf-8")
         for symptom in (
             "### Claude stopped before the audit and said `LIMITATION_ACK_REQUIRED`",
             "### I only got source text, not the real page",
@@ -161,7 +194,12 @@ class PackageTests(unittest.TestCase):
         self.assertIn("scripts/dravux_run.py output-dir", readme)
         self.assertIn("dravux-audits", readme)
         self.assertIn("single folder named `dravux` containing `SKILL.md`", readme)
-        self.assertIn("Installing Dravux never grants network access", readme)
+        self.assertIn("Installing Dravux never grants network access", (ROOT / "README.md").read_text(encoding="utf-8"))
+        self.assertIn("staff", readme)
+        self.assertIn("chmod g-w <path>", readme)
+        self.assertIn("getgrgid().gr_mem", readme)
+        self.assertIn("ENOSYS", readme)
+        self.assertIn("U+202A", readme)
 
     def test_installer_projection_guides_are_tracked_sources(self):
         guides = {
@@ -205,10 +243,47 @@ class PackageTests(unittest.TestCase):
         self.assertNotIn("- [x]", checklist)
         self.assertIn("git status", checklist)
 
+        reference = (ROOT / "docs" / "cli-reference.md").read_text(encoding="utf-8")
+        script_root = SKILL / "scripts"
+        for script, commands in (("dravux_contract.py", (None,)),
+                                 ("dravux_run.py", (None, "preflight", "validate", "output-dir"))):
+            for command in commands:
+                args = [sys.executable, "-B", str(script_root / script)]
+                if command is not None:
+                    args.append(command)
+                    self.assertIn(f"### `{command}`", reference)
+                proc = subprocess.run(args + ["--help"], capture_output=True, text=True)
+                self.assertEqual(proc.returncode, 0, proc.stderr)
+                for flag in set(re.findall(r"(?<!\w)--?[a-z][a-z-]*", proc.stdout)):
+                    self.assertIn(flag, reference, f"missing CLI flag from {script}: {flag}")
+        for exit_code in range(6):
+            self.assertIn(f"| `{exit_code}` |", reference)
+        for status in ("READY", "INVALID", "LOAD_ERROR", "LIMITATION_ACK_REQUIRED",
+                       "UNSUPPORTED", "CREATED", "REDIRECTED", "REFUSED"):
+            self.assertIn(f"`{status}`", reference)
+        self.assertIn("There are no subcommands", reference)
+        self.assertIn("There is no separate receipt command", reference)
+        self.assertIn("loaded-report JSON\nhas no `exit_code` field", reference)
+
+        tracked = (ROOT / "docs" / "tracked-work.md").read_text(encoding="utf-8")
+        self.assertIn("## Published in 1.0.4", tracked)
+        self.assertIn("**Pending release verification.**", tracked)
+        self.assertIn("## Published in 1.0.3", tracked)
+        self.assertNotIn("## Deferred to 1.0.4", tracked)
+        for criterion in ("A1", "A2", "A3", "B1", "B2", "B3", "B4", "C1", "C2", "C3", "C4",
+                          "D1", "D2", "D3", "D4", "D5"):
+            self.assertIn(f"**{criterion}", tracked)
+        self.assertIn("DNS-to-internal-IP validation", tracked.split("## Not doing", 1)[1])
+        self.assertIn("#8", tracked.split("## Still open", 1)[1])
+
     def test_artifact_guides_put_integrity_before_use_without_authenticity_overclaim(self):
         disclosure = "Publisher authenticity was not independently verified."
         guides = {
-            "README.md": ("## Verify a downloaded artifact before using it", "## The 60-second self-test"),
+            "README.md": ("## Verify a downloaded artifact before using it", "## Install"),
+            "docs/install.md": ("## Verify a downloaded artifact before using it", "## The 60-second self-test"),
+            "docs/troubleshooting.md": ("## Artifact integrity gate", "### Claude stopped"),
+            "docs/cli-reference.md": ("## Artifact integrity gate", "## Locate the scripts"),
+            "docs/capabilities.md": ("## Artifact integrity gate", "## Panel 1"),
             "START_HERE.md": ("## Verify the artifact before any route", "## Path 1"),
             "SECURITY.md": ("## Before you extract, upload, install, or run a download", "## What the integrity checks prove"),
             "docs/quickstart.md": ("## Artifact integrity gate", "## Quick self-test"),

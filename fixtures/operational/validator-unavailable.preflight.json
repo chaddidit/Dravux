@@ -1,7 +1,7 @@
 {
   "$schema": "../../schemas/dravux-preflight.schema.json",
   "preflight_version": "1.0.0",
-  "package_version": "1.0.3",
+  "package_version": "1.0.4",
   "surface": {
     "provider": "Example provider",
     "product": "Ordinary chat",

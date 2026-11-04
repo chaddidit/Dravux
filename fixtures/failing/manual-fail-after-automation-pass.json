@@ -76,7 +76,7 @@
   "run": {
     "started_at": "2026-07-16T15:30:00Z",
     "completed_at": "2026-07-16T15:31:00Z",
-    "tooling": ["Dravux fixture harness 1.0.3", "manual keyboard review"],
+    "tooling": ["Dravux fixture harness 1.0.4", "manual keyboard review"],
     "environment": "Synthetic offline fixture"
   }
 }

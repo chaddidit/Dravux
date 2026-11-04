@@ -1,6 +1,6 @@
 {
   "name": "dravux",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Install and verify the portable Dravux accessibility-audit skill.",
   "license": "MIT",
   "repository": {
@@ -18,6 +18,7 @@
     "VERSION",
     "THIRD_PARTY_NOTICES.md",
     "SECURITY.md",
+    "plugins/dravux/THIRD_PARTY_NOTICES.md",
     "plugins/dravux/skills/dravux/"
   ],
   "engines": {

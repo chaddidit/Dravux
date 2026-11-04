@@ -54,6 +54,7 @@ def tree_digest(root):
 class DistributionTests(unittest.TestCase):
     def test_end_user_docs_match_raw_and_plugin_routes(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        install_guide = (ROOT / "docs" / "install.md").read_text(encoding="utf-8")
         claude_adapter = (ROOT / "adapters" / "claude" / "README.md").read_text(encoding="utf-8")
         codex_adapter = (ROOT / "adapters" / "codex" / "README.md").read_text(encoding="utf-8")
 
@@ -63,9 +64,11 @@ class DistributionTests(unittest.TestCase):
             'cp -R fixtures "$DRAVUX_TEST_PROJECT/fixtures"',
             "claude plugin uninstall dravux@dravux",
             "codex plugin remove dravux@dravux",
-            "## Troubleshooting",
         ):
-            self.assertIn(expected, readme)
+            self.assertIn(expected, install_guide)
+        self.assertIn(f"/blob/v{VERSION}/docs/install.md", readme)
+        self.assertIn(f"/blob/v{VERSION}/docs/troubleshooting.md", readme)
+        self.assertTrue((ROOT / "docs/troubleshooting.md").read_text(encoding="utf-8").startswith("# Troubleshooting\n"))
         self.assertIn("/dravux:dravux", claude_adapter)
         self.assertIn("$dravux:dravux", codex_adapter)
         self.assertIn('cd "$DRAVUX_COPY"', claude_adapter)
@@ -101,7 +104,7 @@ class DistributionTests(unittest.TestCase):
             Path("out/generated.json"),
             Path("session.log"),
             Path("dist-release/SHA256SUMS.txt"),
-            Path("dravux-1.0.3.tgz"),
+            Path("dravux-1.0.4.tgz"),
             Path("node_modules/example/package.json"),
         )
         for path in excluded:
@@ -251,6 +254,8 @@ os.execv(PYTHON, [PYTHON] + sys.argv[1:])
                     installed = self.run_script("install.sh", *args, cwd=unrelated, home=home)
                     self.assertEqual(installed.returncode, 0, installed.stderr)
                     self.assertTrue(destination.is_dir())
+                    for name in ("LICENSE", "THIRD_PARTY_NOTICES.md"):
+                        self.assertEqual((destination / name).read_bytes(), (ROOT / name).read_bytes())
                     self.assertEqual(tree_digest(SOURCE), tree_digest(destination))
                     before = tree_digest(destination)
                     verified = self.run_script("verify-install.sh", *args, cwd=unrelated, home=home)
@@ -432,7 +437,8 @@ os.execv(PYTHON, [PYTHON] + sys.argv[1:])
             skills.chmod(0o777)
             verified = self.run_script("verify-install.sh", *args)
             self.assertEqual(verified.returncode, 5, verified.stderr)
-            self.assertIn("group/world-writable", verified.stderr)
+            self.assertIn("world-writable install entry", verified.stderr)
+            self.assertIn("unsafe owner, group or mode", verified.stderr)
             skills.chmod(0o700)
 
             physical = project / ".agents-real"
@@ -632,10 +638,16 @@ os.execv(PYTHON, [PYTHON] + sys.argv[1:])
                 self.assertIn("dravux/fixtures/passing/known-pass.json", names)
                 self.assertIn("dravux/fixtures/hostile/unknown-property.invalid.json", names)
                 self.assertTrue(all(name.startswith("dravux/") for name in names))
+                for name in ("LICENSE", "THIRD_PARTY_NOTICES.md"):
+                    self.assertEqual(archive.read("dravux/" + name), (ROOT / name).read_bytes())
             with zipfile.ZipFile(outputs[0] / "Dravux-OpenAI-Plugin-Source.zip") as archive:
                 names = archive.namelist()
                 self.assertIn("Dravux-OpenAI-Plugin-Source/.agents/plugins/marketplace.json", names)
                 self.assertIn("Dravux-OpenAI-Plugin-Source/plugins/dravux/.codex-plugin/plugin.json", names)
+                for prefix in ("plugins/dravux/", "plugins/dravux/skills/dravux/"):
+                    for name in ("LICENSE", "THIRD_PARTY_NOTICES.md"):
+                        self.assertEqual(archive.read("Dravux-OpenAI-Plugin-Source/" + prefix + name),
+                                         (ROOT / name).read_bytes())
 
             for archive_path in outputs[0].glob("*.zip"):
                 with zipfile.ZipFile(archive_path) as archive:

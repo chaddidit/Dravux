@@ -4,6 +4,16 @@ This page answers one question: **on the product you are actually using, what ca
 
 You do not need to be technical to read it. Start with "The one thing to understand", then find your product in the tables.
 
+## Artifact integrity gate
+
+Before extracting, uploading, installing, or running a downloaded archive, keep it unopened,
+calculate `shasum -a 256 <archive-name>`, and compare its exact entry in `SHA256SUMS.txt`.
+Continue only when it matches. Same-channel checksums establish consistency, not publisher identity.
+Dravux 1.0.4 has no cryptographic publisher signature.
+**Publisher authenticity was not independently verified.** See [SECURITY.md](../SECURITY.md).
+From an extracted engineering ZIP or source checkout, run its `sh verify-release.sh` before use;
+that file is absent from the npm launcher.
+
 ## The one thing to understand
 
 Installing or uploading Dravux does not give the assistant any new powers.
@@ -130,3 +140,6 @@ The exact wording of a settings menu label, every "you connect it" value, and th
 - `plugins/dravux/skills/dravux/references/surface-modes.md` — evidence modes and the required downgrade prompt
 - `plugins/dravux/skills/dravux/references/github-evidence.md` — evidence need to route mapping
 - `plugins/dravux/skills/dravux/references/input-capabilities.md` — what each input type can and cannot establish
+
+See [Install](install.md) for the published npm and GitHub-tag routes, and
+[CLI reference](cli-reference.md) for the checking programs.

@@ -8,7 +8,7 @@ For a downloaded artifact, do not extract, upload, install, or run it until its 
 the exact entry in the accompanying `SHA256SUMS.txt`. After a matching release-archive digest,
 extract it and run `sh verify-release.sh` before the plugin commands below. A same-channel checksum,
 the embedded manifest, and the internal release record detect corruption or inconsistency only; they
-do not authenticate the publisher. Dravux 1.0.3 has no cryptographic publisher signature.
+do not authenticate the publisher. Dravux 1.0.4 has no cryptographic publisher signature.
 **Publisher authenticity was not independently verified.**
 Details: [SECURITY.md](../../SECURITY.md).
 
@@ -71,6 +71,6 @@ the full surface-by-surface picture.
   --project-dir <your project folder>` from the top of this package.
 - **The app still shows an old copy.** Remove the old plugin and the old local source, then add this
   package's folder again. The commands are in
-  [the README's update section](../../README.md#update-or-remove).
+  [Update or remove](../../docs/install.md#update-or-remove).
 - **You are in ordinary ChatGPT Chat.** There is no plugin route there. Anything produced that way
   is an unvalidated draft, not a Dravux result.

@@ -9,7 +9,7 @@ Canonical policy: [SECURITY.md](../SECURITY.md). Release gates below must stay c
 
 - [ ] Before extracting, uploading, installing, or running any downloaded archive, calculate its SHA-256 digest and compare it with the exact matching entry in the accompanying `SHA256SUMS.txt`; stop on mismatch
 - [ ] Confirm the same-channel checksum, embedded manifest, and internal release record are described only as corruption/internal-consistency checks, never publisher authentication
-- [ ] Record that Dravux 1.0.3 has no cryptographic publisher signature
+- [ ] Record that Dravux 1.0.4 has no cryptographic publisher signature
 - [ ] Record this disclosure for every route without an independently trusted digest, signature, or provenance: Publisher authenticity was not independently verified.
 - [ ] Only after the outer archive digest matches, extract it and run `sh verify-release.sh` before any embedded installer is uploaded, installed, or run
 - [ ] Confirm the source checkout contains guides but no installer ZIPs; only a built engineering release injects them
@@ -31,6 +31,10 @@ Canonical policy: [SECURITY.md](../SECURITY.md). Release gates below must stay c
 - [ ] A bare report cannot satisfy the operational run contract
 - [ ] Ordinary Chat attachments are not described as native installation
 - [ ] Claude custom-skill ZIP and OpenAI plugin-source distribution are documented separately
+- [ ] Canonical skill `LICENSE` and `THIRD_PARTY_NOTICES.md` are byte-identical to the root copies and present in both ZIPs, npm, and a plain install
+- [ ] README is at most 150 lines, npm links to absent files are pinned to v1.0.4, and CLI reference matches parser help and exit codes
+- [ ] npm install uses `npx --yes dravux@1.0.4`; GitHub-tag route is the alternative; verify registry publication and record the actual npm file count
+- [ ] Replace the pending 1.0.4 tracking record with exact commit, CI, artifact, checksum, npm, and issue facts only after release
 - [ ] Third-party notices match the package references; final originality/similarity review remains an owner release check
 - [ ] MIT License and copyright holder match `LICENSE`
 - [ ] Release archives contain zero operating-system metadata at any depth (`.DS_Store`, `._*`, `__MACOSX`, `Thumbs.db`, `desktop.ini`)
@@ -52,13 +56,13 @@ sh verify-release.sh
 Fully offline; no credentials, network access, or package installs are required. Exit code `0` is success, and the expected final line is:
 
 ```
-VERIFIED: Dravux 1.0.3 release tree passed all offline checks
+VERIFIED: Dravux 1.0.4 release tree passed all offline checks
 ```
 
 ## Truthful release claims
 
 State only what the package actually enforces.
 
-- Contract strings reject ASCII controls, DEL, NEL, and Unicode line/paragraph separators. Text receipts escape remaining C1 controls and Unicode formatting characters, including bidi overrides, while JSON preserves the original contract values. `--json` is authoritative; diagnostics quote untrusted text as escaped ASCII literals. See [SECURITY.md](../SECURITY.md).
+- Contract strings reject all C0 controls (including TAB, LF and CR), DEL, all C1 controls, Unicode line/paragraph separators, U+202A–U+202E, U+2066–U+2069, U+061C, U+200E and U+200F, even with visible text. ZWJ, ZWNJ and soft hyphen remain allowed. Text receipts escape controls and Unicode formatting characters, while JSON preserves the original contract values. `--json` is authoritative; diagnostics quote untrusted text as escaped ASCII literals. See [SECURITY.md](../SECURITY.md).
 - Bounded JSON ingress is a shipped operational control: input is capped at 4 MiB, each decoded string and object key at 262,144 characters, and numeric tokens at 128 characters, with additional depth, item, and structural-token limits. The schemas do not publish `maxLength`, so schema inspection alone does not describe these loader limits.
 - Reconcile the release inventory against `git status` before committing. The release manifest is built from the working tree, so intentional untracked shipped files must be included in the commit or the pushed tree will not match the manifest.

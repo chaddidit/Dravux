@@ -61,7 +61,9 @@ class OperationalContractTests(unittest.TestCase):
         payload = copy.deepcopy(self.run)
         hostile = "test\u009b31m\u202e\u2066"
         payload["preflight"]["surface"]["product"] = hostile
-        self.assertEqual(validate_run(payload), [])
+        # 1.0.4: validation refuses these controls; display escaping stays as defense in depth.
+        errors = validate_run(payload)
+        self.assertTrue(any("U+009B" in error for error in errors), errors)
         result = {"valid": True, "receipt": build_receipt(payload)}
         text = StringIO()
         with redirect_stdout(text):
@@ -1104,7 +1106,7 @@ class OutputDirectoryContractTests(unittest.TestCase):
     def test_guarded_tree_redirects_beside_the_installation(self):
         with tempfile.TemporaryDirectory() as tmp:
             workspace = Path(tmp).resolve()
-            installed = workspace / "dravux-1.0.3"
+            installed = workspace / "dravux-1.0.4"
             nested = installed / "plugins" / "dravux" / "skills" / "dravux"
             nested.mkdir(parents=True)
             (installed / "RELEASE_MANIFEST.json").write_text("{}", encoding="utf-8")

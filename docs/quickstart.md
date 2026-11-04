@@ -8,7 +8,7 @@ This page is the technical quickstart. If you are not working in a terminal, sta
 Before extracting, uploading, installing, or running a downloaded archive, keep it unopened and run
 `shasum -a 256 <archive-name>`. Compare that digest with the exact archive entry in the accompanying
 `SHA256SUMS.txt`; continue only when it matches. That fingerprint check catches corruption in
-transit; it does **not** prove who published the file. Dravux 1.0.3 has no cryptographic publisher signature.
+transit; it does **not** prove who published the file. Dravux 1.0.4 has no cryptographic publisher signature.
 **Publisher authenticity was not independently verified.**
 Details: [SECURITY.md](../SECURITY.md).
 
@@ -16,6 +16,11 @@ After the digest matches, extract the engineering archive and run `sh verify-rel
 installer, upload, or Dravux execution. A source checkout intentionally contains no installer ZIPs;
 run the verifier on the checkout before local use, or obtain the separately published archive needed
 by the upload route.
+
+This technical page uses the engineering ZIP or source checkout. The slim npm package lacks
+`verify-release.sh`, fixtures, and demo helpers. For the published npm install
+`npx --yes dravux@1.0.4` (1.0.3 is also published), see [Install](install.md#via-npx-npm-registry-github-tag-alternative).
+The GitHub-tag route is the alternative.
 
 ## Quick self-test (about 10 seconds)
 
@@ -28,7 +33,7 @@ sh verify-release.sh
 This is fully offline. It needs no credentials, no network access, and no package installs. Exit code `0` is success, and the expected final line is:
 
 ```
-VERIFIED: Dravux 1.0.3 release tree passed all offline checks
+VERIFIED: Dravux 1.0.4 release tree passed all offline checks
 ```
 
 Any other exit code means the release tree did not verify. Do not treat the package as usable until this passes.
@@ -93,6 +98,8 @@ python3 -B plugins/dravux/skills/dravux/scripts/dravux_run.py validate path/to/r
 ```
 
 Operational exit `0` emits the required run receipt. A bare report is not an established audit run. If either validator cannot execute, return `UNVALIDATED DRAFT — NOT A DRAVUX RESULT`.
+
+See [CLI reference](cli-reference.md) for every subcommand, flag and exit code.
 
 ## 7. Finish honestly
 
