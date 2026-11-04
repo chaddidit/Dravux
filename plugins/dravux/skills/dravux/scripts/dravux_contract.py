@@ -233,10 +233,28 @@ def _reject_duplicates(value: Any, label: str, errors: List[str]) -> None:
         errors.append(f"{label} contains duplicate entries: {', '.join(_quoted(item) for item in duplicates)}")
 
 
-# Codepoints outside the C0 range that still break a rendered receipt into
-# extra lines under str.splitlines(): DEL, NEL, LINE SEPARATOR, PARAGRAPH SEPARATOR.
-_FORBIDDEN_CODEPOINTS = frozenset({0x7F, 0x85, 0x2028, 0x2029})
+# Keep the existing line-break bans as well as C1 and directional controls.
+_FORBIDDEN_CODEPOINTS = frozenset(
+    list(range(0x20)) + list(range(0x7F, 0xA0))
+    + list(range(0x202A, 0x202F)) + list(range(0x2066, 0x206A))
+    + [0x061C, 0x200E, 0x200F, 0x2028, 0x2029]
+)
 _SURROGATE_PATTERN = re.compile(r"[\ud800-\udfff]")
+
+
+def _validate_text_controls(value: Any, label: str, errors: List[str]) -> None:
+    if isinstance(value, str):
+        for character in value:
+            if ord(character) in _FORBIDDEN_CODEPOINTS:
+                errors.append(f"{label} contains forbidden control U+{ord(character):04X}")
+                break
+    elif isinstance(value, dict):
+        for key, item in value.items():
+            field = key if isinstance(key, str) and (key.isidentifier() or key == "$schema") else f"[{_quoted(key)}]"
+            _validate_text_controls(item, f"{label}.{field}" if label else field, errors)
+    elif isinstance(value, list):
+        for index, item in enumerate(value):
+            _validate_text_controls(item, f"{label}[{index}]", errors)
 
 
 # Code points that render as nothing yet are not classed as spaces or format characters.
@@ -252,9 +270,7 @@ def _is_nonempty_string(value: Any) -> bool:
     # str.strip() keeps U+200B, U+FEFF and U+2800, so an invisible-only string would count as text.
     if not isinstance(value, str) or not any(_is_visible(ch) for ch in value):
         return False
-    return not _SURROGATE_PATTERN.search(value) and not any(
-        ord(ch) < 0x20 or ord(ch) in _FORBIDDEN_CODEPOINTS for ch in value
-    )
+    return not _SURROGATE_PATTERN.search(value) and not any(ord(ch) in _FORBIDDEN_CODEPOINTS for ch in value)
 
 
 def _is_string_member(value: Any, allowed: Collection[str]) -> bool:
@@ -387,6 +403,7 @@ def validate_report(report: Any) -> List[str]:
     _require_keys(report, REPORT_REQUIRED, "report", errors)
     if not isinstance(report, dict):
         return errors
+    _validate_text_controls(report, "", errors)
     _reject_unknown(report, REPORT_ALLOWED, "report", errors)
     if "$schema" in report and not _is_nonempty_string(report.get("$schema")):
         errors.append("report.$schema must be a non-empty string when present")

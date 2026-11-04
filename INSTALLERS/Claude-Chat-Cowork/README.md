@@ -67,4 +67,4 @@ and it will stop and ask you rather than quietly downgrading the evidence.
   not the large package archive. Only `dravux.zip` has the folder shape Claude requires.
 - **The skill is on but nothing happens.** Start a fresh conversation.
 - **Dravux stops and asks permission before auditing.** That is the design. See
-  [Troubleshooting](../../README.md#troubleshooting).
+  [Troubleshooting](../../docs/troubleshooting.md).

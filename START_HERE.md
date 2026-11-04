@@ -19,8 +19,9 @@ assistant you already use. If the assistant cannot reach a page, Dravux says so 
 | Comfortable in Terminal, using Claude Code or the Codex command line | [Path 3](#path-3--claude-code-or-codex-command-line) | 5 minutes |
 | Maintaining, packaging, or reviewing Dravux itself | [Path 4](#path-4--maintainer-or-developer) | 15 minutes |
 
-Everything below is offline. Nothing in this package sends data anywhere, installs software, or
-asks for a password, a card, or an API key.
+The bundled validators and self-tests are offline and need no password, card, or API key.
+The npx route downloads the published launcher; installing copies the skill into your chosen project
+or personal folder.
 
 ## Verify the artifact before any route
 
@@ -96,7 +97,7 @@ then starting a fresh session so the app notices the new plugin.
 self-test first, before any real website.
 
 **Where reports go:** into the conversation, and into a folder you choose. See
-[Where did my report go?](README.md#where-did-my-report-go) if you cannot find one.
+[Where did my report go?](docs/troubleshooting.md#where-did-my-report-go) if you cannot find one.
 
 **Honest limit:** ordinary ChatGPT Chat has no plugin route at all. Attaching these files to a chat
 gives the assistant reading material, not a working Dravux installation, and any answer produced
@@ -106,22 +107,25 @@ that way is an unvalidated draft.
 
 ## Path 3 — Claude Code or Codex command line
 
-**What you need:** macOS, Python 3.8 or newer, and Terminal.
+**What you need:** macOS or Linux, Python 3.8 or newer, Node.js 18 or newer, and Terminal.
 
 **What to do:**
 
 ```bash
-sh verify-release.sh
-sh install.sh --claude --project-dir "$HOME/Desktop/Dravux-Test"
-sh verify-install.sh --claude --project-dir "$HOME/Desktop/Dravux-Test"
+npx --yes dravux@1.0.4 --claude --project-dir "$HOME/Desktop/Dravux-Test"
+npx --yes dravux@1.0.4 verify --claude --project-dir "$HOME/Desktop/Dravux-Test"
 ```
 
 Swap `--claude` for `--codex` for the Codex command line. Create the project folder first; the
 installer refuses to guess it, and it refuses to overwrite anything that already exists.
 
-**What success looks like:** the first command ends with
-`VERIFIED: Dravux 1.0.4 release tree passed all offline checks`, and the third confirms the installed
-copy matches the shipped copy byte for byte.
+**What success looks like:** installation succeeds and verification confirms the installed copy
+matches the shipped copy byte for byte. Dravux 1.0.4 and 1.0.3 are published to npm. The alternative
+GitHub-tag route is `npx --yes github:chaddidit/Dravux#v1.0.4` with the same flags.
+For a verified engineering ZIP or source checkout, use `sh install.sh` and `sh verify-install.sh`
+with those flags; its earlier `sh verify-release.sh` gate ends with
+`VERIFIED: Dravux 1.0.4 release tree passed all offline checks`.
+The npm package does not include that release verifier.
 
 **Where reports go:** a `dravux-audits` folder outside the installed skill and outside this package.
 Ask for the exact location with:
@@ -130,7 +134,8 @@ Ask for the exact location with:
 python3 <skill-root>/scripts/dravux_run.py output-dir
 ```
 
-**Read next:** [README.md](README.md) for the 60-second self-test and the first website test.
+**Read next:** [Install and reference](docs/install.md#the-60-second-self-test) for the
+60-second self-test and the first website test (engineering ZIP or source checkout).
 
 ---
 
@@ -143,7 +148,7 @@ PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest discover -s tests -p 'test_*.py
 python3 -B scripts/verify_distribution.py
 ```
 
-Then read, in order: [README.md](README.md) (architecture and reference sections at the end),
+Then read, in order: [Install and reference](docs/install.md#reference-and-architecture),
 [docs/quickstart.md](docs/quickstart.md), [docs/portability.md](docs/portability.md),
 [docs/release-checklist.md](docs/release-checklist.md), [SECURITY.md](SECURITY.md), and
 [docs/capabilities.md](docs/capabilities.md) for exactly which surface can do which kind of
@@ -156,7 +161,7 @@ produces byte-identical archives every time.
 
 ## If something stops you
 
-Go to [Troubleshooting](README.md#troubleshooting) in the README. It is organised by what you saw on
+Go to [Troubleshooting](docs/troubleshooting.md). It is organised by what you saw on
 screen, not by what the internals are called. The most common surprise —
 `LIMITATION_ACK_REQUIRED`, where Dravux stops and asks before auditing — is Dravux working
 correctly, not an error.

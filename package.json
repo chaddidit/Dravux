@@ -18,6 +18,7 @@
     "VERSION",
     "THIRD_PARTY_NOTICES.md",
     "SECURITY.md",
+    "plugins/dravux/THIRD_PARTY_NOTICES.md",
     "plugins/dravux/skills/dravux/"
   ],
   "engines": {

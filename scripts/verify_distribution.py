@@ -639,7 +639,9 @@ def main():
     )
     copyright_holder = re.sub(r"^Copyright \(c\) [0-9]{4} ", "", copyright_line)
     require(bool(copyright_holder), "MIT license copyright holder is missing")
-    allowed_name_files = {Path("LICENSE"), Path("plugins/dravux/LICENSE")}
+    allowed_name_files = {
+        Path("LICENSE"), Path("plugins/dravux/LICENSE"), Path("plugins/dravux/skills/dravux/LICENSE")
+    }
     for path in release_paths():
         if not path.is_file() or path.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp", ".zip"}:
             continue

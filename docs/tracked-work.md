@@ -34,8 +34,8 @@ Dravux 1.0.3 was published on November 3, 2026, after
 - These checksums come from the same channel as the downloads. They establish consistency, not
   publisher identity. 1.0.3 has no cryptographic publisher signature, and publisher authenticity was
   not independently verified. Details: [SECURITY.md](../SECURITY.md).
-- The GitHub-tag route (`npx --yes github:chaddidit/Dravux#v1.0.3`) is published. npm registry
-  publication is separate and has not happened; `npx dravux@1.0.3` will not work until it does.
+- The GitHub-tag route (`npx --yes github:chaddidit/Dravux#v1.0.3`) and npm registry package
+  (`npx --yes dravux@1.0.3`) are published. Registry publication was separate from the GitHub release.
 - #9 covered publication of the release artifacts and short notes. Its completion does not mean the
   release-owner manual checks, any accessibility certification, or any other issue is complete.
 
@@ -54,26 +54,55 @@ tag.
    and unsupported output-directory platforms. Exact-commit CI passed for the release; release-owner
    manual checks are still separate, and this page does not mark a GitHub issue closed.
 
-## Deferred to 1.0.4
+## Published in 1.0.4
 
-- Installer: check setuid bits and ownership; support 0775 `~/.claude`; address the glibc 2.28 requirement for `renameat2`.
-- Validator: make preflight errors in validate more informative; decide how to handle DNS names resolving to internal IPs, which requires network resolution.
-- Packaging: include `LICENSE` and `THIRD_PARTY_NOTICES.md` in the canonical skill folder, so the
-  standalone Claude ZIP and plain installed skill copies keep them. Add archive and installed-copy
-  regression checks.
-- Packaging: make the slim npm package's documentation links and commands usable without the
-  engineering tree.
+**Pending release verification.** This is the implementation checklist, not a publication receipt.
+The integrator fills in the release URL, exact commit, CI runs, final test count, npm file count,
+artifact/checksum read-back and issue closure facts after publication. The user-facing release
+instructions use the published npm route `npx --yes dravux@1.0.4`; 1.0.3 is also on npm.
+The GitHub-tag route is the alternative. No 1.0.4 publication or CI result is certified here.
 
-## Next
+Implemented scope to verify in the integrated release:
 
-4. **Front-language pass** — Keep honesty; shorten integrity essays on the front door (done for
-   the main guides via `SECURITY.md`); continue plain-language edits in adapters and CHANGELOG
-   Highlights vs Engineering.
-5. **CLI reference** — One page for `dravux_run.py` / `dravux_contract.py` commands and exit codes.
-6. **Windows-native operator path** — Optional `cmd`/PowerShell wrappers that call the same Python
-   entry points; land only with Windows CI coverage (`docs/portability.md`).
+- **A1:** installer parent ownership checks; installed-copy ownership and setuid/setgid/sticky refusal.
+- **A2:** tightly bounded 0775 exception for a user-owned primary group with no other listed member;
+  macOS `staff` normally remains refused, with `chmod g-w <path>` guidance.
+- **A3:** Linux direct `renameat2` syscall fallback when libc lacks the wrapper; safe refusal on
+  unsupported architecture or syscall, never an overwriting rename.
+- **B1:** actionable preflight diagnostics in `validate`: JSON path, expected and bounded found value.
+- **B2:** escaped output-directory refusal/suggestion paths, including HOME-derived suggestions.
+- **B3:** guarded-root markers checked with `lstat`, regardless of type or dangling symlink.
+- **B4:** contract control/bidi rejection even alongside visible text; field/code-point diagnostics;
+  ZWJ, ZWNJ and soft hyphen remain allowed.
+- **C1:** canonical skill license/notices match root copies byte for byte.
+- **C2:** license/notices accompany both ZIPs, npm and plain installs.
+- **C3:** authoritative build/distribution inventories include the legal files, new tests and docs.
+- **C4:** npm allow-list and tests match the real dry-run list; final file count pending integrator.
+- **D1:** README front door at most 150 lines; full installation/reference and symptom-led help moved
+  to [Install](install.md) and [Troubleshooting](troubleshooting.md), preserving factual detail.
+- **D2:** npm-safe README/SECURITY links pinned to v1.0.4 for files absent from the slim package;
+  engineering-only commands are identified.
+- **D3:** npm-first 1.0.4 instructions, with the GitHub tag as the alternative and 1.0.3 publication retained.
+- **D4:** integrity before use, app-based upload, unchanged unsigned-publisher disclosures.
+- **D5 / [#7](https://github.com/chaddidit/Dravux/issues/7):** [CLI reference](cli-reference.md)
+  covers both validators' commands, flags and exits, derived from code/help. Ready for issue closure
+  after release; this document does not mark the issue closed itself.
+
+The deferred list is removed: its implementation items are above, and DNS resolution is explicitly
+under “Not doing” below. The 1.0.3 publication record remains historical evidence.
+
+## Still open
+
+- **[#8](https://github.com/chaddidit/Dravux/issues/8) Windows-native operator path:** optional
+  `cmd`/PowerShell wrappers need real Windows CI coverage; no native installer is claimed
+  ([Portability](portability.md)).
+- Release-owner manual checks and exact-commit independent verification remain separate gates.
 
 ## Not doing (for now)
+
+- **DNS-to-internal-IP validation:** permanently outside the offline validator because it requires
+  network resolution. Literal URL checks cannot detect a hostname resolving to an internal address;
+  acquisition tooling owns DNS and redirect safety ([SECURITY.md](../SECURITY.md)).
 
 - Claiming publisher authenticity without a signature.
 - A SaaS status page or “WCAG certified” badge.

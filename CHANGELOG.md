@@ -18,7 +18,20 @@
 
 ### Packaging and documentation
 
+- The skill folder now carries `LICENSE` and `THIRD_PARTY_NOTICES.md`, so the Claude upload `dravux.zip`, the OpenAI plugin source, the npm package and every plain install include them. The npm package grows from 32 to 34 files.
+- The README is a short front door. Installation options, discovery, acceptance testing, update and removal, the package map and contributor detail moved to `docs/install.md` and `docs/troubleshooting.md`.
+- New `docs/cli-reference.md` documents every `dravux_run.py` and `dravux_contract.py` command, flag and exit code (#7).
+- README and SECURITY.md links that point outside the npm package are pinned to the `v1.0.4` tag, so they work on the npm page.
+- `npx --yes dravux@1.0.4` is the primary install route; `npx --yes github:chaddidit/Dravux#v1.0.4` is the alternative.
+
 ### Security hardening
+
+- The installer refuses install-path folders owned by anyone other than you or root. `verify-install.sh` fails on installed files you do not own and on setuid, setgid or sticky bits.
+- A group-writable (0775) `~/.claude`, `~/.agents` or `skills` folder is accepted only when you own it, its group is your primary group, and nobody else is in that group. Any other group-writable or world-writable folder is refused with the reason and the `chmod` fix. On macOS the shared `staff` group stays refused.
+- On Linux with glibc older than 2.28, the installer calls the `renameat2` system call directly, still refusing to replace an existing install. Unsupported systems refuse instead of falling back to a replacing rename.
+- `validate` names the JSON path, what was expected and what was found for each preflight error.
+- Contract text fields refuse control characters (other than tab, line feed and carriage return) and text-direction controls even next to visible text, and the error names the field and the code point.
+- `output-dir` treats a `SKILL.md` or `RELEASE_MANIFEST.json` marker of any type, including a folder or a broken symlink, as Dravux files, and refuses to write there.
 
 ## 1.0.3 — 2026-11-02
 

@@ -71,6 +71,6 @@ the full surface-by-surface picture.
   --project-dir <your project folder>` from the top of this package.
 - **The app still shows an old copy.** Remove the old plugin and the old local source, then add this
   package's folder again. The commands are in
-  [the README's update section](../../README.md#update-or-remove).
+  [Update or remove](../../docs/install.md#update-or-remove).
 - **You are in ordinary ChatGPT Chat.** There is no plugin route there. Anything produced that way
   is an unvalidated draft, not a Dravux result.

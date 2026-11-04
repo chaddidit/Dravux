@@ -23,6 +23,27 @@ checks on the exact release commit. Host-app installation routes still require m
 The installer uses atomic exclusive rename on Linux and macOS. If the OS or filesystem does not
 support that operation, installation fails safely; it never falls back to merging directories.
 
+## Linux exclusive rename
+
+When libc provides `renameat2`, the installer uses it with `RENAME_NOREPLACE`.
+If the wrapper is missing (including glibc before 2.28), it uses `libc.syscall` directly:
+
+| Architecture | System call number |
+|---|---|
+| x86_64 | 316 |
+| aarch64 | 276 |
+| armv7 | 382 |
+| i386 | 353 |
+| ppc64le | 357 |
+| s390x | 347 |
+| riscv64 | 276 |
+
+Any other architecture, `ENOSYS`, `EINVAL`, or inability to run the call causes refusal with
+nothing installed. There is no fallback to a rename that can replace a destination.
+For owner/group permission refusals, including macOS `staff`, see
+[Troubleshooting](troubleshooting.md#installer-refused-an-owner-or-writable-parent).
+Windows-native installation remains open as [#8](https://github.com/chaddidit/Dravux/issues/8).
+
 ## Design rules (keep these)
 
 1. **Validators stay pure Python stdlib.** No POSIX-only calls in the contract or run validators

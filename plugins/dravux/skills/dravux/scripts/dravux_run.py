@@ -21,9 +21,11 @@ from dravux_contract import (  # noqa: E402
     INPUT_TYPES,
     _is_absolute_url,
     _is_nonempty_string,
+    _is_string_member,
     _parse_rfc3339_datetime,
     _is_rfc3339_datetime,
     _quoted,
+    _validate_text_controls,
     load_json_path,
     validate_report,
 )
@@ -247,6 +249,7 @@ def validate_preflight(profile: Any) -> List[str]:
     _require_object(profile, PREFLIGHT_REQUIRED, PREFLIGHT_ALLOWED, "preflight", errors)
     if not isinstance(profile, dict):
         return errors
+    _validate_text_controls(profile, "preflight", errors)
     if "$schema" in profile and not _is_nonempty_string(profile.get("$schema")):
         errors.append("preflight.$schema must be a non-empty string when present")
 
@@ -265,7 +268,7 @@ def validate_preflight(profile: Any) -> List[str]:
     target = profile.get("target")
     _require_object(target, TARGET_KEYS, TARGET_KEYS, "preflight.target", errors)
     if isinstance(target, dict):
-        if target.get("input_type") not in INPUT_TYPES:
+        if not _is_string_member(target.get("input_type"), INPUT_TYPES):
             errors.append("preflight.target.input_type is invalid")
         if not _is_nonempty_string(target.get("location")):
             errors.append("preflight.target.location must be a non-empty string")
@@ -282,7 +285,7 @@ def validate_preflight(profile: Any) -> List[str]:
         for key in ("code_execution", "bundled_files", "screenshots", "manual_evidence"):
             if not isinstance(capabilities.get(key), bool):
                 errors.append(f"preflight.capabilities.{key} must be boolean")
-        if capabilities.get("validator_execution") not in {"AVAILABLE", "UNAVAILABLE"}:
+        if not _is_string_member(capabilities.get("validator_execution"), {"AVAILABLE", "UNAVAILABLE"}):
             errors.append("preflight.capabilities.validator_execution is invalid")
         if capabilities.get("acquisition") not in ACQUISITION_LEVELS:
             errors.append("preflight.capabilities.acquisition is invalid")
@@ -291,27 +294,27 @@ def validate_preflight(profile: Any) -> List[str]:
 
     requested = profile.get("requested_mode")
     selected = profile.get("selected_mode")
-    if requested not in REQUEST_MODES:
+    if not _is_string_member(requested, REQUEST_MODES):
         errors.append("preflight.requested_mode is invalid")
-    if selected not in REQUEST_MODES:
+    if not _is_string_member(selected, REQUEST_MODES):
         errors.append("preflight.selected_mode is invalid")
     if (
         isinstance(target, dict)
         and target.get("input_type") == "WEBSITE"
-        and requested not in {"RENDERED_BROWSER", "RENDERED_DOM", "INTERACTIVE"}
+        and not _is_string_member(requested, {"RENDERED_BROWSER", "RENDERED_DOM", "INTERACTIVE"})
     ):
         errors.append("WEBSITE preflight.requested_mode must require rendered-page evidence")
-    if isinstance(capabilities, dict) and capabilities.get("acquisition") in ACQUISITION_TO_MODE:
+    if isinstance(capabilities, dict) and _is_string_member(capabilities.get("acquisition"), ACQUISITION_TO_MODE):
         maximum = ACQUISITION_TO_MODE[capabilities["acquisition"]]
-        if selected in MODE_RANK and MODE_RANK[selected] > MODE_RANK[maximum]:
+        if _is_string_member(selected, MODE_RANK) and MODE_RANK[selected] > MODE_RANK[maximum]:
             errors.append("preflight.selected_mode exceeds the declared acquisition capability")
-    if requested in MODE_RANK and selected in MODE_RANK and MODE_RANK[selected] > MODE_RANK[requested]:
+    if _is_string_member(requested, MODE_RANK) and _is_string_member(selected, MODE_RANK) and MODE_RANK[selected] > MODE_RANK[requested]:
         errors.append("preflight.selected_mode exceeds the requested mode")
     if (
         isinstance(capabilities, dict)
-        and capabilities.get("acquisition") in ACQUISITION_TO_MODE
-        and requested in MODE_RANK
-        and selected in MODE_RANK
+        and _is_string_member(capabilities.get("acquisition"), ACQUISITION_TO_MODE)
+        and _is_string_member(requested, MODE_RANK)
+        and _is_string_member(selected, MODE_RANK)
     ):
         # Routing is deterministic: the selected mode is exactly the weaker of the request and the
         # demonstrated acquisition ceiling. An acknowledgement only accepts a ceiling that is lower
@@ -334,6 +337,64 @@ def validate_preflight(profile: Any) -> List[str]:
     if not _is_nonempty_string(profile.get("next_action")):
         errors.append("preflight.next_action must be a non-empty string")
     return errors
+
+
+def _preflight_diagnostic(profile: Any, error: str) -> str:
+    """Add context for validate without changing legacy preflight API diagnostics."""
+    match = re.search(r"preflight(?:\.[\w$]+|\[\d+\])*", error)
+    path = match.group() if match else "preflight"
+    if error.startswith("WEBSITE preflight requires manual checks"):
+        path = "preflight.required_manual_checks"
+    value = profile
+    for field, index in re.findall(r"\.([\w$]+)|\[(\d+)\]", path[len("preflight"):]):
+        if field and isinstance(value, dict):
+            value = value.get(field, "<missing>")
+        elif index and isinstance(value, list) and int(index) < len(value):
+            value = value[int(index)]
+        else:
+            value = "<missing>"
+            break
+    choices = {
+        "preflight.target.input_type": sorted(INPUT_TYPES),
+        "preflight.capabilities.validator_execution": ["AVAILABLE", "UNAVAILABLE"],
+        "preflight.capabilities.acquisition": ACQUISITION_LEVELS,
+        "preflight.requested_mode": REQUEST_MODES,
+        "preflight.selected_mode": REQUEST_MODES,
+    }
+    expected = error.replace(" exceeds ", " must not exceed ")
+    if error.endswith("is invalid") and path in choices:
+        expected = "one of " + repr(choices[path])
+    elif "contains forbidden control" in error:
+        expected = "no forbidden control " + error.split("contains forbidden control ", 1)[1]
+    elif "contains unknown properties" in error:
+        expected = "no unknown properties; " + error
+    elif "contains duplicate entry" in error:
+        expected = "unique string entries"
+    elif "missing required fields:" in error:
+        expected = "object with required fields:" + error.split("missing required fields:", 1)[1]
+    return f"{path}: expected {expected}; found {repr(value)[:80]}"
+
+
+def _run_preflight_diagnostic(envelope: Any, error: str) -> str:
+    if error.startswith("run preflight must be READY, received "):
+        return "preflight: expected READY; found " + repr(error.split("received ", 1)[1])[:80]
+    comparisons = {
+        "run and preflight package versions disagree": ("package_version", ("package_version",)),
+        "report target input type does not match preflight": ("target.input_type", ("report", "target", "input_type")),
+        "report target location does not match preflight": ("target.location", ("report", "target", "location")),
+        "acquisition requested location does not match preflight": ("target.location", ("acquisition", "requested_location")),
+    }
+    if error in comparisons:
+        field, expected_path = comparisons[error]
+        expected = envelope
+        for key in expected_path:
+            expected = expected.get(key) if isinstance(expected, dict) else None
+        return _preflight_diagnostic(envelope.get("preflight"), f"preflight.{field} must equal {repr(expected)[:80]}")
+    if error.startswith("report omits preflight manual checks:"):
+        return _preflight_diagnostic(envelope.get("preflight"), "preflight.required_manual_checks must all be declared in report.scope.required_manual_checks")
+    if error.startswith(("report cannot complete manual checks when preflight.", "report cannot contain MANUAL_OBSERVATION evidence when preflight.")):
+        return _preflight_diagnostic(envelope.get("preflight"), "preflight.capabilities.manual_evidence must be True to support manual evidence")
+    return error
 
 
 def preflight_decision(profile: Any) -> Dict[str, Any]:
@@ -566,6 +627,10 @@ def validate_run(envelope: Any) -> List[str]:
     decision = preflight_decision(profile)
     if decision["status"] != "READY":
         errors.append(f"run preflight must be READY, received {decision['status']}")
+    errors.extend(_preflight_diagnostic(profile, error) for error in decision["errors"])
+    for key, value in envelope.items():
+        if key not in {"preflight", "report"}:
+            _validate_text_controls(value, key, errors)
     if isinstance(profile, dict) and profile.get("package_version") != envelope.get("package_version"):
         errors.append("run and preflight package versions disagree")
 
@@ -580,7 +645,8 @@ def validate_run(envelope: Any) -> List[str]:
     report_violations = validate_report(report)
     errors.extend(f"report: {violation}" for violation in report_violations)
     if (
-        not isinstance(profile, dict)
+        decision["status"] == "INVALID"
+        or not isinstance(profile, dict)
         or not isinstance(acquisition, dict)
         or not isinstance(execution, dict)
         or not isinstance(report, dict)
@@ -852,8 +918,15 @@ def guarded_roots(base: Path) -> List[Path]:
     """
     roots: List[Path] = []
     for candidate in (base,) + tuple(base.parents):
-        if any((candidate / marker).is_file() for marker in GUARD_MARKERS):
+        for marker in GUARD_MARKERS:
+            try:
+                (candidate / marker).lstat()
+            except FileNotFoundError:
+                continue
+            except OSError:
+                pass  # Unreadable markers cannot establish that output here is safe.
             roots.append(candidate)
+            break
     return roots
 
 
@@ -1272,6 +1345,7 @@ def main(argv: List[str] = None) -> int:
             _print_preflight(result, args.json_output)
             return result["exit_code"]
         violations = validate_run(payload)
+        violations = [_run_preflight_diagnostic(payload, error) for error in violations]
         result = {
             "valid": not violations,
             "exit_code": 0 if not violations else 1,

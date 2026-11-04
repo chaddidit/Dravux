@@ -19,27 +19,7 @@ fail() {
 }
 
 verify_safe_install_chain() {
-  python3 -B -c '
-import os
-import stat
-import sys
-
-base = os.path.realpath(sys.argv[1])
-for candidate in sys.argv[2:]:
-    try:
-        status = os.lstat(candidate)
-    except OSError:
-        raise SystemExit(1)
-    if stat.S_ISLNK(status.st_mode) or not stat.S_ISDIR(status.st_mode):
-        raise SystemExit(1)
-    physical = os.path.realpath(candidate)
-    try:
-        contained = os.path.commonpath((base, physical)) == base
-    except ValueError:
-        contained = False
-    if not contained or stat.S_IMODE(status.st_mode) & 0o022:
-        raise SystemExit(1)
-' "$1" "$2" "$3" "$4"
+  python3 -B "$safety_helper" verify-parents "$1" "$2" "$3" "$4"
 }
 
 platform=
@@ -117,6 +97,8 @@ verify_safe_install_chain "$base_dir" "$platform_dir" "$skills_dir" "$destinatio
   || fail 5 'Installed destination contains a special file.'
 [ -z "$(find "$destination" \( -perm -g+w -o -perm -o+w \) -print -quit)" ] \
   || fail 5 'Installed destination contains group- or world-writable entries.'
+python3 -B "$safety_helper" verify-tree "$destination" \
+  || fail 5 'Installed entries have unsafe ownership or special mode bits.'
 [ "$(cd "$source_dir" && find . -type f -perm -u+x | LC_ALL=C sort)" = "$(cd "$destination" && find . -type f -perm -u+x | LC_ALL=C sort)" ] \
   || fail 5 'Installed executable bits differ from the verified release source.'
 

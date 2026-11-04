@@ -17,6 +17,11 @@ installer, upload, or Dravux execution. A source checkout intentionally contains
 run the verifier on the checkout before local use, or obtain the separately published archive needed
 by the upload route.
 
+This technical page uses the engineering ZIP or source checkout. The slim npm package lacks
+`verify-release.sh`, fixtures, and demo helpers. For the published npm install
+`npx --yes dravux@1.0.4` (1.0.3 is also published), see [Install](install.md#via-npx-npm-registry-github-tag-alternative).
+The GitHub-tag route is the alternative.
+
 ## Quick self-test (about 10 seconds)
 
 From the extracted release root, run:
@@ -93,6 +98,8 @@ python3 -B plugins/dravux/skills/dravux/scripts/dravux_run.py validate path/to/r
 ```
 
 Operational exit `0` emits the required run receipt. A bare report is not an established audit run. If either validator cannot execute, return `UNVALIDATED DRAFT — NOT A DRAVUX RESULT`.
+
+See [CLI reference](cli-reference.md) for every subcommand, flag and exit code.
 
 ## 7. Finish honestly
 

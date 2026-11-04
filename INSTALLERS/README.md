@@ -50,4 +50,4 @@ plain language before it does anything.
 
 Ask for the bundled self-test first. It runs against files shipped inside the skill, needs no
 network, and proves the installation works. Details are in
-[the README's 60-second self-test](../README.md#the-60-second-self-test).
+[the 60-second self-test](../docs/install.md#the-60-second-self-test).

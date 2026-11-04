@@ -19,29 +19,7 @@ fail() {
 }
 
 verify_safe_parent_chain() {
-  python3 -B -c '
-import os
-import stat
-import sys
-
-base = os.path.realpath(sys.argv[1])
-for candidate in sys.argv[2:]:
-    if not os.path.lexists(candidate):
-        continue
-    try:
-        status = os.lstat(candidate)
-    except OSError:
-        raise SystemExit(1)
-    if stat.S_ISLNK(status.st_mode) or not stat.S_ISDIR(status.st_mode):
-        raise SystemExit(1)
-    physical = os.path.realpath(candidate)
-    try:
-        contained = os.path.commonpath((base, physical)) == base
-    except ValueError:
-        contained = False
-    if not contained or stat.S_IMODE(status.st_mode) & 0o022:
-        raise SystemExit(1)
-' "$1" "$2" "$3"
+  python3 -B "$safety_helper" parents "$1" "$2" "$3"
 }
 
 platform=
@@ -163,7 +141,7 @@ trap 'exit 130' INT
 trap 'exit 143' TERM
 
 staging_record=$(python3 -B "$safety_helper" record "$base_dir" "$platform_name") \
-  || fail 5 'Could not create and bind staging to safe install directories; installation stopped.'
+  || { code=$?; [ "$code" -eq 4 ] || code=5; fail "$code" 'Could not create and bind staging to safe install directories; installation stopped.'; }
 staging_name=${staging_record%% *}
 staging_identity=${staging_record#* }
 staging=$parent_dir/$staging_name
@@ -189,7 +167,7 @@ verify_safe_parent_chain "$base_dir" "$platform_dir" "$skills_dir" \
 
 # Reopen every component without following links and compare the recorded directory identities.
 python3 -B "$safety_helper" finalize "$base_dir" "$platform_name" "$staging_name" "$staging_identity" \
-  || fail 5 'Could not finalize without redirection or overwriting; installation stopped.'
+  || { code=$?; [ "$code" -eq 4 ] || code=5; fail "$code" 'Could not finalize without redirection or overwriting; installation stopped.'; }
 
 staging=
 trap - EXIT HUP INT TERM
