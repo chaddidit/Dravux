@@ -33,7 +33,7 @@ If the wrapper is missing (including glibc before 2.28), it uses `libc.syscall` 
 | x86_64 | 316 |
 | aarch64 | 276 |
 | armv7 | 382 |
-| i386 | 353 |
+| i386 (also reported as i686 or i586) | 353 |
 | ppc64le | 357 |
 | s390x | 347 |
 | riscv64 | 276 |

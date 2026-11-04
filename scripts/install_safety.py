@@ -20,10 +20,12 @@ class UnsafeDirectoryError(ValueError):
     """An unsafe install parent must keep the installer's refusal exit code."""
 
 
-def check_entry(status, path, installed=False, private_group=False):
+def check_entry(status, path, installed=False, private_group=False, user_owned=None):
+    # installed: verification checks (special bits); user_owned: root is not an accepted owner.
+    user_owned = installed if user_owned is None else user_owned
     owner = os.getuid()
-    if status.st_uid not in ({owner} if installed else {owner, 0}):
-        required = "the current user (uid " + str(owner) + ")" + ("" if installed else " or root (uid 0)")
+    if status.st_uid not in ({owner} if user_owned else {owner, 0}):
+        required = "the current user (uid " + str(owner) + ")" + ("" if user_owned else " or root (uid 0)")
         raise UnsafeDirectoryError(path + " is owned by uid " + str(status.st_uid)
                                    + "; must belong to " + required)
     if installed and status.st_mode & 0o7000:
@@ -69,7 +71,8 @@ def check_chain(base, candidates, installed=False):
             raise UnsafeDirectoryError("install parent is not a directory or is a symlink: " + candidate)
         if os.path.commonpath((base, os.path.realpath(candidate))) != base:
             raise UnsafeDirectoryError("install parent escapes selected base: " + candidate)
-        check_entry(status, candidate, installed=installed and index >= 2, private_group=index < 2)
+        check_entry(status, candidate, installed=installed, user_owned=installed and index >= 2,
+                    private_group=index < 2)
 
 
 def check_installed_tree(destination):

@@ -233,6 +233,16 @@ if len(sys.argv) > 3 and sys.argv[2].endswith('install_safety.py') and sys.argv[
                             self.assertIn("setuid, setgid or sticky", result.stderr)
                         finally:
                             target.chmod(stat.S_IMODE(mode))
+            # Parents may be root-owned at verification, but special bits are still refused there.
+            for relative in (".agents", ".agents/skills"):
+                target = project / relative
+                mode = target.lstat().st_mode
+                for bit in (stat.S_ISUID, stat.S_ISGID, stat.S_ISVTX):
+                    with self.subTest(parent=relative, bit=oct(bit)):
+                        result = self.run_script("verify-install.sh", project,
+                                                 hook=self.changed_status(target, 0, mode | bit))
+                        self.assertEqual(result.returncode, 5, result.stdout + result.stderr)
+                        self.assertIn("setuid, setgid or sticky", result.stderr)
 
 
 class ExclusiveRename104Tests(unittest.TestCase):

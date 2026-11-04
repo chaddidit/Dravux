@@ -328,8 +328,8 @@
     {
       "mode": "0644",
       "path": "docs/portability.md",
-      "sha256": "ec27cfa48d555b6ae12c7a7296e8cece665322841be21b714087fdd9104dd218",
-      "size": 4425
+      "sha256": "5090c0b341616f261b972212487b2b80dc2d4038cdefdb3813b99929f68df13e",
+      "size": 4457
     },
     {
       "mode": "0644",
@@ -790,8 +790,8 @@
     {
       "mode": "0644",
       "path": "scripts/install_safety.py",
-      "sha256": "c7483d46fe4457a7e555fa297453d8291921266d784a527b6a4a65abf2895fe5",
-      "size": 10258
+      "sha256": "91b1f28bb50ac18fa46fcf62853241b9b972c88cfd589a5647b4a5a1b9bbed6e",
+      "size": 10480
     },
     {
       "mode": "0755",
@@ -832,8 +832,8 @@
     {
       "mode": "0644",
       "path": "tests/test_installer_104.py",
-      "sha256": "c78ea0c3f0f25336b3ba658775a6af9c4c5adf59a1f6e3d204a4cab4729f93ee",
-      "size": 16539
+      "sha256": "03c1c68a0e2d9ffb5452ff572f6df3d43c8cea1c87484bcce8f698a402a1a776",
+      "size": 17280
     },
     {
       "mode": "0644",
