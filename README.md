@@ -42,6 +42,7 @@ assets, a packaged release is not yet available.
 | `dravux.zip` | Claude Chat/Cowork custom-skill upload, where enabled |
 | `Dravux-OpenAI-Plugin-Source.zip` | Codex/ChatGPT local plugin source, where the host supports local plugins |
 | `Dravux-1.0.3.zip` | Full engineering release, local installers, offline tests, and both embedded installer ZIPs |
+| `dravux-1.0.3.tgz` | Packaged npm launcher. Downloading it does not mean Dravux is published on the npm registry |
 | `SHA256SUMS.txt` | Compare the matching archive digest before extraction, upload, or execution |
 
 GitHub's automatically generated **Source code** archives are source snapshots, not the packaged
@@ -49,13 +50,26 @@ release. They do not contain the built installer ZIPs. Download `SHA256SUMS.txt`
 chosen asset and follow the integrity steps below. Checksums detect corruption and inconsistency;
 1.0.3 has no publisher signature and does not independently authenticate its publisher.
 
+Two packaging limits in 1.0.3, both tracked for 1.0.4 in [docs/tracked-work.md](docs/tracked-work.md):
+
+- `dravux-1.0.3.tgz` is a slim launcher package, not the engineering tree. Its bundled README and
+  security guide mention files and commands that only the engineering tree has, such as
+  `START_HERE.md` and `sh verify-release.sh`. For those, use this guide at the
+  [tagged commit](https://github.com/chaddidit/Dravux/tree/8166a35db883c77c88f55dc2d9f27caaf1ed34ff)
+  or the full `Dravux-1.0.3.zip`.
+- The standalone Claude upload `dravux.zip` and plain installed skill copies do not include
+  `LICENSE` or `THIRD_PARTY_NOTICES.md`. The tagged copies are
+  [LICENSE](https://github.com/chaddidit/Dravux/blob/8166a35db883c77c88f55dc2d9f27caaf1ed34ff/LICENSE) and
+  [THIRD_PARTY_NOTICES.md](https://github.com/chaddidit/Dravux/blob/8166a35db883c77c88f55dc2d9f27caaf1ed34ff/THIRD_PARTY_NOTICES.md). The published
+  1.0.3 archives are unchanged; this note does not fix them.
+
 ## Choose your path
 
 New here? **[START_HERE.md](START_HERE.md)** walks through all four routes step by step.
 
 | You are... | Route | Start with |
 |---|---|---|
-| Using Claude in a browser or Cowork, no terminal | Upload one small file | [INSTALLERS/Claude-Chat-Cowork/](INSTALLERS/Claude-Chat-Cowork/) |
+| Using Claude in a browser or Cowork | Check the file's integrity, then upload it in the app | [INSTALLERS/Claude-Chat-Cowork/](INSTALLERS/Claude-Chat-Cowork/) |
 | Using the Codex or ChatGPT desktop app | Install as a local plugin | [INSTALLERS/Codex-ChatGPT/](INSTALLERS/Codex-ChatGPT/) |
 | Comfortable in Terminal (Claude Code, Codex CLI) | Run the installer | [Installation options](#installation-options) below |
 | Maintaining or reviewing Dravux itself | Run the test suite | [Reference and architecture](#reference-and-architecture) |
@@ -330,7 +344,7 @@ when instructed below.
 Choose exactly one. Do not install both a plain skill copy and a plugin copy for the same app;
 duplicate copies cause confusing discovery or shadowing.
 
-### Via npx (after v1.0.3 is published)
+### Via npx (published GitHub tag)
 
 Requires Node.js 18 or newer, macOS or Linux with `sh`, and Python 3.8 or newer.
 The GitHub route downloads the tagged package; no npm publication is required.
@@ -427,7 +441,8 @@ Plugin commands modify the app's plugin configuration and cache. The plain insta
 
 ### Option D — Claude Chat or Cowork custom-skill upload
 
-Use the dedicated `dravux.zip` supplied under `INSTALLERS/Claude-Chat-Cowork/`. In Claude:
+Use the dedicated `dravux.zip` supplied under `INSTALLERS/Claude-Chat-Cowork/`. The upload itself uses
+the app interface, but the integrity checks above use command-line steps and come first. In Claude:
 
 1. Open Customize > Skills — the screen where skills are uploaded. Some versions place it under
    Settings and label it Capabilities.

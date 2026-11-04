@@ -14,7 +14,7 @@ assistant you already use. If the assistant cannot reach a page, Dravux says so 
 
 | You are... | Go to | Time |
 |---|---|---|
-| Using Claude in a browser or in Cowork, and you never want to open a terminal | [Path 1](#path-1--claude-chat-or-cowork-no-terminal) | 10 minutes |
+| Using Claude in a browser or in Cowork, uploading after a short integrity check | [Path 1](#path-1--claude-chat-or-cowork-upload-after-verification) | 10 minutes |
 | Using the Codex or ChatGPT desktop app, mostly clicking, plus two short commands to paste | [Path 2](#path-2--codex-or-chatgpt-desktop-app-mostly-clicking) | 10 minutes |
 | Comfortable in Terminal, using Claude Code or the Codex command line | [Path 3](#path-3--claude-code-or-codex-command-line) | 5 minutes |
 | Maintaining, packaging, or reviewing Dravux itself | [Path 4](#path-4--maintainer-or-developer) | 15 minutes |
@@ -42,9 +42,12 @@ needs an archive. Maintainers can generate release candidates outside the source
 
 ---
 
-## Path 1 — Claude Chat or Cowork (no terminal)
+## Path 1 — Claude Chat or Cowork (upload after verification)
 
 **What you need:** a Claude account where you can turn on code execution.
+
+**First:** complete [the integrity check above](#verify-the-artifact-before-any-route). It uses a
+couple of commands in a terminal. The upload itself happens in the Claude app.
 
 **What to open:** the folder `INSTALLERS/Claude-Chat-Cowork/` inside this package. It contains one
 file to upload, `dravux.zip`, and a short page of instructions in an extracted published release.

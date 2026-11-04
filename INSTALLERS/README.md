@@ -19,7 +19,7 @@ archive for an upload route.
 
 | Folder | Use it for | What is inside |
 |---|---|---|
-| `Claude-Chat-Cowork/` | Claude in a browser, or Cowork. No terminal needed. | Guide; a downloadable release also includes `dravux.zip` |
+| `Claude-Chat-Cowork/` | Claude in a browser, or Cowork. Upload in the app after the integrity checks above. | Guide; a downloadable release also includes `dravux.zip` |
 | `Codex-ChatGPT/` | The Codex or ChatGPT desktop app. | Guide; a downloadable release also includes `Dravux-OpenAI-Plugin-Source.zip` |
 
 Using Claude Code or the Codex command line instead? You do not need this folder. Run

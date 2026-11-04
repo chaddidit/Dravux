@@ -123,7 +123,7 @@ class PackageTests(unittest.TestCase):
         start = (ROOT / "START_HERE.md").read_text(encoding="utf-8")
         self.assertIn(f"VERIFIED: Dravux {VERSION} release tree passed all offline checks", start)
         for route in (
-            "Claude Chat or Cowork (no terminal)",
+            "Claude Chat or Cowork (upload after verification)",
             "Codex or ChatGPT desktop app",
             "Claude Code or Codex command line",
             "Maintainer or developer",

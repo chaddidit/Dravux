@@ -64,8 +64,8 @@
     {
       "mode": "0644",
       "path": "INSTALLERS/Claude-Chat-Cowork/README.md",
-      "sha256": "57b8ea927855c2eadb59d6c8ce0e3dac0575eb90ba3207ffca1f2594d5946a08",
-      "size": 3454
+      "sha256": "4a17b5cc7e583cb75c37a0b14e33f28e7f13044c3d5980282aa013f13cfba68a",
+      "size": 3570
     },
     {
       "mode": "0644",
@@ -76,8 +76,8 @@
     {
       "mode": "0644",
       "path": "INSTALLERS/README.md",
-      "sha256": "a23bf6b9d44581d14b77a7146b20f0953260dae436462d2add2a50e0bc0fd900",
-      "size": 2902
+      "sha256": "6226cbcb7a2a3b5e54b93fb8a9c3f7b3ac92c4a790327c927bf99476aca3bc14",
+      "size": 2934
     },
     {
       "mode": "0644",
@@ -88,8 +88,8 @@
     {
       "mode": "0644",
       "path": "README.md",
-      "sha256": "fa46eb16f302bb2b3cebe02247e1c46ae46ec8bfe3f8f0fbf1374450823f2723",
-      "size": 28345
+      "sha256": "59d0e27e864d062b10037c6aafe8c3cda10d9d48f04ef06a8258d1717b03dbd1",
+      "size": 29564
     },
     {
       "mode": "0644",
@@ -100,8 +100,8 @@
     {
       "mode": "0644",
       "path": "START_HERE.md",
-      "sha256": "2f87a28c8080a3bda03ce3a9b2bb6b3605bb66300d3898840366c3bbf2a4c49c",
-      "size": 7752
+      "sha256": "8dba856038e5c300fa95a51d658ec419091e804994234402369d9e8a7c91db6d",
+      "size": 7960
     },
     {
       "mode": "0644",
@@ -334,8 +334,8 @@
     {
       "mode": "0644",
       "path": "docs/tracked-work.md",
-      "sha256": "692eb0f6470a024661a6b1b08258b7c7dda3cb144ce4918823a0e1076debbab4",
-      "size": 2719
+      "sha256": "9597b3f7b9ddd9aedbb049fda0ba83fae29e58aa9bd49bd095d8c121fb72b5f0",
+      "size": 5104
     },
     {
       "mode": "0644",
@@ -832,8 +832,8 @@
     {
       "mode": "0644",
       "path": "tests/test_package.py",
-      "sha256": "c71a9aea448576727c8514acc24f72b9bc2e1568bd9c5de58cc4f8c27b34c54c",
-      "size": 32906
+      "sha256": "d9027a7c0d3f105d53b638ef595adcbd8a3bdb3dd76bbad10b7f35acd24d3554",
+      "size": 32920
     },
     {
       "mode": "0644",

@@ -1,6 +1,7 @@
 # Install Dravux in Claude Chat or Cowork
 
-No terminal. About five minutes.
+The upload uses the app interface and takes about five minutes after verification. The integrity
+checks below use command-line steps and come first.
 
 ## Integrity gate — before upload
 
