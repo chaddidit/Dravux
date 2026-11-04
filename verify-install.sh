@@ -89,7 +89,7 @@ printf 'Platform: %s\nScope: %s\nDestination: %s\n' "$platform" "$scope" "$desti
 [ -d "$destination" ] && [ ! -L "$destination" ] \
   || fail 4 'Installed destination is missing, not a directory, or is a symlink.'
 verify_safe_install_chain "$base_dir" "$platform_dir" "$skills_dir" "$destination" \
-  || fail 5 'Installed directory chain escapes the selected base or is group/world-writable.'
+  || fail 5 'Installed directory chain has an unsafe owner, group or mode.'
 
 [ -z "$(find "$destination" -type l -print -quit)" ] \
   || fail 5 'Installed destination contains a symlink.'
@@ -98,7 +98,7 @@ verify_safe_install_chain "$base_dir" "$platform_dir" "$skills_dir" "$destinatio
 [ -z "$(find "$destination" \( -perm -g+w -o -perm -o+w \) -print -quit)" ] \
   || fail 5 'Installed destination contains group- or world-writable entries.'
 python3 -B "$safety_helper" verify-tree "$destination" \
-  || fail 5 'Installed entries have unsafe ownership or special mode bits.'
+  || fail 5 'Installed entries have an unsafe owner, group or mode.'
 [ "$(cd "$source_dir" && find . -type f -perm -u+x | LC_ALL=C sort)" = "$(cd "$destination" && find . -type f -perm -u+x | LC_ALL=C sort)" ] \
   || fail 5 'Installed executable bits differ from the verified release source.'
 

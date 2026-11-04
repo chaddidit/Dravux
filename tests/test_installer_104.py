@@ -86,12 +86,61 @@ os.lstat = lambda *a, **kw: changed(real_lstat(*a, **kw))
             self.assertEqual(list(target.iterdir()), [])
 
     def test_root_owned_nonwritable_parents_are_allowed(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            project = Path(tmp).resolve()
-            target = project / ".agents"
-            target.mkdir()
-            result = self.run_script("install.sh", project, hook=self.changed_status(target, 4, 0))
-            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        for platform in (".claude", ".agents"):
+            for component in (platform, platform + "/skills"):
+                for personal in (False, True):
+                    with self.subTest(component=component, personal=personal), tempfile.TemporaryDirectory() as tmp:
+                        project = Path(tmp).resolve()
+                        target = project / component
+                        target.mkdir(parents=True)
+                        hook = self.changed_status(target, 4, 0)
+                        for script in ("install.sh", "verify-install.sh"):
+                            result = self.run_script(script, project, platform, personal, hook)
+                            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_owner_refusal_names_owner_and_required_ownership(self):
+        foreign = os.getuid() + 10000
+        for installed in (False, True):
+            for owner in ({foreign} if not installed else {foreign, 0} - {os.getuid()}):
+                with self.subTest(installed=installed, owner=owner):
+                    status = SimpleNamespace(st_uid=owner, st_mode=stat.S_IFDIR | 0o755)
+                    with self.assertRaises(safety.UnsafeDirectoryError) as raised:
+                        safety.check_entry(status, "/test/entry", installed=installed)
+                    message = str(raised.exception)
+                    self.assertIn("owned by uid " + str(owner), message)
+                    self.assertIn("must belong to the current user (uid " + str(os.getuid()) + ")", message)
+                    self.assertEqual("or root (uid 0)" in message, not installed)
+                    self.assertNotIn("chmod", message)
+
+    def test_owner_refusal_shell_summaries_keep_the_helper_reason(self):
+        for phase in ("initial", "created", "final", "verify"):
+            with self.subTest(phase=phase), tempfile.TemporaryDirectory() as tmp:
+                project = Path(tmp).resolve()
+                target = project / ".agents"
+                target.mkdir()
+                skills = target / "skills"
+                if phase == "verify":
+                    result = self.run_script("install.sh", project)
+                    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                condition = {
+                    "initial": "True",
+                    "created": "os.path.isdir({!r})".format(str(skills)),
+                    "final": "os.path.isdir({0!r}) and any(n.startswith('.dravux-install.') for n in os.listdir({0!r}))".format(str(skills)),
+                    "verify": "True",
+                }[phase]
+                command = "verify-parents" if phase == "verify" else "parents"
+                hook = "if len(sys.argv) > 3 and sys.argv[3] == {!r} and {}:\n".format(command, condition)
+                hook += "\n".join("    " + line for line in self.changed_status(target, 4, os.getuid() + 10000).splitlines())
+                result = self.run_script("verify-install.sh" if phase == "verify" else "install.sh",
+                                         project, hook=hook)
+                self.assertEqual(result.returncode, 5 if phase == "verify" else 4, result.stdout + result.stderr)
+                self.assertIn("owned by uid " + str(os.getuid() + 10000), result.stderr)
+                self.assertIn("has an unsafe owner, group or mode", result.stderr)
+                self.assertNotIn("escap", result.stderr)
+                self.assertNotIn("group/world-writable", result.stderr)
+                self.assertNotIn("chmod", result.stderr)
+                if phase != "verify":
+                    self.assertFalse((skills / "dravux").exists())
 
     def test_private_primary_group_parents_install_and_verify(self):
         hook = ("grp.getgrgid = lambda gid: SimpleNamespace(gr_mem=[pwd.getpwuid(os.getuid()).pw_name])\n"
@@ -133,7 +182,7 @@ os.lstat = lambda *a, **kw: changed(real_lstat(*a, **kw))
                         result = self.run_script("install.sh", project, platform, hook=hook)
                         self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
                         self.assertIn(reason, result.stderr)
-                        self.assertIn("chmod g-w " + str(target), result.stderr)
+                        self.assertIn("chmod " + ("o-w " if mode & 0o002 else "g-w ") + str(target), result.stderr)
                         self.assertFalse((project / platform / "skills/dravux").exists())
 
     def test_unavailable_linux_rename_installs_nothing_and_cleans_staging(self):
@@ -208,6 +257,13 @@ class ExclusiveRename104Tests(unittest.TestCase):
                 self.rename(SimpleNamespace(syscall=syscall), machine)
                 syscall.assert_called_once_with(number, 42, b".dravux-install.test", 42, b"dravux", 1)
                 self.assertEqual(syscall.restype, ctypes.c_long)
+
+    def test_32bit_x86_machine_aliases_use_noreplace_syscall(self):
+        for machine in ("i686", "i586"):
+            with self.subTest(machine=machine):
+                syscall = Mock(return_value=0)
+                self.rename(SimpleNamespace(syscall=syscall), machine)
+                syscall.assert_called_once_with(353, 42, b".dravux-install.test", 42, b"dravux", 1)
 
     def test_unsupported_syscall_paths_refuse_without_replacing(self):
         syscall = Mock(return_value=0)

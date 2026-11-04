@@ -22,13 +22,14 @@ class UnsafeDirectoryError(ValueError):
 
 def check_entry(status, path, installed=False, private_group=False):
     owner = os.getuid()
-    remedy = "; remove group write with chmod g-w " + shlex.quote(path)
     if status.st_uid not in ({owner} if installed else {owner, 0}):
-        raise UnsafeDirectoryError("unexpected owner for " + path + remedy)
+        required = "the current user (uid " + str(owner) + ")" + ("" if installed else " or root (uid 0)")
+        raise UnsafeDirectoryError(path + " is owned by uid " + str(status.st_uid)
+                                   + "; must belong to " + required)
     if installed and status.st_mode & 0o7000:
         raise UnsafeDirectoryError("setuid, setgid or sticky bit on " + path)
     if status.st_mode & 0o002:
-        raise UnsafeDirectoryError("world-writable install entry: " + path + remedy
+        raise UnsafeDirectoryError("world-writable install entry: " + path
                                    + "; remove world write with chmod o-w " + shlex.quote(path))
     if status.st_mode & 0o020:
         if not private_group:
@@ -51,7 +52,8 @@ def check_entry(status, path, installed=False, private_group=False):
             else:
                 reason = "primary group has another account as a member" if shared else None
         if reason:
-            raise UnsafeDirectoryError(reason + ": " + path + remedy)
+            raise UnsafeDirectoryError(reason + ": " + path
+                                       + "; remove group write with chmod g-w " + shlex.quote(path))
 
 
 def check_chain(base, candidates, installed=False):
@@ -67,7 +69,7 @@ def check_chain(base, candidates, installed=False):
             raise UnsafeDirectoryError("install parent is not a directory or is a symlink: " + candidate)
         if os.path.commonpath((base, os.path.realpath(candidate))) != base:
             raise UnsafeDirectoryError("install parent escapes selected base: " + candidate)
-        check_entry(status, candidate, installed=installed, private_group=index < 2)
+        check_entry(status, candidate, installed=installed and index >= 2, private_group=index < 2)
 
 
 def check_installed_tree(destination):
@@ -162,7 +164,8 @@ def exclusive_rename(parent, source):
         except AttributeError:
             machine = platform.machine()
             number = {"x86_64": 316, "aarch64": 276, "armv7": 382, "armv7l": 382,
-                      "i386": 353, "ppc64le": 357, "s390x": 347, "riscv64": 276}.get(machine)
+                      "i386": 353, "i686": 353, "i586": 353,
+                      "ppc64le": 357, "s390x": 347, "riscv64": 276}.get(machine)
             if number is None:
                 raise OSError("atomic exclusive rename unsupported on architecture " + machine)
             try:

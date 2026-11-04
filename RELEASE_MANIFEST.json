@@ -58,8 +58,8 @@
     {
       "mode": "0644",
       "path": "CHANGELOG.md",
-      "sha256": "bc40f89aae693ea9c783082be25a0a77e46bd21dfaae09b0faba74d258d1d89e",
-      "size": 17162
+      "sha256": "3946c3a1e4d13126a3d115084147efc6fb52e56eee4c1cd9dc21703e6d136b61",
+      "size": 17308
     },
     {
       "mode": "0644",
@@ -94,8 +94,8 @@
     {
       "mode": "0644",
       "path": "SECURITY.md",
-      "sha256": "27038afbf6deb1e082c31925fe670e9fffcf864dc353c4b681642f4fe8b6b34b",
-      "size": 6691
+      "sha256": "a3c1c8e5a40bdd1b4d0721dba5efb7922ba6ecf315d1ea290c6b14cc60cd42d3",
+      "size": 6752
     },
     {
       "mode": "0644",
@@ -352,8 +352,8 @@
     {
       "mode": "0644",
       "path": "docs/troubleshooting.md",
-      "sha256": "1edf03508d7d259155fb0030fcf7e2c9915c6247e0e20f7eea4811f5e2189477",
-      "size": 8264
+      "sha256": "222fefb7dfc8ffe54f80c2ddccc2532a4a5d7056b79bc2434092e97971d68d6a",
+      "size": 8319
     },
     {
       "mode": "0644",
@@ -580,8 +580,8 @@
     {
       "mode": "0755",
       "path": "install.sh",
-      "sha256": "bde81af0ad234062dd3a01255c113bc28d7688b5f72e5a8bb5bedd6458538f0c",
-      "size": 6618
+      "sha256": "781d42ff3df7e250a1e5fbc83a3b0e3199321b6294cbdc7ec62f609addd9ddb0",
+      "size": 6586
     },
     {
       "mode": "0644",
@@ -790,8 +790,8 @@
     {
       "mode": "0644",
       "path": "scripts/install_safety.py",
-      "sha256": "c78226129904ca4848602ccfa54dad65afbb1cd70402e2ce21e3234a3ebcaea1",
-      "size": 10002
+      "sha256": "c7483d46fe4457a7e555fa297453d8291921266d784a527b6a4a65abf2895fe5",
+      "size": 10258
     },
     {
       "mode": "0755",
@@ -826,14 +826,14 @@
     {
       "mode": "0644",
       "path": "tests/test_distribution.py",
-      "sha256": "3620b8c6051b8160b6af5f28de775c7baa949876549993142c1ffaf5aa921bfd",
-      "size": 73106
+      "sha256": "bbb1b2ebe97e63021edb1ec8f4d33d49043a3aa934d75df1c9f7386d41cfd1a4",
+      "size": 73188
     },
     {
       "mode": "0644",
       "path": "tests/test_installer_104.py",
-      "sha256": "0b198152f0d6bc139e426a2edadbad411a3393c6d95da7426821d0868c727134",
-      "size": 12788
+      "sha256": "c78ea0c3f0f25336b3ba658775a6af9c4c5adf59a1f6e3d204a4cab4729f93ee",
+      "size": 16539
     },
     {
       "mode": "0644",
@@ -868,7 +868,7 @@
     {
       "mode": "0644",
       "path": "tests/test_package.py",
-      "sha256": "0230512f96e965adb79a9b63c9e1c072f3d4d6990fa97ded3dcc1d252d3d2ef1",
+      "sha256": "c735da0aa5aebfc7d9b6ed0f0b2fae99f9025b20b09ea9ecfa79c0992e50727e",
       "size": 38197
     },
     {
@@ -904,8 +904,8 @@
     {
       "mode": "0755",
       "path": "verify-install.sh",
-      "sha256": "92bc730d7dbd615e8a1ad2895705303ad18649ca649e5716b25339a8eedf874c",
-      "size": 4338
+      "sha256": "56247ffdfcf7bac60ebdbf3db42ed9baa56b755b3042eb3c399f6ea9c5e25a74",
+      "size": 4313
     },
     {
       "mode": "0755",

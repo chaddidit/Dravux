@@ -1,19 +1,5 @@
 # Changelog
 
-## Unreleased
-
-- Matched preflight website URL checks to acquisition policy and escaped terminal controls/bidi formatting in text receipts while preserving JSON values.
-- Required an OPEN manually evidenced normative finding for a manual override of automated PASS/ERROR.
-- Added source/staging special-file rejection and atomic no-replace installer finalization on Linux/macOS.
-- Rejected ZIP file/descendant conflicts, Windows-invalid characters, and superscript reserved device names.
-- Added a README download table, explicit source-snapshot distinction, and accurate platform limits.
-
-- Removed the unpublished project-website link from the README front door; GitHub remains the public home until a site is intentionally published.
-- Added root `SECURITY.md` as the canonical integrity, residual-risk, and vulnerability-reporting page; operator guides keep the short disclosure and link there.
-- Added `docs/portability.md` describing the OS-agnostic validator core, POSIX installer path, and Windows-via-CI testing model for maintainers without a Windows machine.
-- Scoped Windows CI to portable contract/preflight/run tests; full packaging and installer gates remain Linux/macOS. Safe output-directory creation refuses unsupported directory-descriptor platforms.
-- Added GitHub issue templates for bugs, docs, and features so public feedback has a clear path.
-
 ## 1.0.4 — 2026-11-04
 
 ### Packaging and documentation
@@ -27,16 +13,30 @@
 ### Security hardening
 
 - The installer refuses install-path folders owned by anyone other than you or root. `verify-install.sh` fails on installed files you do not own and on setuid, setgid or sticky bits.
-- A group-writable (0775) `~/.claude`, `~/.agents` or `skills` folder is accepted only when you own it, its group is your primary group, and nobody else is in that group. Any other group-writable or world-writable folder is refused with the reason and the `chmod` fix. On macOS the shared `staff` group stays refused.
+- A group-writable (0775) `~/.claude`, `~/.agents` or `skills` folder is accepted only when you own it, its group is your primary group, and no other account is a member of that group or uses it as its primary group. Any other group-writable or world-writable folder is refused with the reason and the `chmod` fix. On macOS the shared `staff` group stays refused.
 - On Linux with glibc older than 2.28, the installer calls the `renameat2` system call directly, still refusing to replace an existing install. Unsupported systems refuse instead of falling back to a replacing rename.
 - `validate` names the JSON path, what was expected and what was found for each preflight error.
-- Contract text fields refuse control characters (other than tab, line feed and carriage return) and text-direction controls even next to visible text, and the error names the field and the code point.
+- Contract text fields refuse all C0 controls (including tab, line feed and carriage return), DEL, C1 controls and text-direction controls, even next to visible text. ZWJ, ZWNJ and soft hyphen stay allowed. The error names the field and the code point.
 - `output-dir` treats a `SKILL.md` or `RELEASE_MANIFEST.json` marker of any type, including a folder or a broken symlink, as Dravux files, and refuses to write there.
 
 ## 1.0.3 — 2026-11-02
 
 - Added a dependency-free npx launcher for installation and verification with the existing Claude/Codex personal and project flags; bundled the hardened installer safety helper.
 - Kept local release output out of source inventories while retaining strict checks on extracted releases, and excluded Git internals and binary npm artifacts from package text checks.
+
+### Also shipped in 1.0.3 (previously listed under Unreleased)
+
+- Matched preflight website URL checks to acquisition policy and escaped terminal controls/bidi formatting in text receipts while preserving JSON values.
+- Required an OPEN manually evidenced normative finding for a manual override of automated PASS/ERROR.
+- Added source/staging special-file rejection and atomic no-replace installer finalization on Linux/macOS.
+- Rejected ZIP file/descendant conflicts, Windows-invalid characters, and superscript reserved device names.
+- Added a README download table, explicit source-snapshot distinction, and accurate platform limits.
+
+- Removed the unpublished project-website link from the README front door; GitHub remains the public home until a site is intentionally published.
+- Added root `SECURITY.md` as the canonical integrity, residual-risk, and vulnerability-reporting page; operator guides keep the short disclosure and link there.
+- Added `docs/portability.md` describing the OS-agnostic validator core, POSIX installer path, and Windows-via-CI testing model for maintainers without a Windows machine.
+- Scoped Windows CI to portable contract/preflight/run tests; full packaging and installer gates remain Linux/macOS. Safe output-directory creation refuses unsupported directory-descriptor platforms.
+- Added GitHub issue templates for bugs, docs, and features so public feedback has a clear path.
 
 ### Security hardening
 

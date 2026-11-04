@@ -437,7 +437,8 @@ os.execv(PYTHON, [PYTHON] + sys.argv[1:])
             skills.chmod(0o777)
             verified = self.run_script("verify-install.sh", *args)
             self.assertEqual(verified.returncode, 5, verified.stderr)
-            self.assertIn("group/world-writable", verified.stderr)
+            self.assertIn("world-writable install entry", verified.stderr)
+            self.assertIn("unsafe owner, group or mode", verified.stderr)
             skills.chmod(0o700)
 
             physical = project / ".agents-real"

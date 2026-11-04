@@ -108,7 +108,7 @@ for candidate in "$platform_dir" "$skills_dir"; do
 done
 
 verify_safe_parent_chain "$base_dir" "$platform_dir" "$skills_dir" \
-  || fail 4 'Install parent escapes the selected base or is group/world-writable; nothing was installed.'
+  || fail 4 'Install parent has an unsafe owner, group or mode; nothing was installed.'
 
 if [ -e "$destination" ] || [ -L "$destination" ]; then
   fail 4 "Destination already exists; refusing to merge or overwrite: $destination"
@@ -122,7 +122,7 @@ umask 077
   || fail 5 "Could not create install parent: $skills_dir"
 [ -L "$skills_dir" ] && fail 4 "Install parent became a symlink: $skills_dir"
 verify_safe_parent_chain "$base_dir" "$platform_dir" "$skills_dir" \
-  || fail 4 'Install parent changed, escaped the selected base, or has unsafe modes; nothing was installed.'
+  || fail 4 'Install parent has an unsafe owner, group or mode; nothing was installed.'
 
 parent_dir=$skills_dir
 
@@ -163,7 +163,7 @@ if [ -e "$destination" ] || [ -L "$destination" ]; then
 fi
 
 verify_safe_parent_chain "$base_dir" "$platform_dir" "$skills_dir" \
-  || fail 4 'Install parent changed before finalization; installation stopped.'
+  || fail 4 'Install parent has an unsafe owner, group or mode; installation stopped.'
 
 # Reopen every component without following links and compare the recorded directory identities.
 python3 -B "$safety_helper" finalize "$base_dir" "$platform_name" "$staging_name" "$staging_identity" \

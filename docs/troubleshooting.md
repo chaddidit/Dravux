@@ -121,7 +121,8 @@ each must belong to your current user or root. It refuses unsafe paths with exit
 nothing. Do not use `sudo` to bypass a refusal.
 
 A group-writable directory (such as mode `0775`) is accepted only if you own it, its group is your
-primary group, and `getgrgid().gr_mem` lists no other account. World-writable directories and all
+primary group, `getgrgid().gr_mem` lists no other account, and no other account uses that group as
+its primary group. World-writable directories and all
 other group-writable directories are refused. On macOS, `staff` normally fails the membership
 condition, so a `0775` folder in `staff` is still refused. Remove group write permission with
 `chmod g-w <path>` on the exact folder named by the error, then retry; do not change a folder

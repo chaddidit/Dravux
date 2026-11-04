@@ -61,7 +61,8 @@ to ship.
   for the requested URL, redirect hops, and final location.
 - Installers refuse symlink parents and unsafe ownership or permissions. Group-writable directories
   are accepted only when owned by the user, in their primary group, with no other account in
-  `getgrgid().gr_mem`; world-writable directories are always refused. On macOS, `staff` normally
+  `getgrgid().gr_mem` and no other account using that group as its primary group; world-writable
+  directories are always refused. On macOS, `staff` normally
   fails that membership check. Installed files/folders must be user-owned and have no setuid, setgid
   or sticky bits. Installers refuse overwrite and do not call
   `curl`, `wget`, `sudo`, or `eval`. Source and staging trees reject symlinks and special files
