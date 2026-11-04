@@ -10,7 +10,7 @@ Do not upload `dravux.zip` until its SHA-256 digest matches its exact entry in t
 extracting it, then run `sh verify-release.sh` from the extracted root before using this embedded
 installer. A same-channel checksum, the embedded manifest, and the internal release record detect
 corruption or inconsistency only; they do not authenticate the publisher.
-Dravux 1.0.3 has no cryptographic publisher signature.
+Dravux 1.0.4 has no cryptographic publisher signature.
 **Publisher authenticity was not independently verified.**
 Details: [SECURITY.md](../../SECURITY.md).
 

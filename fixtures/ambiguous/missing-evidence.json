@@ -35,7 +35,7 @@
   "run": {
     "started_at": "2026-07-16T14:05:00Z",
     "completed_at": "2026-07-16T14:05:01Z",
-    "tooling": ["Dravux capability check 1.0.3"],
+    "tooling": ["Dravux capability check 1.0.4"],
     "environment": "Synthetic screenshot-only fixture"
   }
 }

@@ -60,7 +60,7 @@
   "run": {
     "started_at": "2026-07-16T14:10:00Z",
     "completed_at": "2026-07-16T14:10:01Z",
-    "tooling": ["Dravux fixture harness 1.0.3"],
+    "tooling": ["Dravux fixture harness 1.0.4"],
     "environment": "Synthetic invalid fixture"
   }
 }

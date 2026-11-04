@@ -110,7 +110,7 @@ class PackageTests(unittest.TestCase):
                 self.assertNotRegex(
                     tool,
                     r"\bDravux\b.*\b1\.0\.1\b",
-                    f"{item['path']} claims legacy tooling in the active 1.0.3 fixture set",
+                    f"{item['path']} claims legacy tooling in the active 1.0.4 fixture set",
                 )
             if item["path"] == "hostile/invalid-semver.invalid.json":
                 continue

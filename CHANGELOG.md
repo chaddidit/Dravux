@@ -14,6 +14,12 @@
 - Scoped Windows CI to portable contract/preflight/run tests; full packaging and installer gates remain Linux/macOS. Safe output-directory creation refuses unsupported directory-descriptor platforms.
 - Added GitHub issue templates for bugs, docs, and features so public feedback has a clear path.
 
+## 1.0.4 — 2026-11-04
+
+### Packaging and documentation
+
+### Security hardening
+
 ## 1.0.3 — 2026-11-02
 
 - Added a dependency-free npx launcher for installation and verification with the existing Claude/Codex personal and project flags; bundled the hardened installer safety helper.

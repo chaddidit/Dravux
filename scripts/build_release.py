@@ -173,7 +173,7 @@ SHIPPED_FILES = (
     "tests/test_operational.py",
     "tests/test_output_dir_hardening.py",
     "tests/test_package.py",
-    "tests/test_release_103.py",
+    "tests/test_release_104.py",
     "tests/test_skill_portability.py",
     "tests/test_validator_text.py",
     "verify-install.sh",

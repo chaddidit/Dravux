@@ -31,7 +31,7 @@ extracted engineering release, run `sh verify-release.sh` before uploading an em
 installing, or running Dravux.
 
 That fingerprint check catches corruption in transit; it does **not** prove who published the file.
-Dravux 1.0.3 has no cryptographic publisher signature.
+Dravux 1.0.4 has no cryptographic publisher signature.
 **Publisher authenticity was not independently verified.**
 Details: [SECURITY.md](SECURITY.md).
 
@@ -120,7 +120,7 @@ Swap `--claude` for `--codex` for the Codex command line. Create the project fol
 installer refuses to guess it, and it refuses to overwrite anything that already exists.
 
 **What success looks like:** the first command ends with
-`VERIFIED: Dravux 1.0.3 release tree passed all offline checks`, and the third confirms the installed
+`VERIFIED: Dravux 1.0.4 release tree passed all offline checks`, and the third confirms the installed
 copy matches the shipped copy byte for byte.
 
 **Where reports go:** a `dravux-audits` folder outside the installed skill and outside this package.

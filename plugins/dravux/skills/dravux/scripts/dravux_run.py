@@ -29,7 +29,7 @@ from dravux_contract import (  # noqa: E402
 )
 
 
-PACKAGE_VERSION = "1.0.3"
+PACKAGE_VERSION = "1.0.4"
 PREFLIGHT_VERSION = "1.0.0"
 RUN_CONTRACT_VERSION = "1.2.0"
 

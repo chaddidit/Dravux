@@ -8,7 +8,7 @@ For a downloaded artifact, do not extract, upload, install, or run it until its 
 the exact entry in the accompanying `SHA256SUMS.txt`. After a matching release-archive digest,
 extract it and run `sh verify-release.sh` before the plugin commands below. A same-channel checksum,
 the embedded manifest, and the internal release record detect corruption or inconsistency only; they
-do not authenticate the publisher. Dravux 1.0.3 has no cryptographic publisher signature.
+do not authenticate the publisher. Dravux 1.0.4 has no cryptographic publisher signature.
 **Publisher authenticity was not independently verified.**
 Details: [SECURITY.md](../../SECURITY.md).
 

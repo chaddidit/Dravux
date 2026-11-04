@@ -393,7 +393,7 @@ class OutputDirectoryHardeningTests(unittest.TestCase):
         self.assertEqual([p.name for p in guarded.iterdir()], ["SKILL.md"])
 
     def test_package_version_is_1_0_3(self):
-        self.assertEqual(dravux_run.PACKAGE_VERSION, "1.0.3")
+        self.assertEqual(dravux_run.PACKAGE_VERSION, "1.0.4")
 
 
 if __name__ == "__main__":

@@ -1104,7 +1104,7 @@ class OutputDirectoryContractTests(unittest.TestCase):
     def test_guarded_tree_redirects_beside_the_installation(self):
         with tempfile.TemporaryDirectory() as tmp:
             workspace = Path(tmp).resolve()
-            installed = workspace / "dravux-1.0.3"
+            installed = workspace / "dravux-1.0.4"
             nested = installed / "plugins" / "dravux" / "skills" / "dravux"
             nested.mkdir(parents=True)
             (installed / "RELEASE_MANIFEST.json").write_text("{}", encoding="utf-8")

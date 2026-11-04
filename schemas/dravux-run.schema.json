@@ -8,7 +8,7 @@
   "properties": {
     "$schema": {"type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*[^\\s\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029][^\\u0000-\\u001f\\u007f\\u0085\\u2028\\u2029]*$"},
     "run_contract_version": {"const": "1.2.0"},
-    "package_version": {"const": "1.0.3"},
+    "package_version": {"const": "1.0.4"},
     "preflight": {"$ref": "dravux-preflight.schema.json"},
     "acquisition": {
       "type": "object",
